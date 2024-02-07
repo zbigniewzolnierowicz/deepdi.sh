@@ -19,6 +19,10 @@ cargo install cargo-binstall
 cargo binstall trunk
 ```
 
+## Issues
+
+- Yew with SSR doesn't support editing the `<head>`
+
 ## Others
 
 [mk48.io](https://mk48.io)

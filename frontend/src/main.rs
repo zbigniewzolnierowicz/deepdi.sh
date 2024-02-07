@@ -1,5 +1,5 @@
 use frontend::render;
-use frontend::utils::tracing::tracing;
+use frontend::utils::tracing;
 
 fn main() {
     tracing();

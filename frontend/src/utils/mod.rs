@@ -1,2 +1,4 @@
 pub mod api;
-pub mod tracing;
+mod tracing;
+
+pub use self::tracing::*;
