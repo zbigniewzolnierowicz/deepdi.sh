@@ -1,3 +1,7 @@
+use frontend::render;
+use frontend::utils::tracing::tracing;
+
 fn main() {
-    println!("Hello, world!");
+    tracing();
+    render();
 }
