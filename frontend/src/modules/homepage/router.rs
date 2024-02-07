@@ -3,8 +3,8 @@ use leptos::{component, view, IntoView};
 use leptos_router::Route;
 
 #[component(transparent)]
-pub fn HomepageRoutes() -> impl IntoView {
+pub fn HomepageRoutes(root_path: &'static str) -> impl IntoView {
     view! {
-        <Route path="/" view=Homepage />
+        <Route path={root_path} view=Homepage />
     }
 }

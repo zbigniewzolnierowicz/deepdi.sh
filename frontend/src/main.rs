@@ -1,12 +1,26 @@
-use leptos::{mount_to_body, view};
+use leptos::{create_node_ref, mount_to_body, view};
 use wasm_bindgen::prelude::*;
 use frontend::routes::InternalRouter;
+use web_sys::Element;
 
-#[wasm_bindgen(module = "/thing.js")]
+#[wasm_bindgen(module = "/dist/.stage/index.js")]
 extern "C" {
-    pub fn jsfunc();
+    fn trial(thing: String);
+    fn boop(element: Element);
 }
 
 fn main() {
-    mount_to_body(|| view! { <InternalRouter></InternalRouter> })
+    let element = create_node_ref::<leptos::html::P>();
+    let on_click = move |_| {
+        let el = element.get().unwrap();
+        let element = web_sys::Element::from((*el).clone());
+        boop(element);
+    };
+
+    mount_to_body(move || view! {
+        <p on:click={on_click} _ref=element>
+            <span>"THIS IS A TEST TEXT"</span>
+        </p>
+        <InternalRouter />
+    })
 }

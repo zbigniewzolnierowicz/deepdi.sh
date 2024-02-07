@@ -12,7 +12,7 @@ pub fn InternalRouter() -> impl IntoView {
         <main>
           // all our routes will appear inside <main>
           <Routes>
-              <HomepageRoutes />
+              <HomepageRoutes root_path="/" />
           </Routes>
         </main>
       </Router>

@@ -19,4 +19,4 @@ tracing-subscriber = { version = "0.3.18", features = ["time", "serde"] }
 tracing-web = "0.1.3"
 wasm-bindgen = { version = "0.2.91", features = ["serde", "serde_json"] }
 wasm-bindgen-futures = "0.4.41"
-web-sys = "0.3.68"
+web-sys = { version = "0.3.68", features = ["HtmlElement"] }
