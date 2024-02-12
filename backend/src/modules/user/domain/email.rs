@@ -1,19 +1,18 @@
 use serde::{Deserialize, Serialize};
-use shrinkwraprs::Shrinkwrap;
 use validator::validate_email;
 
-#[derive(Shrinkwrap, Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Email(String);
 
 impl Email {
-    pub fn parse(s: String) -> Result<Self, String> {
+    pub fn parse(s: &str)-> Result<Self, String> {
         let is_empty = s.trim().is_empty();
-        let valid_email = validate_email(s.clone());
+        let valid_email = validate_email(s);
 
         if is_empty || !valid_email {
             Err(format!("{s} is not a valid email"))
         } else {
-            Ok(Self(s))
+            Ok(Self(s.to_string()))
         }
     }
 }
