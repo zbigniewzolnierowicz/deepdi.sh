@@ -351,9 +351,11 @@ name = "backend"
 version = "0.0.0"
 dependencies = [
  "actix-web",
+ "anyhow",
  "chrono",
  "serde",
  "serde_json",
+ "shrinkwraprs",
  "sqlx",
  "tracing",
  "tracing-actix-web",
@@ -361,6 +363,8 @@ dependencies = [
  "tracing-error",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "uuid",
+ "validator",
 ]
 
 [[package]]
@@ -1362,6 +1366,16 @@ dependencies = [
 
 [[package]]
 name = "idna"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d20d6b07bfbc108882d88ed8e37d39636dcc260e15e30c45e6ba089610b917c"
+dependencies = [
+ "unicode-bidi",
+ "unicode-normalization",
+]
+
+[[package]]
+name = "idna"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
@@ -1397,6 +1411,15 @@ name = "ipnet"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
+
+[[package]]
+name = "itertools"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f56a2d0bc861f9165be4eb3442afd3c236d8a98afd426f65d92324ae1091a484"
+dependencies = [
+ "either",
+]
 
 [[package]]
 name = "itertools"
@@ -1492,7 +1515,7 @@ dependencies = [
  "getrandom",
  "html-escape",
  "indexmap",
- "itertools",
+ "itertools 0.12.1",
  "js-sys",
  "leptos_reactive",
  "once_cell",
@@ -1537,7 +1560,7 @@ dependencies = [
  "cfg-if",
  "convert_case 0.6.0",
  "html-escape",
- "itertools",
+ "itertools 0.12.1",
  "leptos_hot_reload",
  "prettyplease",
  "proc-macro-error",
@@ -1585,7 +1608,7 @@ checksum = "498159479603569e1d7c969cffa0817b73249e96f825c295743f8f4607a68cbe"
 dependencies = [
  "cfg-if",
  "gloo-net 0.2.6",
- "itertools",
+ "itertools 0.12.1",
  "js-sys",
  "lazy_static",
  "leptos",
@@ -2673,6 +2696,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "shrinkwraprs"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e63e6744142336dfb606fe2b068afa2e1cca1ee6a5d8377277a92945d81fa331"
+dependencies = [
+ "bitflags 1.3.2",
+ "itertools 0.8.2",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2763,7 +2799,7 @@ version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce81b7bd7c4493975347ef60d8c7e8b742d4694f4c49f93e0a12ea263938176c"
 dependencies = [
- "itertools",
+ "itertools 0.12.1",
  "nom",
  "unicode_categories",
 ]
@@ -3421,7 +3457,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31e6302e3bb753d46e83516cae55ae196fc0c309407cf11ab35cc51a4c2a4633"
 dependencies = [
  "form_urlencoded",
- "idna",
+ "idna 0.5.0",
  "percent-encoding",
 ]
 
@@ -3444,6 +3480,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f00cc9702ca12d3c81455259621e676d0f7251cec66a21e98fe2e9a37db93b2a"
 dependencies = [
  "getrandom",
+ "serde",
+]
+
+[[package]]
+name = "validator"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b92f40481c04ff1f4f61f304d61793c7b56ff76ac1469f1beb199b1445b253bd"
+dependencies = [
+ "idna 0.4.0",
+ "lazy_static",
+ "regex",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "url",
 ]
 
 [[package]]

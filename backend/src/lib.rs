@@ -1,18 +1,16 @@
 pub mod modules;
 pub mod telemetry;
 
-use actix_web::{dev::Server, web, App, HttpServer, Responder};
+use actix_web::{dev::Server, web, App, HttpServer};
+use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
 
-async fn index() -> impl Responder {
-    "Hello, world!"
-}
-
-pub fn run(listener: std::net::TcpListener) -> Result<Server, std::io::Error> {
-    let server = HttpServer::new(|| {
+pub fn run(listener: std::net::TcpListener, database: PgPool) -> Result<Server, std::io::Error> {
+    let database = web::Data::new(database);
+    let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
-            .route("/", web::get().to(index))
+            .app_data(database.clone())
             .service(modules::router())
     })
     .listen(listener)?
