@@ -11,17 +11,19 @@
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
 | tmux | [zellij](https://zellij.dev) |
 | Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/) |
+| curl | hurl |
 
 ## Prerequisites
 
 ```sh
 cargo install cargo-binstall
 cargo binstall trunk
+cargo binstall hurl
 ```
 
 ## Issues
 
-- Yew with SSR doesn't support editing the `<head>`
+- Integrating with existing JS libraries is a bit of a pain
 
 ## Others
 

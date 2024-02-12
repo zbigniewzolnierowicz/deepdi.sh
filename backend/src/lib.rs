@@ -1,3 +1,5 @@
+pub mod modules;
+
 use actix_web::{dev::Server, web, App, HttpServer, Responder};
 use tracing_actix_web::TracingLogger;
 
@@ -10,6 +12,7 @@ pub fn run(listener: std::net::TcpListener) -> Result<Server, std::io::Error> {
         App::new()
             .wrap(TracingLogger::default())
             .route("/", web::get().to(index))
+            .service(modules::router())
     })
     .listen(listener)?
     .run();
