@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "build:css": "tailwindcss -i ./styles/tailwind.css -o ./dist/.stage/index.css",
+      "build:js": "esbuild --bundle ./src-ts/index.ts --outfile=./dist/.stage/index.js --format=esm"
   },
   "author": "",
   "license": "ISC",

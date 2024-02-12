@@ -1,12 +1,12 @@
 [[hooks]]
 stage = "post_build"
-command = "sh"
-command_arguments = ["-c", "npx tailwindcss -i ./styles/tailwind.css -o ./dist/.stage/index.css"]
+command = "npm"
+command_arguments = ["run", "build:css"]
 
 [[hooks]]
 stage = "pre_build"
-command = "sh"
-command_arguments = ["-c", "npx esbuild ./src-ts/index.ts --outfile=./dist/.stage/index.js"]
+command = "npm"
+command_arguments = ["run", "build:js"]
 
 [[proxy]]
 rewrite = "/api"
