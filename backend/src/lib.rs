@@ -1,4 +1,5 @@
 pub mod modules;
+pub mod telemetry;
 
 use actix_web::{dev::Server, web, App, HttpServer, Responder};
 use tracing_actix_web::TracingLogger;

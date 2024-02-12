@@ -1,7 +1,9 @@
+mod login;
 mod logout;
 mod signup;
-mod login;
 
-// use logout::*;
-pub use signup::*;
-// pub use login::*;
+use actix_web::{web, Scope};
+
+pub fn router(base_route: &str) -> Scope {
+    web::scope(base_route).route("signup", web::post().to(signup::create_account))
+}
