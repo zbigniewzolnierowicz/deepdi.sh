@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::modules::user::domain::{Email, Username, HashedPassword};
+use crate::modules::user::domain::{Email, HashedPassword, Username};
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -20,6 +20,10 @@ impl User {
             password_hash,
             email,
         })
+    }
+
+    pub fn check_password(&self, verification_password: &str) -> bool {
+        bcrypt::verify(verification_password, self.password_hash.as_ref()).unwrap_or(false)
     }
 }
 

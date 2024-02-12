@@ -9,6 +9,10 @@ impl HashedPassword {
 
         Ok(Self(hashed_password))
     }
+
+    pub fn new(hashed_password: &str) -> Self {
+        Self(hashed_password.to_string())
+    }
 }
 
 impl std::fmt::Display for HashedPassword {

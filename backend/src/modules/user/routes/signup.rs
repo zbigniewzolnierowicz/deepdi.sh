@@ -24,8 +24,8 @@ pub async fn create_account(
     Ok(HttpResponse::Ok().json(UserDataDTO::from(user)))
 }
 
-#[instrument(skip(db, user))]
-pub async fn insert_user(db: &PgPool, user: &User) -> Result<(), sqlx::Error> {
+#[instrument(name = "Persist user in the database", skip(db, user))]
+async fn insert_user(db: &PgPool, user: &User) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3)",
         user.username.as_ref(),

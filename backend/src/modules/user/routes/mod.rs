@@ -12,9 +12,5 @@ pub fn router(base_route: &str) -> Scope {
     web::scope(base_route)
         .route("/", web::get().to(HttpResponse::Ok))
         .route("/signup", web::post().to(signup::create_account))
-        .service(
-            web::resource("{user_id}")
-                .name("user")
-                .route(web::get().to(get_user_info)),
-        )
+        .route("/login", web::post().to(login::log_in))
 }

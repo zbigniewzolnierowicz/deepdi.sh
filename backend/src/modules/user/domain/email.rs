@@ -15,6 +15,10 @@ impl Email {
             Ok(Self(s.to_string()))
         }
     }
+    
+    pub fn new(email: &str) -> Self {
+        Self(email.to_string())
+    }
 }
 
 impl std::fmt::Display for Email {
