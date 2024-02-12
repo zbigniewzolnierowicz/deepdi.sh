@@ -13,7 +13,7 @@ fn main() {
     let element = create_node_ref::<leptos::html::P>();
     let on_click = move |_| {
         let el = element.get().unwrap();
-        let element = web_sys::Element::from((*el).clone());
+        let element: Element = (*el).clone().into();
         boop(element);
     };
 

@@ -17,6 +17,12 @@
 ```sh
 cargo install cargo-binstall
 cargo binstall trunk
+
+rustup toolchain add nightly
+rustup override set nightly
+cd frontend
+rustup target add wasm32-unknown-unknown
+rustup component add rust-analyzer
 ```
 
 ## Issues
@@ -24,5 +30,8 @@ cargo binstall trunk
 - Yew with SSR doesn't support editing the `<head>`
 
 ## Others
+
+[https://github.com/StardustDL/Linq-in-Rust](https://github.com/StardustDL/Linq-in-Rust)
+[https://github.com/mattgathu/cute](https://github.com/mattgathu/cute)
 
 [mk48.io](https://mk48.io)
