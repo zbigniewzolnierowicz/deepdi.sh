@@ -354,6 +354,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "color-eyre",
+ "common",
  "eyre",
  "serde",
  "serde_json",
@@ -605,6 +606,7 @@ dependencies = [
 name = "common"
 version = "0.0.0"
 dependencies = [
+ "chrono",
  "serde",
 ]
 

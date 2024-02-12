@@ -1,6 +1,6 @@
 use actix_web::{http::StatusCode, ResponseError};
 
-use crate::error::ErrorMessage;
+use common::error::ErrorMessage;
 
 #[derive(Debug, thiserror::Error)]
 pub enum HealthCheckError {

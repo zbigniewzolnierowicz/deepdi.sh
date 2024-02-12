@@ -1,3 +1,6 @@
+pub mod user;
+pub mod error;
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
