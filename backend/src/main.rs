@@ -11,7 +11,7 @@ async fn main() -> Result<(), std::io::Error> {
     let connection_pool = PgPoolOptions::new().connect_lazy_with(config.database.with_db());
 
     let server = backend::run(
-        std::net::TcpListener::bind(("0.0.0.0", 8111))?,
+        std::net::TcpListener::bind((config.application.host, config.application.port))?,
         connection_pool,
     )?;
     server.await

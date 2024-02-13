@@ -1,6 +1,6 @@
 database:
   host: 127.0.0.1
   port: 5432
-  username: recipies
-  password: recipies
-  database_name: recipies
+  username: recipes
+  password: recipes
+  database_name: recipes
