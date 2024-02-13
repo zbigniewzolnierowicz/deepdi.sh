@@ -10,8 +10,9 @@
 | React | [Leptos](https://leptos.dev/) |
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
 | tmux | [zellij](https://zellij.dev) |
-| Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/) |
-| curl | hurl |
+| Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/), or [zed](https://zed.dev) |
+| curl | [hurl](https://hurl.dev) |
+| nvm/rubyenv/pyenv | [mise](https://mise.jdx.dev/) |
 
 ## Prerequisites
 
