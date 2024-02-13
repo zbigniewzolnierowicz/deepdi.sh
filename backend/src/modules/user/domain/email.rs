@@ -5,7 +5,7 @@ use validator::validate_email;
 pub struct Email(String);
 
 impl Email {
-    pub fn parse(s: &str)-> Result<Self, String> {
+    pub fn parse(s: &str) -> Result<Self, String> {
         let is_empty = s.trim().is_empty();
         let valid_email = validate_email(s);
 
@@ -15,7 +15,7 @@ impl Email {
             Ok(Self(s.to_string()))
         }
     }
-    
+
     pub fn new(email: &str) -> Self {
         Self(email.to_string())
     }

@@ -1,0 +1,8 @@
+application:
+  host: 0.0.0.0
+  port: 80
+database:
+  port: 5432
+  username: zbigniewzolnierowicz
+  database_name: neondb
+  require_ssl: true

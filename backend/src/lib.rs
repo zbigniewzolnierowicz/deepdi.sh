@@ -1,3 +1,4 @@
+pub mod configuration;
 pub mod modules;
 pub mod telemetry;
 
@@ -6,6 +7,8 @@ use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
 
 pub fn run(listener: std::net::TcpListener, database: PgPool) -> Result<Server, std::io::Error> {
+    let addr = listener.local_addr()?;
+    tracing::info!("Starting listening on {}:{}", addr.ip(), addr.port());
     let database = web::Data::new(database);
     let server = HttpServer::new(move || {
         App::new()

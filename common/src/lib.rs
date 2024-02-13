@@ -1,7 +1,7 @@
-pub mod user;
 pub mod error;
+pub mod user;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Ingredient {
@@ -14,5 +14,5 @@ pub struct Ingredient {
 pub struct Recipe {
     pub serves: u16,
     pub ingredients: Vec<Ingredient>,
-    pub steps: Vec<String>
+    pub steps: Vec<String>,
 }

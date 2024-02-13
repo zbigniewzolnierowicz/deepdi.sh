@@ -13,7 +13,7 @@ pub enum LoginError {
     ValidationError(String),
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error)
+    UnexpectedError(#[from] anyhow::Error),
 }
 
 impl ResponseError for LoginError {
@@ -21,7 +21,7 @@ impl ResponseError for LoginError {
         match self {
             Self::WrongPassword => StatusCode::BAD_REQUEST,
             Self::NotFound => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

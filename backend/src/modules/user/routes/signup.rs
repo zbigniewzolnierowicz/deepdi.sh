@@ -12,12 +12,8 @@ pub async fn create_account(
     db: web::Data<PgPool>,
     body: web::Json<CreateNewUserDTO>,
 ) -> Result<HttpResponse, SignupError> {
-    let user = User::new(
-        &body.username,
-        &body.password,
-        &body.email,
-    )
-    .map_err(SignupError::Validation)?;
+    let user =
+        User::new(&body.username, &body.password, &body.email).map_err(SignupError::Validation)?;
 
     insert_user(&db, &user).await.context("Database error")?;
 

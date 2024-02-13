@@ -7,7 +7,7 @@ pub enum SignupError {
     Validation(String),
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error)
+    UnexpectedError(#[from] anyhow::Error),
 }
 
 impl ResponseError for SignupError {
