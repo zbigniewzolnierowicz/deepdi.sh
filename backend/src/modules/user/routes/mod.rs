@@ -2,16 +2,6 @@ mod login;
 mod logout;
 mod signup;
 
-use actix_web::{web, HttpResponse, Responder, Scope};
-
-pub async fn get_user_info(path: web::Path<String>) -> impl Responder {
-    path.into_inner()
-}
-
-pub fn router(base_route: &str) -> Scope {
-    web::scope(base_route)
-        .route("/", web::get().to(HttpResponse::Ok))
-        .route("/signup", web::post().to(signup::create_account))
-        .route("/login", web::post().to(login::log_in))
-        .route("/logout", web::post().to(logout::log_out))
-}
+pub use login::*;
+pub use logout::*;
+pub use signup::*;

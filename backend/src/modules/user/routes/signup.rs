@@ -4,8 +4,7 @@ use common::user::{CreateNewUserDTO, UserDataDTO};
 use sqlx::PgPool;
 use tracing::instrument;
 
-use crate::modules::user::errors::signup::SignupError;
-use crate::modules::user::models::user::CreateNewUser;
+use crate::modules::user::{CreateNewUser, SignupError};
 
 #[instrument(name = "Create a new account", skip(db, body))]
 pub async fn create_account(

@@ -5,9 +5,7 @@ use common::user::UserDataDTO;
 use sqlx::PgPool;
 use tracing::instrument;
 
-use crate::modules::user::domain::{validate_session, Email, HashedPassword, Username};
-use crate::modules::user::errors::login::LoginError;
-use crate::modules::user::models::user::CreateNewUser;
+use crate::modules::user::{CreateNewUser, Email, HashedPassword, LoginError, Username};
 
 #[instrument(name = "User logs in", skip(db, body, session))]
 pub async fn log_in(
@@ -15,10 +13,6 @@ pub async fn log_in(
     body: web::Json<common::user::LoginUserDTO>,
     session: Session,
 ) -> Result<HttpResponse, LoginError> {
-    if validate_session(&session).is_ok() {
-        return Err(LoginError::AlreadyLoggedIn);
-    };
-
     let (id, user) = find_user(&db, &body.username).await?;
     if !user.check_password(&body.password) {
         return Err(LoginError::WrongPassword);
