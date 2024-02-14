@@ -13,10 +13,11 @@ async fn main() -> Result<(), std::io::Error> {
     let connection_pool = PgPoolOptions::new().connect_lazy_with(config.database.with_db());
 
     let redis_conn = config.session.get_redis_connection_string();
-    let session = RedisSessionStore::new(redis_conn)
+    let session = RedisSessionStore::new(redis_conn.clone())
         .await
         .expect("Could not connect to redis");
     let session_key = actix_web::cookie::Key::from(config.session.key.expose_secret().as_bytes());
+    let redis = redis::Client::open(redis_conn);
 
     let server = backend::run(
         std::net::TcpListener::bind((config.application.host, config.application.port))?,
