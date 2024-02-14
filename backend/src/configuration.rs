@@ -33,6 +33,7 @@ impl TryFrom<String> for Environment {
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub session: SessionSettings,
 }
 
 #[derive(Deserialize, Clone)]
@@ -52,6 +53,18 @@ pub struct DatabaseSettings {
     pub database_name: String,
     #[serde(default)]
     pub require_ssl: bool,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct SessionSettings {
+    pub key: Secret<String>,
+    pub host: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+    pub username: String,
+    pub password: Secret<String>,
+    #[serde(default)]
+    pub ssl: bool,
 }
 
 impl Settings {
@@ -98,5 +111,21 @@ impl DatabaseSettings {
             .username(&self.username)
             .ssl_mode(mode)
             .password(self.password.expose_secret())
+    }
+}
+
+impl SessionSettings {
+    pub fn get_redis_connection_string(&self) -> String {
+        let connection_prefix = if self.ssl { "rediss://" } else { "redis://" };
+
+        format!(
+            "{}{}:{}@{}:{}",
+            connection_prefix,
+            self.username,
+            self.password.expose_secret(),
+            self.host,
+            self.port
+        )
+        .to_string()
     }
 }

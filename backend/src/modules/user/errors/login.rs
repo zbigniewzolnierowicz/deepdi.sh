@@ -12,6 +12,9 @@ pub enum LoginError {
     #[error("{0}")]
     ValidationError(String),
 
+    #[error("User is already logged in")]
+    AlreadyLoggedIn,
+
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -21,6 +24,7 @@ impl ResponseError for LoginError {
         match self {
             Self::WrongPassword => StatusCode::BAD_REQUEST,
             Self::NotFound => StatusCode::NOT_FOUND,
+            Self::AlreadyLoggedIn => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

@@ -10,6 +10,8 @@ use self::errors::HealthCheckError;
 async fn health_check(db: web::Data<PgPool>) -> Result<String, HealthCheckError> {
     db_status(&db).await?;
 
+    // TODO: add Redis health check
+
     Ok("All good!".into())
 }
 

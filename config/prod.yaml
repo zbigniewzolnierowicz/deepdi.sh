@@ -6,3 +6,7 @@ database:
   username: zbigniewzolnierowicz
   database_name: neondb
   require_ssl: true
+session:
+  username: default
+  port: 12200
+  ssl: true

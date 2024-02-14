@@ -13,4 +13,5 @@ pub fn router(base_route: &str) -> Scope {
         .route("/", web::get().to(HttpResponse::Ok))
         .route("/signup", web::post().to(signup::create_account))
         .route("/login", web::post().to(login::log_in))
+        .route("/logout", web::post().to(logout::log_out))
 }

@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 use crate::modules::user::domain::{Email, HashedPassword, Username};
 
 #[derive(Serialize, Deserialize)]
-pub struct User {
+pub struct CreateNewUser {
     pub username: Username,
     pub password_hash: HashedPassword,
     pub email: Email,
 }
 
-impl User {
+impl CreateNewUser {
     pub fn new(username: &str, password_hash: &str, email: &str) -> Result<Self, String> {
         let username = Username::parse(username)?;
         let email = Email::parse(email)?;
@@ -27,11 +27,19 @@ impl User {
     }
 }
 
-impl From<User> for common::user::UserDataDTO {
-    fn from(val: User) -> Self {
+impl From<CreateNewUser> for common::user::UserDataDTO {
+    fn from(val: CreateNewUser) -> Self {
         Self {
             email: val.email.as_ref().to_string(),
             username: val.username.as_ref().to_string(),
         }
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct User {
+    pub id: i32,
+    pub username: Username,
+    pub password_hash: HashedPassword,
+    pub email: Email,
 }

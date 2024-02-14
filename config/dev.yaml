@@ -4,3 +4,10 @@ database:
   username: recipes
   password: recipes
   database_name: recipes
+session:
+  key: ZAŻÓŁĆ GĘŚLĄ JAŹŃ MUSZĘ BYĆ BARDZO DŁUGI UWIELBIAM DŁUGIE KLUCZE
+  host: 127.0.0.1
+  port: 6379
+  username: default
+  password: recipes
+  ssl: false
