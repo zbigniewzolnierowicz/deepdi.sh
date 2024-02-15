@@ -18,10 +18,12 @@ pub fn run(
     database: PgPool,
     session: RedisSessionStore,
     session_key: Key,
+    redis: redis::Client,
 ) -> Result<Server, std::io::Error> {
     let addr = listener.local_addr()?;
     tracing::info!("Starting listening on {}:{}", addr.ip(), addr.port());
     let database = web::Data::new(database);
+    let redis = web::Data::new(redis);
     let session_lifecycle = PersistentSession::default().session_ttl(CookieDuration::weeks(1));
     let server = HttpServer::new(move || {
         App::new()
@@ -35,7 +37,7 @@ pub fn run(
             .route(
                 "/user/signup",
                 web::post()
-                    .to(modules::user::log_in)
+                    .to(modules::user::create_account)
                     .wrap(LoginStatusChecker::new(LoginStatus::LoggedOut)),
             )
             .route(
@@ -51,6 +53,7 @@ pub fn run(
                     .wrap(LoginStatusChecker::new(LoginStatus::LoggedIn)),
             )
             .app_data(database.clone())
+            .app_data(redis.clone())
     })
     .listen(listener)?
     .run();

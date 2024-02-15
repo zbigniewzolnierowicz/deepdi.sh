@@ -17,13 +17,14 @@ async fn main() -> Result<(), std::io::Error> {
         .await
         .expect("Could not connect to redis");
     let session_key = actix_web::cookie::Key::from(config.session.key.expose_secret().as_bytes());
-    let redis = redis::Client::open(redis_conn);
+    let redis = redis::Client::open(redis_conn).expect("Could not connect to Redis");
 
     let server = backend::run(
         std::net::TcpListener::bind((config.application.host, config.application.port))?,
         connection_pool,
         session,
         session_key,
+        redis,
     )?;
     server.await
 }

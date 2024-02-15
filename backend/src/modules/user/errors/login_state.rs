@@ -1,8 +1,4 @@
-use actix_web::{
-    body::BoxBody,
-    http::StatusCode,
-    HttpResponse, ResponseError,
-};
+use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use common::error::ErrorMessage;
 
 use crate::modules::user::middleware::LoginStatus;

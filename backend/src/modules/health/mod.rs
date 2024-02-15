@@ -1,35 +1,28 @@
 use std::collections::HashMap;
 use std::pin::Pin;
 
-use actix_web::http::StatusCode;
-use actix_web::{web, HttpResponse};
-use anyhow::Context;
-use futures;
+use actix_web::{http::StatusCode, web, HttpResponse};
+use futures::{self, future};
 use sqlx::PgPool;
 use std::future::Future;
 use tracing::instrument;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize)]
 struct HealthChecks {
-    checks: HashMap<String, String>,
+    checks: HashMap<&'static str, String>,
 }
 
-#[instrument(name = "Health check", skip(db))]
-pub async fn health_check(db: web::Data<PgPool>) -> HttpResponse {
-    type StatusCheck = Pin<Box<dyn Future<Output = (&'static str, Result<(), anyhow::Error>)>>>;
+#[instrument(name = "Health check", skip(db, redis))]
+pub async fn health_check(db: web::Data<PgPool>, redis: web::Data<redis::Client>) -> HttpResponse {
+    type HealthCheckResult = Result<(), anyhow::Error>;
+    type HealthCheckEntry = (&'static str, HealthCheckResult);
+    type StatusCheck = Pin<Box<dyn Future<Output = HealthCheckEntry>>>;
 
-    let redis_check = async {
-        (
-            "redis",
-            Err(anyhow::anyhow!("Redis error"))
-            // redis_status()
-            //     .await
-            //     .map_err(|_| anyhow::anyhow!("Redis error")),
-        )
-    };
-    let db_check = async move { ("db", db_status(&db).await.context("Database error")) };
-    let futures: [StatusCheck; 2] = [Box::pin(redis_check), Box::pin(db_check)];
-    let status_checks_futures = futures::future::join_all(futures).await;
+    let redis_check = async move { ("redis", redis_status(&redis).await) };
+    let db_check = async move { ("db", db_status(&db).await) };
+
+    let futures: Vec<StatusCheck> = vec![Box::pin(redis_check), Box::pin(db_check)];
+    let status_checks_futures = future::join_all(futures).await;
 
     let status: StatusCode = if status_checks_futures.iter().any(|c| c.1.is_err()) {
         StatusCode::INTERNAL_SERVER_ERROR
@@ -37,10 +30,10 @@ pub async fn health_check(db: web::Data<PgPool>) -> HttpResponse {
         StatusCode::OK
     };
 
-    let checks: HashMap<String, String> =
+    let checks: HashMap<&str, String> =
         HashMap::from_iter(status_checks_futures.into_iter().map(|(key, value)| {
             (
-                key.to_string(),
+                key,
                 value.map_or_else(|error| error.to_string(), |_| "OK!".to_string()),
             )
         }));
@@ -48,13 +41,16 @@ pub async fn health_check(db: web::Data<PgPool>) -> HttpResponse {
     HttpResponse::build(status).json(HealthChecks { checks })
 }
 
-#[tracing::instrument(name = "Check status of database", skip(db))]
-async fn db_status(db: &PgPool) -> Result<(), sqlx::Error> {
+#[tracing::instrument(name = "Database health check", skip(db))]
+async fn db_status(db: &PgPool) -> Result<(), anyhow::Error> {
     sqlx::query("SELECT 1;").execute(db).await?;
 
     Ok(())
 }
 
-async fn redis_status() -> Result<(), ()> {
+#[tracing::instrument(name = "Redis health check", skip(conn))]
+async fn redis_status(conn: &redis::Client) -> Result<(), anyhow::Error> {
+    let mut conn = conn.get_connection()?;
+    redis::cmd("PING").query(&mut conn)?;
     Ok(())
 }
