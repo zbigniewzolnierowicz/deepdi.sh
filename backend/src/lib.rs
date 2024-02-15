@@ -11,7 +11,7 @@ use actix_web::{
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
 
-use crate::modules::user::middleware::{LoginStatus, LoginStatusChecker};
+use crate::modules::user::middleware::LoginStatusChecker;
 
 pub fn run(
     listener: std::net::TcpListener,
@@ -38,19 +38,25 @@ pub fn run(
                 "/user/signup",
                 web::post()
                     .to(modules::user::create_account)
-                    .wrap(LoginStatusChecker::new(LoginStatus::LoggedOut)),
+                    .wrap(LoginStatusChecker::only_logged_out()),
             )
             .route(
                 "/user/login",
                 web::post()
                     .to(modules::user::log_in)
-                    .wrap(LoginStatusChecker::new(LoginStatus::LoggedOut)),
+                    .wrap(LoginStatusChecker::only_logged_out()),
             )
             .route(
                 "/user/logout",
                 web::post()
                     .to(modules::user::log_out)
-                    .wrap(LoginStatusChecker::new(LoginStatus::LoggedIn)),
+                    .wrap(LoginStatusChecker::only_logged_in()),
+            )
+            .route(
+                "/recipes/get",
+                web::get()
+                    .to(modules::recipes::get_recipe)
+                    .wrap(LoginStatusChecker::only_logged_in()),
             )
             .app_data(database.clone())
             .app_data(redis.clone())

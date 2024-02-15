@@ -23,6 +23,14 @@ impl LoginStatusChecker {
     pub fn new(status: LoginStatus) -> Self {
         Self(status)
     }
+
+    pub fn only_logged_in() -> Self {
+        Self::new(LoginStatus::LoggedIn)
+    }
+
+    pub fn only_logged_out() -> Self {
+        Self::new(LoginStatus::LoggedOut)
+    }
 }
 
 impl<S, B> Transform<S, ServiceRequest> for LoginStatusChecker
