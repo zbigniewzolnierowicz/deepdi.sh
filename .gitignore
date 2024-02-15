@@ -1,5 +1,6 @@
 **/target/*
 frontend/dist
+frontend/compiled-js
 target/
 **/node_modules
 .env

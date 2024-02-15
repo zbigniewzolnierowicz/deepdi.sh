@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
       "build:css": "tailwindcss -i ./styles/tailwind.css -o ./dist/.stage/index.css",
-      "build:js": "esbuild --bundle ./src-ts/index.ts --outfile=./dist/.stage/index.js --format=esm"
+      "build:js": "esbuild --bundle ./src-ts/index.ts --outfile=./compiled-js/index.js --format=esm"
   },
   "author": "",
   "license": "ISC",

@@ -3,7 +3,7 @@ use leptos::{create_node_ref, mount_to_body, view};
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
 
-#[wasm_bindgen(module = "/dist/.stage/index.js")]
+#[wasm_bindgen(module = "/compiled-js/index.js")]
 extern "C" {
     fn trial(thing: String);
     fn boop(element: Element);

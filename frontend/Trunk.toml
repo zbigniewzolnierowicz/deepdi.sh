@@ -1,3 +1,6 @@
+[watch]
+ignore = ["compiled-js"]
+
 [[hooks]]
 stage = "post_build"
 command = "npm"
