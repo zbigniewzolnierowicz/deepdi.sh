@@ -1,34 +1,47 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct Ingredient {
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
+pub struct RecipeBase {
     pub id: i32,
     pub name: String,
-    pub description: String
+    pub description: String,
 }
 
-impl Ingredient {
-    pub fn with_units_and_amount(&self, unit: &str, amount: f64) -> IngredientInRecipe {
-        IngredientInRecipe {
-            ingredient_id: self.id,
-            unit: unit.to_string(),
-            amount
+impl RecipeBase {
+    pub fn into_dto(self, steps: Vec<Step>, ingredients: Vec<Ingredient>) -> common::Recipe {
+        common::Recipe {
+            name: self.name,
+            description: self.description,
+            steps: steps.iter().map(|s| s.instructions.clone()).collect(),
+            serves: 4,
+            ingredients: ingredients
+                .into_iter()
+                .map(common::Ingredient::from)
+                .collect(),
         }
     }
 }
 
-pub struct IngredientInRecipe {
-    pub ingredient_id: i32,
-    pub amount: f64,
-    pub unit: String
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
+pub struct Step {
+    pub index: i32,
+    pub instructions: String
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Recipe {
-    pub id: i32,
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
+pub struct Ingredient {
+    pub unit: String,
+    pub amount: f64,
     pub name: String,
-    pub description: String,
-    pub serves: u16,
-    pub steps: Vec<String>,
-    pub ingredients: Vec<Ingredient>
+    pub ingredient_id: i32,
+}
+
+impl From<Ingredient> for common::Ingredient {
+    fn from(val: Ingredient) -> Self {
+        common::Ingredient {
+            name: val.name,
+            unit: val.unit,
+            amount: val.amount
+        }
+    }
 }
