@@ -34,8 +34,9 @@ rustup component add rust-analyzer
 
 ## Issues
 
-- Rust is a very slow language
+- Rust is a very slow to write in language
     - But a very correct language!
+- Steep learning curve
 - Integrating with existing JS libraries is a bit of a pain
 
 ## Others
