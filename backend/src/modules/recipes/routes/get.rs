@@ -71,7 +71,6 @@ async fn get_ingredients_for_recipe(
         Ingredient,
         r#"SELECT
                unit, amount, name, ingredient_id
-
                FROM ingredients_in_recipes
                INNER JOIN ingredients
                ON ingredients.id = ingredients_in_recipes.ingredient_id

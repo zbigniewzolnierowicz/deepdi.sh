@@ -13,6 +13,7 @@
 | Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/), or [zed](https://zed.dev) |
 | curl | [hurl](https://hurl.dev) |
 | nvm/rubyenv/pyenv | [mise](https://mise.jdx.dev/) |
+| cd/z | [zoxide](https://github.com/ajeetdsouza/zoxide) |
 
 ## Prerequisites
 
@@ -38,10 +39,15 @@ rustup component add rust-analyzer
     - But a very correct language!
 - Steep learning curve
 - Integrating with existing JS libraries is a bit of a pain
+- Async traits have caveats (for library developers mostly)
 
 ## Others
 
-[https://github.com/StardustDL/Linq-in-Rust](https://github.com/StardustDL/Linq-in-Rust)
-[https://github.com/mattgathu/cute](https://github.com/mattgathu/cute)
+[Energy efficiency across programming languages](https://greenlab.di.uminho.pt/wp-content/uploads/2017/10/sleFinal.pdf)
+[Cargo script?](https://github.com/rust-lang/rfcs/pull/3503#issuecomment-1930765966)
+[LINQ in Rust](https://github.com/StardustDL/Linq-in-Rust)
+[Python-like list comprehension](https://github.com/mattgathu/cute)
+[Are we learning yet?](https://www.arewelearningyet.com/gpu-computing/)
+[Are we web yet?](https://www.arewewebyet.org/)
 
 [mk48.io](https://mk48.io)
