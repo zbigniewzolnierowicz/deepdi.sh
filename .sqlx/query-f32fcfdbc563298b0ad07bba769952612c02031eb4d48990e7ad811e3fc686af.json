@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT index, instructions FROM steps WHERE steps.recipe_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "instructions",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "f32fcfdbc563298b0ad07bba769952612c02031eb4d48990e7ad811e3fc686af"
+}

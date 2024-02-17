@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-session = { version = "0.9.0", features = ["redis-rs-session", "redis-rs-tls-session"] }
+actix-session = { git = "https://github.com/zbigniewzolnierowicz/actix-extras", features = ["redis-rs-session", "redis-rs-tls-session-rustls"] }
 actix-web = "4.5.1"
 anyhow = "1.0.79"
 bcrypt = "0.15.0"
