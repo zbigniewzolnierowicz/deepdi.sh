@@ -7,13 +7,19 @@ use tracing::instrument;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RecipeGetError {
+    #[error("Recipe does not exist")]
+    MissingRecipe,
+
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
 
 impl ResponseError for RecipeGetError {
     fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
+        match self {
+            Self::MissingRecipe => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR
+        }
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
@@ -23,22 +29,26 @@ impl ResponseError for RecipeGetError {
 
 #[instrument(name = "Getting a recipe", skip(db))]
 pub async fn get_recipe(db: web::Data<PgPool>) -> Result<HttpResponse, RecipeGetError> {
-    let recipe = get_base_recipe(&db).await?;
+    let tx = db.begin().await.context("Error making a transaction")?;
+    let recipe = get_base_recipe(&db)
+        .await?
+        .ok_or_else(|| RecipeGetError::MissingRecipe)?;
     let steps = get_steps_for_recipe(&db, &recipe).await?;
     let ingredients = get_ingredients_for_recipe(&db, &recipe).await?;
+    tx.commit().await.context("Error committing transaction")?;
     let rec = recipe.into_dto(steps, ingredients);
 
     Ok(HttpResponse::Ok().json(rec))
 }
 
 #[instrument(name = "Getting recipe metadata", skip(db))]
-async fn get_base_recipe(db: &PgPool) -> Result<RecipeBase, anyhow::Error> {
+async fn get_base_recipe(db: &PgPool) -> anyhow::Result<Option<RecipeBase>> {
     sqlx::query_as!(
         RecipeBase,
         "SELECT id, name, description FROM recipes WHERE id = $1",
         1
     )
-    .fetch_one(db)
+    .fetch_optional(db)
     .await
     .context("Error fetching recipes")
 }
@@ -47,7 +57,7 @@ async fn get_base_recipe(db: &PgPool) -> Result<RecipeBase, anyhow::Error> {
 async fn get_steps_for_recipe(
     db: &PgPool,
     recipe: &RecipeBase,
-) -> Result<Vec<Step>, anyhow::Error> {
+) -> anyhow::Result<Vec<Step>> {
     let mut steps = sqlx::query_as!(
         Step,
         "SELECT index, instructions FROM steps WHERE steps.recipe_id = $1",
@@ -81,4 +91,3 @@ async fn get_ingredients_for_recipe(
     .await
     .context("Error fetching ingredients")
 }
-

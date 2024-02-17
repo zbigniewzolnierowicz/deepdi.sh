@@ -40,6 +40,7 @@ rustup component add rust-analyzer
 - Steep learning curve
 - Integrating with existing JS libraries is a bit of a pain
 - Async traits have caveats (for library developers mostly)
+- Cannot use pooled connections with Neon ([issue in sqlx](https://github.com/launchbadge/sqlx/issues/67), just use normal connections rather than Neon's connection pooling)
 
 ## Others
 
