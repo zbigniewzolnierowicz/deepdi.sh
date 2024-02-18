@@ -2,18 +2,35 @@
 
 ## Tools used:
 
+### In the app proper
+
 | Usual | New |
 |:------| --- |
-| git   | [~~jj~~](https://github.com/martinvonz/jj) (I ended up not using this) |
 | postgres | [SurrealDB](https://surrealdb.com/) (not using this, I wanna show off sqlx) |
 | Spring | [Actix Web](https://actix.rs/) |
 | React | [Leptos](https://leptos.dev/) |
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
+| curl | [hurl](https://hurl.dev) |
+
+### In my terminal
+
+| Usual | New |
+|:------| --- |
 | tmux | [zellij](https://zellij.dev) |
 | Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/), or [zed](https://zed.dev) |
-| curl | [hurl](https://hurl.dev) |
 | nvm/rubyenv/pyenv | [mise](https://mise.jdx.dev/) |
 | cd/z | [zoxide](https://github.com/ajeetdsouza/zoxide) |
+| oh-my-zsh prompt | [starship](https://starship.rs) |
+| grep | [ripgrep](https://github.com/BurntSushi/ripgrep) |
+| find | [fd](https://github.com/sharkdp/fd) |
+| cat | [bat](https://github.com/sharkdp/bat) |
+| du | [dust](https://github.com/bootandy/dust) |
+| ls | [eza](https://eza.rocks) |
+| lazygit | [gitui](https://github.com/extrawurst/gitui) |
+| vscode | [neovide](https://neovide.dev) |
+| tldr | [tealdeer](https://github.com/dbrgn/tealdeer) |
+| zsh | [nu](https://nushell.sh) (but I'm not using this one, too used to zsh) |
+| ctrl-r | [mcfly](https://github.com/cantino/mcfly) && [mcfly-fzf](https://github.com/bnprks/mcfly-fzf) |
 
 ## Prerequisites
 
