@@ -1,6 +1,6 @@
 use actix_web::{body::BoxBody, http::StatusCode, web, HttpResponse, ResponseError};
-use anyhow::Context;
 use common::error::ErrorMessage;
+use eyre::{eyre, Context};
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -12,7 +12,7 @@ pub enum RecipeCreateError {
     MissingIngredients(Vec<i32>),
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
+    UnexpectedError(#[from] eyre::Report),
 }
 
 impl ResponseError for RecipeCreateError {
@@ -36,8 +36,8 @@ pub async fn create_recipe(
     let tx = db.begin().await.context("Could not create transaction.")?;
     let user_id = session
         .get::<i32>("user_id")
-        .context("Failed to get session")?
-        .ok_or(anyhow::anyhow!("User ID is missing."))?;
+        .wrap_err("Failed to get session")?
+        .ok_or(eyre!("User ID is missing."))?;
 
     let ingredient_ids = body.ingredients.iter().cloned().map(|r| r.id).collect();
 
@@ -55,7 +55,11 @@ pub async fn create_recipe(
     Ok(HttpResponse::Ok().json(result))
 }
 
-pub async fn insert_ingredients(db: &PgPool, recipe: &RecipeBase, body: &common::CreateRecipe) -> anyhow::Result<Vec<Ingredient>> {
+pub async fn insert_ingredients(
+    db: &PgPool,
+    recipe: &RecipeBase,
+    body: &common::CreateRecipe,
+) -> eyre::Result<Vec<Ingredient>> {
     let mut ingredients = vec![];
     for common::CreateRecipeIngredient { id, unit, amount } in body.ingredients.iter() {
         let ingredient = sqlx::query_as!(
@@ -77,7 +81,7 @@ pub async fn insert_ingredients(db: &PgPool, recipe: &RecipeBase, body: &common:
         .await?;
 
         ingredients.push(ingredient);
-    };
+    }
 
     Ok(ingredients)
 }
@@ -87,7 +91,7 @@ pub async fn create_base_recipe(
     db: &PgPool,
     body: &common::CreateRecipe,
     user_id: &i32,
-) -> anyhow::Result<RecipeBase> {
+) -> eyre::Result<RecipeBase> {
     sqlx::query_as!(
         RecipeBase,
         "INSERT INTO recipes (name, description, user_id) VALUES ($1, $2, $3) RETURNING id, name, description, user_id",
@@ -103,7 +107,7 @@ pub async fn insert_steps(
     db: &PgPool,
     recipe: &RecipeBase,
     body: &common::CreateRecipe,
-) -> anyhow::Result<Vec<Step>> {
+) -> eyre::Result<Vec<Step>> {
     let mut steps: Vec<Step> = vec![];
     for (index, step) in body.steps.iter().enumerate() {
         let index: i32 = index as i32;
@@ -120,7 +124,7 @@ pub async fn insert_steps(
         .await?;
 
         steps.push(step);
-    };
+    }
 
     Ok(steps)
 }
@@ -129,7 +133,7 @@ pub async fn insert_steps(
 pub async fn check_if_ingredients_exist(
     db: &PgPool,
     ingredient_ids: Vec<i32>,
-) -> anyhow::Result<Result<(), Vec<i32>>> {
+) -> eyre::Result<Result<(), Vec<i32>>> {
     let ingredient_ids_that_exist: Vec<i32> = sqlx::query!(
         "SELECT id FROM ingredients WHERE id IN (SELECT unnest($1::integer[]))",
         &ingredient_ids

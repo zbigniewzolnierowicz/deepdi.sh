@@ -410,7 +410,6 @@ version = "0.0.0"
 dependencies = [
  "actix-session",
  "actix-web",
- "anyhow",
  "bcrypt",
  "chrono",
  "color-eyre",

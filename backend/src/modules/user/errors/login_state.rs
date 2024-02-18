@@ -12,7 +12,7 @@ pub enum LoginStatusError {
     NotLoggedIn,
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
+    UnexpectedError(#[from] eyre::Report),
 }
 
 impl ResponseError for LoginStatusError {

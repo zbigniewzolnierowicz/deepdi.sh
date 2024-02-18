@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO steps (index, recipe_id, instructions)\n               VALUES ($1, $2, $3)\n               RETURNING index, instructions",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "instructions",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "8b413ffeb636b3d9cde18660e7f669ab23ebeb8b13d984028f25b8d970c07ac7"
+}

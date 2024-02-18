@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, name, description FROM recipes WHERE id = $1",
+  "query": "INSERT INTO recipes (name, description, user_id) VALUES ($1, $2, $3) RETURNING id, name, description, user_id",
   "describe": {
     "columns": [
       {
@@ -17,18 +17,26 @@
         "ordinal": 2,
         "name": "description",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
+        "Varchar",
+        "Text",
         "Int4"
       ]
     },
     "nullable": [
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "8f9606946e700900b82c01a4fddb6f2f2c7b71f6d8a961de749eea79cdb9af17"
+  "hash": "cad10f345d1354ccce7fef8094c799f0e9b3919f7d037d26868f7f95f9bbbafa"
 }

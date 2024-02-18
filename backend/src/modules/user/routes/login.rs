@@ -1,7 +1,7 @@
 use actix_session::Session;
 use actix_web::{web, HttpResponse};
-use anyhow::Context;
 use common::user::UserDataDTO;
+use eyre::Context;
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -27,7 +27,7 @@ pub async fn log_in(
 async fn persist_id_in_session(id: i32, session: &Session) -> Result<(), LoginError> {
     session
         .insert("user_id", id)
-        .context("Could not insert into session")?;
+        .wrap_err("Could not insert into session")?;
     Ok(())
 }
 
@@ -39,7 +39,7 @@ async fn find_user(db: &PgPool, username: &str) -> Result<(i32, CreateNewUser), 
     )
     .fetch_optional(db)
     .await
-    .context("Database error")?
+    .wrap_err("Database error")?
     .ok_or(LoginError::NotFound)?;
     let id = user.id;
 

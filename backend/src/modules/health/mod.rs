@@ -14,7 +14,7 @@ struct HealthChecks {
 
 #[instrument(name = "Health check", skip(db, redis))]
 pub async fn health_check(db: web::Data<PgPool>, redis: web::Data<redis::Client>) -> HttpResponse {
-    type HealthCheckResult = Result<(), anyhow::Error>;
+    type HealthCheckResult = eyre::Result<()>;
     type HealthCheckEntry = (&'static str, HealthCheckResult);
     type StatusCheck = Pin<Box<dyn Future<Output = HealthCheckEntry>>>;
 
@@ -42,14 +42,14 @@ pub async fn health_check(db: web::Data<PgPool>, redis: web::Data<redis::Client>
 }
 
 #[tracing::instrument(name = "Database health check", skip(db))]
-async fn db_status(db: &PgPool) -> anyhow::Result<()> {
+async fn db_status(db: &PgPool) -> eyre::Result<()> {
     sqlx::query("SELECT 1;").execute(db).await?;
 
     Ok(())
 }
 
 #[tracing::instrument(name = "Redis health check", skip(conn))]
-async fn redis_status(conn: &redis::Client) -> anyhow::Result<()> {
+async fn redis_status(conn: &redis::Client) -> eyre::Result<()> {
     let mut conn = conn.get_connection()?;
     redis::cmd("PING").query(&mut conn)?;
 

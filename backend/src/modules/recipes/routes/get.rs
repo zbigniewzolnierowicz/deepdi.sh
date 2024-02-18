@@ -1,7 +1,7 @@
 use crate::modules::recipes::models::{Ingredient, RecipeBase, Step};
 use actix_web::{body::BoxBody, http::StatusCode, web, HttpResponse, ResponseError};
-use anyhow::Context;
 use common::error::ErrorMessage;
+use eyre::Context;
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -11,7 +11,7 @@ pub enum RecipeGetError {
     MissingRecipe,
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
+    UnexpectedError(#[from] eyre::Error),
 }
 
 impl ResponseError for RecipeGetError {
@@ -28,21 +28,24 @@ impl ResponseError for RecipeGetError {
 }
 
 #[instrument(name = "Getting a recipe", skip(db))]
-pub async fn get_recipe(path: web::Path<i32>, db: web::Data<PgPool>) -> Result<HttpResponse, RecipeGetError> {
-    let tx = db.begin().await.context("Error making a transaction")?;
+pub async fn get_recipe(
+    path: web::Path<i32>,
+    db: web::Data<PgPool>,
+) -> Result<HttpResponse, RecipeGetError> {
+    let tx = db.begin().await.wrap_err("Error making a transaction")?;
     let recipe = get_base_recipe(&db, *path)
         .await?
         .ok_or_else(|| RecipeGetError::MissingRecipe)?;
     let steps = get_steps_for_recipe(&db, &recipe).await?;
     let ingredients = get_ingredients_for_recipe(&db, &recipe).await?;
-    tx.commit().await.context("Error committing transaction")?;
+    tx.commit().await.wrap_err("Error committing transaction")?;
     let rec = recipe.into_dto(steps, ingredients);
 
     Ok(HttpResponse::Ok().json(rec))
 }
 
 #[instrument(name = "Getting recipe metadata", skip(db))]
-async fn get_base_recipe(db: &PgPool, id: i32) -> anyhow::Result<Option<RecipeBase>> {
+async fn get_base_recipe(db: &PgPool, id: i32) -> eyre::Result<Option<RecipeBase>> {
     sqlx::query_as!(
         RecipeBase,
         "SELECT id, name, description, user_id FROM recipes WHERE id = $1",
@@ -50,11 +53,11 @@ async fn get_base_recipe(db: &PgPool, id: i32) -> anyhow::Result<Option<RecipeBa
     )
     .fetch_optional(db)
     .await
-    .context("Error fetching recipes")
+    .wrap_err("Error fetching recipes")
 }
 
 #[instrument(name = "Getting steps for recipe", skip(db))]
-async fn get_steps_for_recipe(db: &PgPool, recipe: &RecipeBase) -> anyhow::Result<Vec<Step>> {
+async fn get_steps_for_recipe(db: &PgPool, recipe: &RecipeBase) -> eyre::Result<Vec<Step>> {
     let mut steps = sqlx::query_as!(
         Step,
         "SELECT index, instructions FROM steps WHERE steps.recipe_id = $1",
@@ -62,7 +65,7 @@ async fn get_steps_for_recipe(db: &PgPool, recipe: &RecipeBase) -> anyhow::Resul
     )
     .fetch_all(db)
     .await
-    .context("Error fetching steps for the recipe")?;
+    .wrap_err("Error fetching steps for the recipe")?;
 
     steps.sort_by_key(|s| s.index);
 
@@ -73,7 +76,7 @@ async fn get_steps_for_recipe(db: &PgPool, recipe: &RecipeBase) -> anyhow::Resul
 async fn get_ingredients_for_recipe(
     db: &PgPool,
     recipe: &RecipeBase,
-) -> anyhow::Result<Vec<Ingredient>> {
+) -> eyre::Result<Vec<Ingredient>> {
     sqlx::query_as!(
         Ingredient,
         r#"SELECT
@@ -86,5 +89,5 @@ async fn get_ingredients_for_recipe(
     )
     .fetch_all(db)
     .await
-    .context("Error fetching ingredients")
+    .wrap_err("Error fetching ingredients")
 }

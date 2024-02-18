@@ -26,12 +26,12 @@ pub struct CreateRecipe {
     pub description: String,
     pub serves: u16,
     pub ingredients: Vec<CreateRecipeIngredient>,
-    pub steps: Vec<String>
+    pub steps: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreateRecipeIngredient {
     pub id: i32,
     pub amount: f64,
-    pub unit: String
+    pub unit: String,
 }

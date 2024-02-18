@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
-use anyhow::Context;
 use common::user::{CreateNewUserDTO, UserDataDTO};
+use eyre::Context;
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -14,7 +14,7 @@ pub async fn create_account(
     let user = CreateNewUser::new(&body.username, &body.password, &body.email)
         .map_err(SignupError::Validation)?;
 
-    insert_user(&db, &user).await.context("Database error")?;
+    insert_user(&db, &user).await.wrap_err("Database error")?;
 
     Ok(HttpResponse::Ok().json(UserDataDTO::from(user)))
 }

@@ -4,7 +4,9 @@ use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
 
 #[actix_web::main]
-async fn main() -> Result<(), std::io::Error> {
+async fn main() -> color_eyre::eyre::Result<()> {
+    color_eyre::install()?;
+
     let subscriber = telemetry::get_subscriber("recipes".into(), "info".into(), std::io::stdout);
     telemetry::init_subscriber(subscriber);
 
@@ -26,5 +28,7 @@ async fn main() -> Result<(), std::io::Error> {
         session_key,
         redis,
     )?;
-    server.await
+
+    server.await?;
+    Ok(())
 }

@@ -9,7 +9,7 @@ pub enum LogoutError {
     NotLoggedIn,
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
+    UnexpectedError(#[from] eyre::Report),
 }
 
 impl ResponseError for LogoutError {

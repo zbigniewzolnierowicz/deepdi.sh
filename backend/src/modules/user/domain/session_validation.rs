@@ -1,5 +1,5 @@
 use actix_session::Session;
-use anyhow::Context;
+use eyre::Context;
 
 #[derive(thiserror::Error, Debug)]
 pub enum SessionValidationError {
@@ -7,13 +7,13 @@ pub enum SessionValidationError {
     NotLoggedIn,
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error),
+    UnexpectedError(#[from] eyre::Error),
 }
 
 pub fn validate_session(session: &Session) -> Result<i32, SessionValidationError> {
     let user_id: Option<i32> = session
         .get("user_id")
-        .context("Session get error")
+        .wrap_err("Session get error")
         .map_err(SessionValidationError::UnexpectedError)?;
 
     match user_id {
