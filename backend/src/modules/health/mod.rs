@@ -42,15 +42,16 @@ pub async fn health_check(db: web::Data<PgPool>, redis: web::Data<redis::Client>
 }
 
 #[tracing::instrument(name = "Database health check", skip(db))]
-async fn db_status(db: &PgPool) -> Result<(), anyhow::Error> {
+async fn db_status(db: &PgPool) -> anyhow::Result<()> {
     sqlx::query("SELECT 1;").execute(db).await?;
 
     Ok(())
 }
 
 #[tracing::instrument(name = "Redis health check", skip(conn))]
-async fn redis_status(conn: &redis::Client) -> Result<(), anyhow::Error> {
+async fn redis_status(conn: &redis::Client) -> anyhow::Result<()> {
     let mut conn = conn.get_connection()?;
     redis::cmd("PING").query(&mut conn)?;
+
     Ok(())
 }

@@ -53,7 +53,13 @@ pub fn run(
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
-                "/recipes/get",
+                "/recipes/create",
+                web::post()
+                    .to(modules::recipes::create_recipe)
+                    .wrap(LoginStatusChecker::only_logged_in()),
+            )
+            .route(
+                "/recipes/get/{recipeId}",
                 web::get()
                     .to(modules::recipes::get_recipe)
                     .wrap(LoginStatusChecker::only_logged_in()),

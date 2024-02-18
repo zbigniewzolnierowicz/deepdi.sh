@@ -1,15 +1,17 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
 pub struct RecipeBase {
     pub id: i32,
     pub name: String,
     pub description: String,
+    pub user_id: i32
 }
 
 impl RecipeBase {
     pub fn into_dto(self, steps: Vec<Step>, ingredients: Vec<Ingredient>) -> common::Recipe {
         common::Recipe {
+            id: self.id,
             name: self.name,
             description: self.description,
             steps: steps.iter().map(|s| s.instructions.clone()).collect(),
@@ -25,7 +27,7 @@ impl RecipeBase {
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
 pub struct Step {
     pub index: i32,
-    pub instructions: String
+    pub instructions: String,
 }
 
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
@@ -41,7 +43,7 @@ impl From<Ingredient> for common::Ingredient {
         common::Ingredient {
             name: val.name,
             unit: val.unit,
-            amount: val.amount
+            amount: val.amount,
         }
     }
 }

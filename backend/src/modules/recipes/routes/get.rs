@@ -18,7 +18,7 @@ impl ResponseError for RecipeGetError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::MissingRecipe => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
@@ -28,9 +28,9 @@ impl ResponseError for RecipeGetError {
 }
 
 #[instrument(name = "Getting a recipe", skip(db))]
-pub async fn get_recipe(db: web::Data<PgPool>) -> Result<HttpResponse, RecipeGetError> {
+pub async fn get_recipe(path: web::Path<i32>, db: web::Data<PgPool>) -> Result<HttpResponse, RecipeGetError> {
     let tx = db.begin().await.context("Error making a transaction")?;
-    let recipe = get_base_recipe(&db)
+    let recipe = get_base_recipe(&db, *path)
         .await?
         .ok_or_else(|| RecipeGetError::MissingRecipe)?;
     let steps = get_steps_for_recipe(&db, &recipe).await?;
@@ -42,10 +42,10 @@ pub async fn get_recipe(db: web::Data<PgPool>) -> Result<HttpResponse, RecipeGet
 }
 
 #[instrument(name = "Getting recipe metadata", skip(db))]
-async fn get_base_recipe(db: &PgPool) -> anyhow::Result<Option<RecipeBase>> {
+async fn get_base_recipe(db: &PgPool, id: i32) -> anyhow::Result<Option<RecipeBase>> {
     sqlx::query_as!(
         RecipeBase,
-        "SELECT id, name, description FROM recipes WHERE id = $1",
+        "SELECT id, name, description, user_id FROM recipes WHERE id = $1",
         1
     )
     .fetch_optional(db)
@@ -54,10 +54,7 @@ async fn get_base_recipe(db: &PgPool) -> anyhow::Result<Option<RecipeBase>> {
 }
 
 #[instrument(name = "Getting steps for recipe", skip(db))]
-async fn get_steps_for_recipe(
-    db: &PgPool,
-    recipe: &RecipeBase,
-) -> anyhow::Result<Vec<Step>> {
+async fn get_steps_for_recipe(db: &PgPool, recipe: &RecipeBase) -> anyhow::Result<Vec<Step>> {
     let mut steps = sqlx::query_as!(
         Step,
         "SELECT index, instructions FROM steps WHERE steps.recipe_id = $1",
@@ -76,7 +73,7 @@ async fn get_steps_for_recipe(
 async fn get_ingredients_for_recipe(
     db: &PgPool,
     recipe: &RecipeBase,
-) -> Result<Vec<Ingredient>, anyhow::Error> {
+) -> anyhow::Result<Vec<Ingredient>> {
     sqlx::query_as!(
         Ingredient,
         r#"SELECT
