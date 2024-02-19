@@ -1,6 +1,7 @@
 use actix_web::{body::BoxBody, http::StatusCode, web, HttpResponse, ResponseError};
 use common::error::ErrorMessage;
 use eyre::{eyre, Context};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use sqlx::PgPool;
 use tracing::instrument;
 
@@ -99,7 +100,7 @@ pub async fn create_base_recipe(
     )
         .fetch_one(db)
         .await
-        .context("COuld not insert base recipe")
+        .context("Could not insert base recipe")
 }
 
 #[instrument(name = "Insert steps")]
@@ -145,7 +146,7 @@ pub async fn check_if_ingredients_exist(
     .collect();
 
     let ingredient_ids_that_dont_exist: Vec<i32> = ingredient_ids
-        .into_iter()
+        .into_par_iter()
         .filter(|x| !ingredient_ids_that_exist.contains(x))
         .collect();
 
