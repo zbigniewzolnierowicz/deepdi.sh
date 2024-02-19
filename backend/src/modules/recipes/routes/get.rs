@@ -1,31 +1,11 @@
-use crate::modules::recipes::models::{Ingredient, RecipeBase, Step};
-use actix_web::{body::BoxBody, http::StatusCode, web, HttpResponse, ResponseError};
-use common::error::ErrorMessage;
+use crate::modules::recipes::{
+    errors::get::RecipeGetError,
+    models::{Ingredient, RecipeBase, Step},
+};
+use actix_web::{web, HttpResponse};
 use eyre::Context;
 use sqlx::PgPool;
 use tracing::instrument;
-
-#[derive(Debug, thiserror::Error)]
-pub enum RecipeGetError {
-    #[error("Recipe does not exist")]
-    MissingRecipe,
-
-    #[error(transparent)]
-    UnexpectedError(#[from] eyre::Error),
-}
-
-impl ResponseError for RecipeGetError {
-    fn status_code(&self) -> StatusCode {
-        match self {
-            Self::MissingRecipe => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
-        }
-    }
-
-    fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code()).json(ErrorMessage::new(self.to_string()))
-    }
-}
 
 #[instrument(name = "Getting a recipe", skip(db))]
 pub async fn get_recipe(
