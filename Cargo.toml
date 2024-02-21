@@ -5,3 +5,6 @@ members = [
     "common",
     "frontend"
 ]
+
+[profile.release]
+strip = true

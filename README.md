@@ -67,5 +67,6 @@ rustup component add rust-analyzer
 [Python-like list comprehension](https://github.com/mattgathu/cute)
 [Are we learning yet?](https://www.arewelearningyet.com/gpu-computing/)
 [Are we web yet?](https://www.arewewebyet.org/)
+[sccache](https://github.com/mozilla/sccache)
 
 [mk48.io](https://mk48.io)
