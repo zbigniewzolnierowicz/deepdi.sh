@@ -27,15 +27,15 @@ pub async fn create_recipe(
 
     let base = create_base_recipe(&db, &body, &user_id).await?;
     let steps = insert_steps(&db, &base, &body).await?;
-    let ingredients = insert_ingredients(&db, &base, &body).await?;
+    let ingredients = insert_ingredients_to_recipe(&db, &base, &body).await?;
 
     let result = base.into_dto(steps, ingredients);
 
     tx.commit().await.context("Could not commit transaction")?;
-    Ok(HttpResponse::Ok().json(result))
+    Ok(HttpResponse::Created().json(result))
 }
 
-pub async fn insert_ingredients(
+pub async fn insert_ingredients_to_recipe(
     db: &PgPool,
     recipe: &RecipeBase,
     body: &common::CreateRecipe,
@@ -50,7 +50,7 @@ pub async fn insert_ingredients(
                 VALUES ($1, $2, $3, $4)
                 RETURNING ingredient_id, unit, amount
             )
-            SELECT ingredient_id, name, unit, amount
+            SELECT id, ingredient_id, name, unit, amount
             FROM ingredients INNER JOIN iir ON ingredients.id = iir.ingredient_id;"#,
             recipe.id,
             id,

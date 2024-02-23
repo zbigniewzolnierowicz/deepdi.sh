@@ -78,12 +78,6 @@ where
             None => LoginStatus::LoggedOut,
         };
 
-        tracing::debug!(
-            user_id = id,
-            login_status = status.to_string(),
-            "Checking session ID"
-        );
-
         if self.status != status {
             return Box::pin(async move {
                 Ok(req

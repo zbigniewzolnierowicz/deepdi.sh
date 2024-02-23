@@ -18,7 +18,7 @@ impl RecipeBase {
             serves: 4,
             ingredients: ingredients
                 .into_iter()
-                .map(common::Ingredient::from)
+                .map(common::IngredientWithAmount::from)
                 .collect(),
         }
     }
@@ -32,15 +32,17 @@ pub struct Step {
 
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
 pub struct Ingredient {
+    pub id: i32,
     pub unit: String,
     pub amount: f64,
     pub name: String,
     pub ingredient_id: i32,
 }
 
-impl From<Ingredient> for common::Ingredient {
+impl From<Ingredient> for common::IngredientWithAmount {
     fn from(val: Ingredient) -> Self {
-        common::Ingredient {
+        common::IngredientWithAmount {
+            id: val.id,
             name: val.name,
             unit: val.unit,
             amount: val.amount,
