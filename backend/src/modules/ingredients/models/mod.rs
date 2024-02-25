@@ -13,7 +13,7 @@ impl From<Ingredient> for common::Ingredient {
         common::Ingredient {
             id: val.id,
             name: val.name,
-            description: val.description
+            description: val.description,
         }
     }
 }

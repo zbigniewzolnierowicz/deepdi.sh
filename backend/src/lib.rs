@@ -68,13 +68,13 @@ pub fn run(
                 "/ingredients/get/{ingredientId}",
                 web::get()
                     .to(modules::ingredients::get_recipe)
-                    .wrap(LoginStatusChecker::only_logged_in())
+                    .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
                 "/ingredients/create",
                 web::post()
                     .to(modules::ingredients::create_ingredient)
-                    .wrap(LoginStatusChecker::only_logged_in())
+                    .wrap(LoginStatusChecker::only_logged_in()),
             )
             .app_data(database.clone())
             .app_data(redis.clone())

@@ -27,7 +27,10 @@ impl From<sqlx::Error> for CreateIngredientError {
 
 impl ResponseError for CreateIngredientError {
     fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
+        match self {
+            Self::AlreadyExists => StatusCode::CONFLICT,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
