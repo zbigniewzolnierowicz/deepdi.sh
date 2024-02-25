@@ -5,16 +5,28 @@ use tracing::instrument;
 
 use crate::modules::ingredients::{errors::GetIngredientError, models::Ingredient};
 
+#[utoipa::path(
+    get,
+    path = "/ingredients/get/{ingredientId}",
+    params(("ingredientId" = i32,)),
+    responses(
+        (status = 200, description = "Ingredient is returned", body = IngredientDTO),
+        (status = 404, description = "Ingredient does not exist", body = ErrorMessageWithJsonValue),
+        (status = 500, description = "Fatal error", body = ErrorMessageWithJsonValue)
+    )
+)]
 #[instrument(name = "Get recipes", skip(db))]
-pub async fn get_recipe(
+pub async fn get_ingredient(
     path: web::Path<i32>,
     db: web::Data<PgPool>,
 ) -> Result<HttpResponse, GetIngredientError> {
     let ingredient = get_ingredient_from_db(&db, &path)
         .await?
-        .ok_or(GetIngredientError::MissingIngredient(0))?;
+        .ok_or(GetIngredientError::MissingIngredient(*path))?;
 
-    Ok(HttpResponse::Ok().json(ingredient))
+    let dto: common::IngredientDTO = ingredient.into();
+
+    Ok(HttpResponse::Ok().json(dto))
 }
 
 #[instrument(name = "Get ingredient from database", skip(db))]

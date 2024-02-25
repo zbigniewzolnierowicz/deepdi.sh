@@ -12,7 +12,10 @@ pub enum GetIngredientError {
 
 impl ResponseError for GetIngredientError {
     fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
+        match self {
+            Self::MissingIngredient(_) => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {

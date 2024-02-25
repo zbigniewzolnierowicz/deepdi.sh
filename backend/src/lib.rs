@@ -1,5 +1,6 @@
 pub mod configuration;
 pub mod modules;
+mod openapi;
 pub mod telemetry;
 
 use actix_session::{config::PersistentSession, storage::RedisSessionStore, SessionMiddleware};
@@ -10,8 +11,10 @@ use actix_web::{
 };
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
-use crate::modules::user::middleware::LoginStatusChecker;
+use crate::{modules::user::LoginStatusChecker, openapi::ApiDoc};
 
 pub fn run(
     listener: std::net::TcpListener,
@@ -25,6 +28,9 @@ pub fn run(
     let database = web::Data::new(database);
     let redis = web::Data::new(redis);
     let session_lifecycle = PersistentSession::default().session_ttl(CookieDuration::weeks(1));
+
+    let openapi = ApiDoc::openapi();
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
@@ -67,7 +73,7 @@ pub fn run(
             .route(
                 "/ingredients/get/{ingredientId}",
                 web::get()
-                    .to(modules::ingredients::get_recipe)
+                    .to(modules::ingredients::get_ingredient)
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
@@ -75,6 +81,9 @@ pub fn run(
                 web::post()
                     .to(modules::ingredients::create_ingredient)
                     .wrap(LoginStatusChecker::only_logged_in()),
+            )
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),
             )
             .app_data(database.clone())
             .app_data(redis.clone())

@@ -13,7 +13,7 @@ pub enum RecipeCreateError {
 impl ResponseError for RecipeCreateError {
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::MissingIngredients(_) => StatusCode::NOT_FOUND,
+            Self::MissingIngredients(_) => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

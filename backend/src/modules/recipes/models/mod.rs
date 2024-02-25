@@ -9,8 +9,8 @@ pub struct RecipeBase {
 }
 
 impl RecipeBase {
-    pub fn into_dto(self, steps: Vec<Step>, ingredients: Vec<Ingredient>) -> common::Recipe {
-        common::Recipe {
+    pub fn into_dto(self, steps: Vec<Step>, ingredients: Vec<Ingredient>) -> common::RecipeDTO {
+        common::RecipeDTO {
             id: self.id,
             name: self.name,
             description: self.description,

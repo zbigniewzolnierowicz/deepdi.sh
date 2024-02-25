@@ -8,9 +8,20 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use sqlx::PgPool;
 use tracing::instrument;
 
+#[utoipa::path(
+    post,
+    path = "/recipes/create",
+    request_body = CreateRecipeDTO,
+    responses(
+        (status = 201, description = "Recipe was created", body = RecipeDTO),
+        (status = 400, description = "Ingredients are missing", body = ErrorMessageWithJsonValue),
+        (status = 500, description = "Fatal error", body = ErrorMessageWithJsonValue)
+    )
+)]
+#[instrument(name = "Create recipe", skip(session, db))]
 pub async fn create_recipe(
     session: actix_session::Session,
-    body: web::Json<common::CreateRecipe>,
+    body: web::Json<common::CreateRecipeDTO>,
     db: web::Data<PgPool>,
 ) -> Result<HttpResponse, RecipeCreateError> {
     let tx = db.begin().await.context("Could not create transaction.")?;
@@ -35,10 +46,11 @@ pub async fn create_recipe(
     Ok(HttpResponse::Created().json(result))
 }
 
+#[instrument(name = "Insert ingredients to recipe" skip(db))]
 pub async fn insert_ingredients_to_recipe(
     db: &PgPool,
     recipe: &RecipeBase,
-    body: &common::CreateRecipe,
+    body: &common::CreateRecipeDTO,
 ) -> eyre::Result<Vec<Ingredient>> {
     let mut ingredients = vec![];
     for common::CreateRecipeIngredient { id, unit, amount } in body.ingredients.iter() {
@@ -69,7 +81,7 @@ pub async fn insert_ingredients_to_recipe(
 #[instrument(name = "Create base recipe" skip(db))]
 pub async fn create_base_recipe(
     db: &PgPool,
-    body: &common::CreateRecipe,
+    body: &common::CreateRecipeDTO,
     user_id: &i32,
 ) -> eyre::Result<RecipeBase> {
     sqlx::query_as!(
@@ -86,7 +98,7 @@ pub async fn create_base_recipe(
 pub async fn insert_steps(
     db: &PgPool,
     recipe: &RecipeBase,
-    body: &common::CreateRecipe,
+    body: &common::CreateRecipeDTO,
 ) -> eyre::Result<Vec<Step>> {
     let mut steps: Vec<Step> = vec![];
     for (index, step) in body.steps.iter().enumerate() {

@@ -8,9 +8,9 @@ pub struct Ingredient {
     pub description: String,
 }
 
-impl From<Ingredient> for common::Ingredient {
+impl From<Ingredient> for common::IngredientDTO {
     fn from(val: Ingredient) -> Self {
-        common::Ingredient {
+        common::IngredientDTO {
             id: val.id,
             name: val.name,
             description: val.description,

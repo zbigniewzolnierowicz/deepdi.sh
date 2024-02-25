@@ -7,7 +7,17 @@ use tracing::instrument;
 
 use crate::modules::user::{CreateNewUser, Email, HashedPassword, LoginError, Username};
 
+/// Endpoint for the user to log in on
 #[instrument(name = "User logs in", skip(db, body, session))]
+#[utoipa::path(
+    post,
+    path = "/user/login",
+    request_body = LoginUserDTO,
+    responses(
+        (status = 200, description = "User was logged in", body = UserDataDTO),
+        (status = 500, description = "Fatal error", body = ErrorMessageWithJsonValue)
+    )
+)]
 pub async fn log_in(
     db: web::Data<PgPool>,
     body: web::Json<common::user::LoginUserDTO>,

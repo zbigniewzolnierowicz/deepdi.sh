@@ -32,5 +32,7 @@ tracing-bunyan-formatter = "0.3.9"
 tracing-error = "0.2.0"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "chrono", "serde"] }
+utoipa = { version = "4.2.0", features = ["actix_extras", "chrono"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
 uuid = { version = "1.7.0", features = ["v4", "serde"] }
 validator = "0.16.1"

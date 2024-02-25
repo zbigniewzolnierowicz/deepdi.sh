@@ -7,7 +7,6 @@ pub mod routes;
 use domain::*;
 use errors::login::*;
 use errors::login_state::*;
-use errors::logout::*;
 use errors::signup::*;
 pub use middleware::*;
 use models::user::*;

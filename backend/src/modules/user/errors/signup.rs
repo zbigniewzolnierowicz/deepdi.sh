@@ -3,6 +3,9 @@ use common::error::ErrorMessage;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SignupError {
+    #[error("User with the following data already exists.")]
+    AlreadyExists,
+
     #[error("{0}")]
     Validation(String),
 
@@ -12,10 +15,29 @@ pub enum SignupError {
 
 impl ResponseError for SignupError {
     fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
+        match self {
+            Self::AlreadyExists => StatusCode::CONFLICT,
+            Self::Validation(_) => StatusCode::BAD_REQUEST,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
         HttpResponse::build(self.status_code()).json(ErrorMessage::new(self.to_string()))
+    }
+}
+
+impl From<sqlx::Error> for SignupError {
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::Database(e) => {
+                if e.is_unique_violation() {
+                    Self::AlreadyExists
+                } else {
+                    Self::UnexpectedError(e.into())
+                }
+            }
+            e => Self::UnexpectedError(e.into()),
+        }
     }
 }
