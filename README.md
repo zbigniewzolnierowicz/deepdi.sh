@@ -11,6 +11,7 @@
 | React | [Leptos](https://leptos.dev/) |
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
 | curl | [hurl](https://hurl.dev) |
+| Stripe | [Hyperswitch](https://hyperswitch.io/) (not using this) |
 
 ### In my terminal
 

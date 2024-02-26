@@ -9,4 +9,5 @@ edition = "2021"
 chrono = { version = "0.4.34", features = ["serde"] }
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.114"
+ts-rs = { version = "7.1.1", features = ["chrono", "chrono-impl"] }
 utoipa = { version = "4.2.0", features = ["actix_extras", "chrono"] }
