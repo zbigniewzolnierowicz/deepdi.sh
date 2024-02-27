@@ -43,3 +43,19 @@ pub struct User {
     pub password_hash: HashedPassword,
     pub email: Email,
 }
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct UserData {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+}
+
+impl From<UserData> for common::user::UserDataDTO {
+    fn from(val: UserData) -> Self {
+        Self {
+            username: val.username,
+            email: val.email,
+        }
+    }
+}

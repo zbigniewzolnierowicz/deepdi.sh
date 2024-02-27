@@ -3,7 +3,7 @@ use common::error::ErrorMessage;
 
 use crate::modules::user::middleware::LoginStatus;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, strum::AsRefStr)]
 pub enum LoginStatusError {
     #[error("User is already logged in")]
     AlreadyLoggedIn,
@@ -25,7 +25,8 @@ impl ResponseError for LoginStatusError {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code()).json(ErrorMessage::new(self.to_string()))
+        HttpResponse::build(self.status_code())
+            .json(ErrorMessage::new(self.as_ref(), self.to_string()))
     }
 }
 

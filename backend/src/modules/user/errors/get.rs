@@ -2,18 +2,19 @@ use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use common::error::ErrorMessage;
 
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
-pub enum RecipeCreateError {
-    #[error("Ingredient with those IDs do not exist: {0:?}")]
-    MissingIngredients(Vec<i32>),
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+pub enum GetUserDataError {
+    #[error("Could not find person")]
+    NotFound,
 
     #[error(transparent)]
     UnexpectedError(#[from] eyre::Report),
 }
 
-impl ResponseError for RecipeCreateError {
+impl ResponseError for GetUserDataError {
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::MissingIngredients(_) => StatusCode::BAD_REQUEST,
+            Self::NotFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

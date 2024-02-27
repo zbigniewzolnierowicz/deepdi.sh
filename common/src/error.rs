@@ -1,18 +1,22 @@
 use chrono::{DateTime, Utc};
+use serde::Serialize;
 use serde_json::Value;
-use std::fmt::Display;
+use ts_rs::TS;
 use utoipa::ToSchema;
 
-#[derive(serde::Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, TS)]
 #[aliases(ErrorMessageWithJsonValue = ErrorMessage<Value>)]
-pub struct ErrorMessage<T: Display> {
+#[ts(export)]
+pub struct ErrorMessage<T: Serialize> {
+    pub kind: String,
     pub timestamp: DateTime<Utc>,
     pub error: T,
 }
 
-impl<T: Display> ErrorMessage<T> {
-    pub fn new(error: T) -> Self {
+impl<T: Serialize> ErrorMessage<T> {
+    pub fn new(kind: &str, error: T) -> Self {
         Self {
+            kind: kind.to_string(),
             timestamp: Utc::now(),
             error,
         }

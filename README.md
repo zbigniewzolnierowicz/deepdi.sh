@@ -8,7 +8,7 @@
 |:------| --- |
 | postgres | [SurrealDB](https://surrealdb.com/) (not using this, I wanna show off sqlx) |
 | Spring | [Actix Web](https://actix.rs/) |
-| React | [Leptos](https://leptos.dev/) |
+| React | [Leptos](https://leptos.dev/) (not using this, gave up, but using some other cool stuff) |
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
 | curl | [hurl](https://hurl.dev) |
 | Stripe | [Hyperswitch](https://hyperswitch.io/) (not using this) |

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use ts_rs::TS;
+use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
 #[ts(export)]

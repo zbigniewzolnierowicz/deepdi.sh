@@ -15,7 +15,6 @@ impl RecipeBase {
             name: self.name,
             description: self.description,
             steps: steps.iter().map(|s| s.instructions.clone()).collect(),
-            serves: 4,
             ingredients: ingredients
                 .into_iter()
                 .map(common::IngredientWithAmount::from)

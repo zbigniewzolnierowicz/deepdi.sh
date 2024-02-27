@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use ts_rs::TS;
+use utoipa::ToSchema;
 
 use crate::IngredientWithAmount;
 
@@ -10,9 +10,16 @@ pub struct RecipeDTO {
     pub id: i32,
     pub name: String,
     pub description: String,
-    pub serves: u16,
     pub ingredients: Vec<IngredientWithAmount>,
     pub steps: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
+#[ts(export)]
+pub struct BareRecipeDTO {
+    pub id: i32,
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
@@ -20,7 +27,6 @@ pub struct RecipeDTO {
 pub struct CreateRecipeDTO {
     pub name: String,
     pub description: String,
-    pub serves: u16,
     pub ingredients: Vec<CreateRecipeIngredient>,
     pub steps: Vec<String>,
 }

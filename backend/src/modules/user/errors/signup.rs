@@ -1,7 +1,7 @@
 use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use common::error::ErrorMessage;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, strum::AsRefStr)]
 pub enum SignupError {
     #[error("User with the following data already exists.")]
     AlreadyExists,
@@ -23,7 +23,8 @@ impl ResponseError for SignupError {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code()).json(ErrorMessage::new(self.to_string()))
+        HttpResponse::build(self.status_code())
+            .json(ErrorMessage::new(self.as_ref(), self.to_string()))
     }
 }
 

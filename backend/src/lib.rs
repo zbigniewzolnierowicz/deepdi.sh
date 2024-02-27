@@ -59,6 +59,12 @@ pub fn run(
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
+                "/user",
+                web::get()
+                    .to(modules::user::get_user_data)
+                    .wrap(LoginStatusChecker::only_logged_in()),
+            )
+            .route(
                 "/recipes/create",
                 web::post()
                     .to(modules::recipes::create_recipe)
@@ -68,6 +74,12 @@ pub fn run(
                 "/recipes/get/{recipeId}",
                 web::get()
                     .to(modules::recipes::get_recipe)
+                    .wrap(LoginStatusChecker::only_logged_in()),
+            )
+            .route(
+                "/recipes/get/",
+                web::get()
+                    .to(modules::recipes::get_all_recipes)
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(

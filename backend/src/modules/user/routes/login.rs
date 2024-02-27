@@ -15,6 +15,7 @@ use crate::modules::user::{CreateNewUser, Email, HashedPassword, LoginError, Use
     request_body = LoginUserDTO,
     responses(
         (status = 200, description = "User was logged in", body = UserDataDTO),
+        (status = 400, description = "User is already logged in", body = ErrorMessageWithJsonValue),
         (status = 500, description = "Fatal error", body = ErrorMessageWithJsonValue)
     )
 )]

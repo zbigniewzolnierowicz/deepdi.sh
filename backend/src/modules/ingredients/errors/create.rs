@@ -1,7 +1,7 @@
 use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use common::error::ErrorMessage;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, strum::AsRefStr)]
 pub enum CreateIngredientError {
     #[error("This ingredient already exists")]
     AlreadyExists,
@@ -34,6 +34,7 @@ impl ResponseError for CreateIngredientError {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code()).json(ErrorMessage::new(self.to_string()))
+        HttpResponse::build(self.status_code())
+            .json(ErrorMessage::new(self.as_ref(), self.to_string()))
     }
 }

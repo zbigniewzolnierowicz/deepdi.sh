@@ -9,6 +9,7 @@ use utoipa::OpenApi;
         crate::modules::user::log_out,
         crate::modules::recipes::create_recipe,
         crate::modules::recipes::get_recipe,
+        crate::modules::recipes::get_all_recipes,
         crate::modules::ingredients::create_ingredient,
         crate::modules::ingredients::get_ingredient,
     ),
