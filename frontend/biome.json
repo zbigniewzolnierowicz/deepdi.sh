@@ -7,12 +7,20 @@
       "./package.json",
       "./biome.json",
       "./tsconfig.json",
-      "./tsconfig.node.json"
+      "./tsconfig.node.json",
+      "./tailwind.config.js",
+      "./postcss.config.js",
+      "./vite.config.ts"
     ]
   },
   "formatter": {
-      "enabled": true,
-      "indentStyle": "space",
-      "indentWidth": 2
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "rules": {
+      "recommended": true
+    }
   }
 }
