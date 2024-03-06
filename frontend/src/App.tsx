@@ -1,9 +1,7 @@
-import { FC } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FC, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { Home } from "./pages/Home";
-
-const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
@@ -13,6 +11,9 @@ const router = createBrowserRouter([
 ]);
 
 export const App: FC = () => {
+  const [queryClient] = useState(() => {
+      return new QueryClient()
+  })
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

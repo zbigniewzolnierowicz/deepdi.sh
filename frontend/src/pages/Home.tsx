@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { RecipeDTO } from "common/bindings/RecipeDTO";
 import { FC, useEffect } from "react";
 import { api } from "../api/base";
@@ -6,18 +7,18 @@ import { UserInfo } from "../components/UserInfo";
 import { useLoginState } from "../stores/login";
 
 const RecipePreview: FC<{ recipe: RecipeDTO }> = ({ recipe }) => (
-  <div className="bg-slate-700 first:mt-0 my-2 p-4">
+  <div
+    className={clsx(
+      "bg-slate-700 first:mt-0 my-2 p-4 rounded-md shadow shadow-gray-700",
+    )}
+  >
     <h2 className="text-4xl mb-4">{recipe.name}</h2>
     <div className="w-full h-auto aspect-video bg-slate-800" />
     <p className="mt-4 text-lg">{recipe.description}</p>
   </div>
 );
 
-const COUNT = 3;
-
-export const Home: FC = () => {
-  const { fetchUserData, userData } = useLoginState();
-
+const RecipeList: FC = () => {
   const { data, error, isError, fetchNextPage, hasNextPage } = useInfiniteQuery(
     {
       queryKey: ["recipes"],
@@ -38,15 +39,38 @@ export const Home: FC = () => {
         return response.data;
       },
       initialPageParam: 0,
+      retry: 3,
       getNextPageParam: (lastPage, allPages) => {
         const nextPage: number | undefined =
           lastPage.length === COUNT ? allPages.flat().length : undefined;
 
         return nextPage;
       },
-      enabled: userData !== null,
     },
   );
+
+  return (
+    <div className="flex flex-col gap-2">
+      {data?.pages.flat().map((recipe) => (
+        <RecipePreview recipe={recipe} key={recipe.id} />
+      ))}
+      {hasNextPage && (
+        <button
+          type="button"
+          onClick={() => fetchNextPage({ cancelRefetch: true })}
+        >
+          Next
+        </button>
+      )}
+    </div>
+  );
+};
+
+const COUNT = 3;
+
+export const Home: FC = () => {
+  const { fetchUserData } = useLoginState();
+  const { userData, errors } = useLoginState();
 
   useEffect(() => {
     fetchUserData();
@@ -59,26 +83,20 @@ export const Home: FC = () => {
           <UserInfo />
         </div>
 
-        <div className="mt-2">
-          {userData !== null ? (
-            <>
-              {data?.pages.flat().map((recipe) => (
-                <RecipePreview recipe={recipe} key={recipe.id} />
+        {errors !== null && errors.length > 0 ? (
+          <div>
+            The following errors have occursed:{" "}
+            <ul>
+              {errors?.map((e) => (
+                <li>{e.message}</li>
               ))}
-              {hasNextPage && (
-                <button
-                  type="button"
-                  onClick={() => fetchNextPage({ cancelRefetch: true })}
-                >
-                  Next
-                </button>
-              )}
-            </>
-          ) : (
-            "You must log in"
-          )}
-          {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
-        </div>
+            </ul>
+          </div>
+        ) : userData !== null ? (
+          <RecipeList />
+        ) : (
+          <div>You must be logged in.</div>
+        )}
       </div>
     </div>
   );

@@ -1,18 +1,18 @@
 use actix_web::{web, HttpResponse};
 use eyre::Context;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tracing::instrument;
 
 use crate::modules::recipes::{errors::get::RecipeGetError, models::RecipeBase};
 
-#[derive(serde::Deserialize, Debug, utoipa::IntoParams)]
+#[derive(Serialize, Deserialize, utoipa::IntoParams, display_json::DebugAsJson)]
 pub struct Pagination {
     pub offset: Option<i64>,
     pub count: Option<i64>,
 }
 
-#[utoipa::path(
-    get,
+#[utoipa::path( get,
     path = "/recipes/get/",
     params(Pagination),
     responses(

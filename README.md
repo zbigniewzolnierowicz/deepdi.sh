@@ -30,8 +30,9 @@
 | lazygit | [gitui](https://github.com/extrawurst/gitui) |
 | vscode | [neovide](https://neovide.dev) |
 | tldr | [tealdeer](https://github.com/dbrgn/tealdeer) |
-| zsh | [nu](https://nushell.sh) (but I'm not using this one, too used to zsh) |
+| zsh | [nu](https://nushell.sh) (I'm not using this one, too used to zsh) |
 | ctrl-r | [mcfly](https://github.com/cantino/mcfly) && [mcfly-fzf](https://github.com/bnprks/mcfly-fzf) |
+| make | [just](https://justfile.dev) |
 
 ## Prerequisites
 

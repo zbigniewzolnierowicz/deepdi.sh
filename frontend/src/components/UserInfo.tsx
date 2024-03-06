@@ -1,10 +1,10 @@
-import { FC, HTMLProps, forwardRef } from "react";
-import { useLoginState } from "../stores/login";
-import { Form, Field } from "react-final-form";
-import { LoginUserDTO } from "common/bindings/LoginUserDTO";
-import { ExitIcon, EnterIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { Popover, Transition } from "@headlessui/react";
+import { EnterIcon, ExitIcon, ReloadIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import { LoginUserDTO } from "common/bindings/LoginUserDTO";
+import { FC, HTMLProps, forwardRef } from "react";
+import { Field, Form } from "react-final-form";
+import { useLoginState } from "../stores/login";
 
 const Label = forwardRef<HTMLLabelElement, HTMLProps<HTMLLabelElement>>(
   ({ className, children, ...props }, ref) => (
