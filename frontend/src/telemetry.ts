@@ -19,7 +19,9 @@ const providerConfig: TracerConfig = {
 export const instrument = () => {
   const provider = new WebTracerProvider(providerConfig);
 
-  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  if (import.meta.env.PROD) {
+    provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  }
 
   provider.register({
     contextManager: new ZoneContextManager(),

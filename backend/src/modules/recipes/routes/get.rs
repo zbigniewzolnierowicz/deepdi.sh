@@ -39,7 +39,7 @@ async fn get_base_recipe(db: &PgPool, id: i32) -> eyre::Result<Option<RecipeBase
     sqlx::query_as!(
         RecipeBase,
         "SELECT id, name, description, user_id FROM recipes WHERE id = $1",
-        1
+        id
     )
     .fetch_optional(db)
     .await

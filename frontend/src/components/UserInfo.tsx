@@ -4,10 +4,7 @@ import clsx from "clsx";
 import { LoginUserDTO } from "common/bindings/LoginUserDTO";
 import { FC, HTMLProps, forwardRef } from "react";
 import { Field, Form } from "react-final-form";
-import { useLoginState } from "../stores/login";
-
-const Label = forwardRef<HTMLLabelElement, HTMLProps<HTMLLabelElement>>(
-  ({ className, children, ...props }, ref) => (
+import { useLoginState } from "../stores/login"; const Label = forwardRef<HTMLLabelElement, HTMLProps<HTMLLabelElement>>( ({ className, children, ...props }, ref) => (
     <label
       ref={ref}
       {...props}
@@ -28,7 +25,7 @@ const Input = forwardRef<HTMLInputElement, HTMLProps<HTMLInputElement>>(
   ),
 );
 
-export const UserInfo: FC = () => {
+export const UserInfo: FC<{ className?: string }> = ({ className }) => {
   const { userData, loading, logIn, logOut } = useLoginState();
 
   const onSubmit = (r: LoginUserDTO) => {
@@ -38,12 +35,15 @@ export const UserInfo: FC = () => {
   if (loading) {
     return (
       <div
-        className={clsx([
-          "m-2 p-2 h-16 aspect-square",
-          "rounded-xl",
-          "bg-slate-700 text-white",
-          "flex items-center justify-center",
-        ])}
+        className={clsx(
+          [
+            "m-2 p-2 h-16 aspect-square",
+            "rounded-xl",
+            "bg-slate-700 text-white",
+            "flex items-center justify-center",
+          ],
+          className,
+        )}
       >
         <ReloadIcon className="animate-spin" />
       </div>
@@ -51,7 +51,12 @@ export const UserInfo: FC = () => {
   }
 
   return userData !== null ? (
-    <div className="flex flex-row flex-nowrap items-center gap-8 p-2 rounded-2xl w-fit max-w-96 bg-slate-700">
+    <div
+      className={clsx(
+        "flex flex-row flex-nowrap items-center gap-8 p-2 rounded-2xl w-fit max-w-96 bg-slate-700",
+        className,
+      )}
+    >
       <div className="h-16 aspect-square bg-red-400 rounded-xl" />
       <div className="text-white font-bold min-w-[16ch]">
         {userData.username}
@@ -67,14 +72,17 @@ export const UserInfo: FC = () => {
       </button>
     </div>
   ) : (
-    <Popover className="relative">
+    <Popover className="relative m-2">
       <Popover.Button
-        className={clsx([
-          "m-2 p-2 h-16 aspect-square",
-          "rounded-xl",
-          "bg-slate-700 text-white",
-          "flex items-center justify-center",
-        ])}
+        className={clsx(
+          [
+            "m-2 p-2 h-16 aspect-square",
+            "rounded-xl",
+            "bg-slate-700 text-white",
+            "flex items-center justify-center",
+          ],
+          className,
+        )}
       >
         {({ open }) => (
           <EnterIcon
@@ -92,7 +100,7 @@ export const UserInfo: FC = () => {
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="p-4 absolute z-10 right-0 bg-slate-700 rounded-xl text-white">
+        <Popover.Panel className="p-4 absolute z-10 right-0 bg-slate-700 rounded-xl text-white shadow shadow-slate-800">
           <Form onSubmit={onSubmit}>
             {(props) => (
               <form
