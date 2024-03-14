@@ -1,3 +1,6 @@
+_default:
+    @just --choose
+
 build:
     cargo build --release
 

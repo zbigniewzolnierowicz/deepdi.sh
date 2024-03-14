@@ -12,7 +12,8 @@ pub struct Pagination {
     pub count: Option<i64>,
 }
 
-#[utoipa::path( get,
+#[utoipa::path(
+    get,
     path = "/recipes/get/",
     params(Pagination),
     responses(

@@ -12,6 +12,7 @@
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
 | curl | [hurl](https://hurl.dev) |
 | Stripe | [Hyperswitch](https://hyperswitch.io/) (not using this) |
+| esbuild/Webpack | [Vite](https://vitejs.dev) with [SWC](https://swc.rs) and later with [Rolldown](https://rolldown.rs) |
 
 ### In my terminal
 
@@ -58,6 +59,7 @@ rustup component add rust-analyzer
     - But a very correct language!
 - Steep learning curve
 - Integrating with existing JS libraries is a bit of a pain
+    - this was written back when the frontend was in Rust
 - Async traits have caveats (for library developers mostly)
 - Cannot use pooled connections with Neon ([issue in sqlx](https://github.com/launchbadge/sqlx/issues/67), just use normal connections rather than Neon's connection pooling)
 

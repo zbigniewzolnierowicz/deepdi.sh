@@ -2,6 +2,7 @@ import { isAxiosError } from "axios";
 import { ErrorMessage } from "common/bindings/ErrorMessage";
 import { LoginUserDTO } from "common/bindings/LoginUserDTO";
 import { UserDataDTO } from "common/bindings/UserDataDTO";
+import { CreateNewUserDTO } from "common/bindings/CreateNewUserDTO";
 import { create } from "zustand";
 import { api } from "../api/base";
 
@@ -14,6 +15,7 @@ interface LoginStateStore {
   clear: () => void;
   fetchUserData: () => Promise<void>;
   pushError: (e: unknown) => void;
+  createAccount: (payload: CreateNewUserDTO) => Promise<void>;
 }
 
 export const useLoginState = create<LoginStateStore>((set, get) => ({
@@ -47,7 +49,23 @@ export const useLoginState = create<LoginStateStore>((set, get) => ({
       const response = await api.get<UserDataDTO>("/user");
       set({ userData: response.data, loading: false });
     } catch (e) {
-      get().clear();
+      if (
+        isAxiosError<ErrorMessage<string>>(e) &&
+        e.response?.data.kind === "NotLoggedIn" &&
+        e.response.status === 400
+      ) {
+        get().clear();
+      } else {
+        get().clear();
+        get().pushError(e);
+      }
+    }
+  },
+  createAccount: async (signupPayload: CreateNewUserDTO) => {
+    try {
+      if (get().userData !== null) return;
+      await api.post("/user/signup", signupPayload);
+    } catch (e) {
       get().pushError(e);
     }
   },

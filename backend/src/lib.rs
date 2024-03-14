@@ -72,15 +72,11 @@ pub fn run(
             )
             .route(
                 "/recipes/get/{recipeId}",
-                web::get()
-                    .to(modules::recipes::get_recipe)
-                    .wrap(LoginStatusChecker::only_logged_in()),
+                web::get().to(modules::recipes::get_recipe),
             )
             .route(
                 "/recipes/get/",
-                web::get()
-                    .to(modules::recipes::get_all_recipes)
-                    .wrap(LoginStatusChecker::only_logged_in()),
+                web::get().to(modules::recipes::get_all_recipes),
             )
             .route(
                 "/ingredients/get/{ingredientId}",
