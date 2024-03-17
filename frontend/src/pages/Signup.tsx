@@ -10,7 +10,7 @@ const Input = forwardRef<HTMLInputElement, JSX.IntrinsicElements["input"]>(
   ({ className, ...props }, ref) => (
     <input
       {...props}
-      className={clsx("bg-slate-800 rounded p-2", className)}
+      className={clsx("bg-slate-200 border border-black p-2", className)}
       ref={ref}
     />
   ),
@@ -52,7 +52,7 @@ export const Signup: FC = () => {
         {(props) => (
           <form
             onSubmit={props.handleSubmit}
-            className="flex flex-col bg-slate-700"
+            className="flex flex-col bg-zinc-300 text-black"
           >
             <Field name="username" id="signup-username">
               {({ input, meta }) => (
@@ -60,7 +60,7 @@ export const Signup: FC = () => {
                   <label htmlFor={input.name}>
                     Username
                     {meta.error && (
-                      <span className="text-red-300">{meta.error}</span>
+                      <span className="text-red-600">{meta.error}</span>
                     )}
                   </label>
                   <Input {...input} />
@@ -73,7 +73,7 @@ export const Signup: FC = () => {
                   <label htmlFor={input.name}>
                     Password
                     {meta.error && (
-                      <span className="text-red-300">{meta.error}</span>
+                      <span className="text-red-600">{meta.error}</span>
                     )}
                   </label>
                   <Input
@@ -90,7 +90,7 @@ export const Signup: FC = () => {
                   <label htmlFor={input.name}>
                     Email
                     {meta.error && (
-                      <span className="text-red-300">{meta.error}</span>
+                      <span className="text-red-600">{meta.error}</span>
                     )}
                   </label>
                   <Input autoComplete="email" type="email" {...input} />

@@ -11,12 +11,12 @@ const COUNT = 3;
 const RecipePreview: FC<{ recipe: RecipeDTO }> = ({ recipe }) => (
   <Link
     className={clsx(
-      "bg-slate-700 first:mt-0 my-2 p-4 rounded-md shadow shadow-gray-700",
+      "bg-zinc-200 first:mt-0 my-2 p-4 border border-black",
     )}
     to={`/recipe/${recipe.id}`}
   >
     <h2 className="text-3xl mb-4">{recipe.name}</h2>
-    <div className="w-full h-auto aspect-video bg-slate-800" />
+    <div className="w-full h-auto aspect-video bg-zinc-300 border border-black" />
     <p className="mt-4 text-lg">{recipe.description}</p>
   </Link>
 );
@@ -51,7 +51,7 @@ const RecipeList: FC = () => {
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 text-black">
       {data?.pages.flat().map((recipe) => (
         <RecipePreview recipe={recipe} key={recipe.id} />
       ))}
@@ -70,7 +70,7 @@ const RecipeList: FC = () => {
 export const ListPage: FC = () => {
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <div className="mb-4 relative 2xl:fixed 2xl:top-4 2xl:right-4">
+      <div className="mb-4 relative 2xl:fixed 2xl:sidewinder-left-screen-md">
         <UserInfo className="ml-auto" />
       </div>
       <RecipeList />
