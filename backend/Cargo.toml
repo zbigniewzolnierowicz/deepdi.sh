@@ -4,6 +4,7 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+actix-multipart = "0.6.1"
 actix-session = { git = "https://github.com/zbigniewzolnierowicz/actix-extras", features = ["redis-rs-session", "redis-rs-tls-session-rustls"] }
 actix-web = "4.5.1"
 bcrypt = "0.15.0"

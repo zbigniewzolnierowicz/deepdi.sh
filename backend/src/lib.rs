@@ -71,6 +71,12 @@ pub fn run(
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
+                "/recipes/get/{recipeId}/image",
+                web::post()
+                .to(modules::recipes::add_images_to_recipe)
+                .wrap(LoginStatusChecker::only_logged_in())
+            )
+            .route(
                 "/recipes/get/{recipeId}",
                 web::get().to(modules::recipes::get_recipe),
             )

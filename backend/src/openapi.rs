@@ -10,6 +10,7 @@ use utoipa::OpenApi;
         crate::modules::recipes::create_recipe,
         crate::modules::recipes::get_recipe,
         crate::modules::recipes::get_all_recipes,
+        crate::modules::recipes::add_images_to_recipe,
         crate::modules::ingredients::create_ingredient,
         crate::modules::ingredients::get_ingredient,
     ),
@@ -25,6 +26,7 @@ use utoipa::OpenApi;
             common::ingredients::IngredientDTO,
             common::ingredients::CreateIngredientDTO,
             common::error::ErrorMessage<Value>,
+            crate::modules::recipes::ImageUpload,
         )
     )
 )]
