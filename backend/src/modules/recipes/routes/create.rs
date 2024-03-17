@@ -31,7 +31,6 @@ pub async fn create_recipe(
         .ok_or(eyre!("User ID is missing."))?;
 
     let ingredient_ids = body.ingredients.iter().cloned().map(|r| r.id).collect();
-
     check_if_ingredients_exist(&db, ingredient_ids)
         .await?
         .map_err(RecipeCreateError::MissingIngredients)?;
@@ -121,7 +120,7 @@ pub async fn insert_steps(
     Ok(steps)
 }
 
-#[instrument]
+#[instrument(name = "Check if ingredients exist", skip(db))]
 pub async fn check_if_ingredients_exist(
     db: &PgPool,
     ingredient_ids: Vec<i32>,
