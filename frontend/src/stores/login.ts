@@ -15,6 +15,7 @@ interface LoginStateStore {
   clear: () => void;
   fetchUserData: () => Promise<void>;
   pushError: (e: unknown) => void;
+  createAccount: (payload: CreateNewUserDTO) => Promise<void>;
 }
 
 export const useLoginState = create<LoginStateStore>((set, get) => ({

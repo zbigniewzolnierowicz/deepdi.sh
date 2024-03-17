@@ -4,6 +4,7 @@ import { Field, Form } from "react-final-form";
 import { useLoginState } from "../stores/login";
 import { Navigate } from "react-router-dom";
 import { validate } from "email-validator"
+import { CreateNewUserDTO } from "common/bindings/CreateNewUserDTO";
 
 const Input = forwardRef<HTMLInputElement, JSX.IntrinsicElements["input"]>(
   ({ className, ...props }, ref) => (
@@ -16,8 +17,7 @@ const Input = forwardRef<HTMLInputElement, JSX.IntrinsicElements["input"]>(
 );
 
 export const Signup: FC = () => {
-  const { userData } = useLoginState();
-
+  const { userData, createAccount } = useLoginState();
 
   if (userData !== null) {
     return <Navigate to="/" />;
@@ -25,9 +25,8 @@ export const Signup: FC = () => {
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <pre>{JSON.stringify({ userData })}</pre>
       <Form
-        onSubmit={(v) => console.table(v)}
+        onSubmit={(v: CreateNewUserDTO) => createAccount(v)}
         validate={(v) => {
           const errors: Record<string, string> = {};
 
