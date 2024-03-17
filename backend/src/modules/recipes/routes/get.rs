@@ -9,7 +9,7 @@ use tracing::instrument;
 
 #[utoipa::path(
     get,
-    path = "/recipes/get/{recipeId}",
+    path = "/recipes/{recipeId}",
     params(("recipeId" = i32,),),
     responses(
         (status = 200, description = "Recipe was created", body = RecipeDTO),

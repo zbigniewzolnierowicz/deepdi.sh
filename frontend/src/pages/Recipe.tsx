@@ -12,7 +12,7 @@ export const Recipe: FC = () => {
     queryKey: ["recipe", recipeId],
     queryFn: async () => {
       console.log(recipeId);
-      const result = await api.get<RecipeDTO>(`/recipes/get/${recipeId}`);
+      const result = await api.get<RecipeDTO>(`/recipes/${recipeId}`);
 
       return result.data;
     },

@@ -13,7 +13,7 @@ pub struct ImageUpload {
 
 #[utoipa::path(
     post,
-    path = "/recipes/get/{recipeId}/image",
+    path = "/recipes/{recipeId}/image",
     params(("recipeId" = i32,),),
     request_body(content = ImageUpload, content_type = "multipart/form-data"),
     responses(

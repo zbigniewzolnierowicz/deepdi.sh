@@ -30,7 +30,7 @@ const RecipeList: FC = () => {
       params.append("offset", pageParam.toString());
       params.append("count", COUNT.toString());
 
-      const response = await api.get<RecipeDTO[]>("/recipes/get/", {
+      const response = await api.get<RecipeDTO[]>("/recipes/", {
         signal,
         params,
         responseType: "json",

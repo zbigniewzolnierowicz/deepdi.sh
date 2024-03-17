@@ -71,17 +71,17 @@ pub fn run(
                     .wrap(LoginStatusChecker::only_logged_in()),
             )
             .route(
-                "/recipes/get/{recipeId}/image",
+                "/recipes/{recipeId}/image",
                 web::post()
                 .to(modules::recipes::add_images_to_recipe)
                 .wrap(LoginStatusChecker::only_logged_in())
             )
             .route(
-                "/recipes/get/{recipeId}",
+                "/recipes/{recipeId}",
                 web::get().to(modules::recipes::get_recipe),
             )
             .route(
-                "/recipes/get/",
+                "/recipes/",
                 web::get().to(modules::recipes::get_all_recipes),
             )
             .route(

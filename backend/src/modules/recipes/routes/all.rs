@@ -14,7 +14,7 @@ pub struct Pagination {
 
 #[utoipa::path(
     get,
-    path = "/recipes/get/",
+    path = "/recipes/",
     params(Pagination),
     responses(
         (status = 200, description = "Recipes were fetched", body = Vec<RecipeDTO>),
