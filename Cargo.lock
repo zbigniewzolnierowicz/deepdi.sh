@@ -414,6 +414,7 @@ dependencies = [
  "eyre",
  "futures",
  "futures-util",
+ "mime",
  "rayon",
  "redis",
  "secrecy",

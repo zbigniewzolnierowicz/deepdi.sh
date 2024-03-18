@@ -85,7 +85,7 @@ pub fn run(
                 web::get().to(modules::recipes::get_all_recipes),
             )
             .route(
-                "/ingredients/get/{ingredientId}",
+                "/ingredients/{ingredientId}",
                 web::get()
                     .to(modules::ingredients::get_ingredient)
                     .wrap(LoginStatusChecker::only_logged_in()),

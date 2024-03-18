@@ -29,7 +29,7 @@ pub async fn add_images_to_recipe(
     let TempFile {
         file, content_type, ..
     } = body.0.images.first().unwrap();
-    let data = std::fs::read(file.path()).unwrap();
+    let data = std::fs::read(file).unwrap();
 
     Ok(HttpResponse::Ok()
         .content_type(content_type.clone().unwrap())

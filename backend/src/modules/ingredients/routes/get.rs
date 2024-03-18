@@ -7,7 +7,7 @@ use crate::modules::ingredients::{errors::GetIngredientError, models::Ingredient
 
 #[utoipa::path(
     get,
-    path = "/ingredients/get/{ingredientId}",
+    path = "/ingredients/{ingredientId}",
     params(("ingredientId" = i32,)),
     responses(
         (status = 200, description = "Ingredient is returned", body = IngredientDTO),
