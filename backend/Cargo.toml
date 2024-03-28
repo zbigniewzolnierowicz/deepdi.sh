@@ -4,6 +4,7 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+async-trait = "0.1.79"
 axum = { version = "0.7.5", features = ["multipart"] }
 color-eyre = "0.6.3"
 eyre = "0.6.12"
