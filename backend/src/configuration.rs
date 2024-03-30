@@ -1,10 +1,7 @@
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::{
-    postgres::{PgConnectOptions, PgSslMode},
-    ConnectOptions,
-};
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use tokio::net::TcpListener;
 
 #[derive(strum::Display, Debug)]

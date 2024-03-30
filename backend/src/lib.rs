@@ -1,11 +1,12 @@
 pub mod configuration;
+mod domain;
 
-use std::time::Duration;
+use std::collections::HashMap;
 
-use axum::{extract::State, routing::get, Router};
-use serde::Serialize;
+use axum::{extract::State, routing::get, Json, Router};
+use serde_json::Value;
 use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
+    postgres::PgConnectOptions,
     PgPool,
 };
 
@@ -13,9 +14,15 @@ pub struct App {
     router: Router,
 }
 
-async fn health(State(db): State<PgPool>) -> axum::response::Result<String> {
-    let result = sqlx::query!("SELECT 1 as test;").fetch_one(&db).await.unwrap();
-    Ok(result.test.unwrap().to_string())
+async fn health(State(db): State<PgPool>) -> Json<Value> {
+    let db_ok = sqlx::query("SELECT 1;").execute(&db).await.is_ok();
+    let details: HashMap<&'static str, bool> = HashMap::from([("database", db_ok)]);
+
+    let health = details.values().into_iter().all(|check| !!check);
+    Json(serde_json::json!({
+        "health": health,
+        "details": details
+    }))
 }
 
 impl App {
