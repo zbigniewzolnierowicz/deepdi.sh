@@ -1,10 +1,12 @@
 use color_eyre::Result;
-use backend::App;
+use backend::{App, configuration::Settings};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let listener = tokio::net::TcpListener::bind(("127.0.0.1", 8111)).await?;
-    let app = App::new();
+    color_eyre::install()?;
+    let config = Settings::get()?;
+    let app = App::new(config.database.with_db()).await?;
+    let listener = config.application.get_listener().await?;
     app.serve(listener).await?;
 
     Ok(())
