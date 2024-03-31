@@ -5,10 +5,15 @@ use std::sync::Arc;
 use crate::domain::repositories::ingredients::{
     InMemoryIngredientRepository, IngredientRepository,
 };
-use axum::{routing::post, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use sqlx::postgres::PgConnectOptions;
 
-use self::routes::create_ingredient::create_ingredient_route;
+use self::routes::{
+    create_ingredient::create_ingredient_route, get_ingredient_by_id::get_ingredient_by_id_route,
+};
 
 pub struct App {
     router: Router,
@@ -28,6 +33,7 @@ impl App {
         };
         let router = Router::new()
             .route("/ingredient/create", post(create_ingredient_route))
+            .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .with_state(state);
 
         Ok(App { router })

@@ -1,14 +1,18 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use common::{CreateIngredientDTO, IngredientDTO};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
+use common::IngredientDTO;
+use uuid::Uuid;
 
 use crate::{
     api::AppState,
-    domain::ingredients::create_ingredient::{
-        create_ingredient, CreateIngredient, CreateIngredientError,
-    },
+    domain::ingredients::get_ingredient::{get_ingredient_by_id, GetIngredientError},
 };
 
-impl IntoResponse for CreateIngredientError {
+impl IntoResponse for GetIngredientError {
     fn into_response(self) -> axum::response::Response {
         let error_type: &str = &self.as_ref();
         (
@@ -22,19 +26,14 @@ impl IntoResponse for CreateIngredientError {
     }
 }
 
-pub async fn create_ingredient_route(
+pub async fn get_ingredient_by_id_route(
+    Path(ingredient_id): Path<Uuid>,
     State(AppState {
         ingredient_repository,
         ..
     }): State<AppState>,
-    Json(body): Json<CreateIngredientDTO>,
 ) -> axum::response::Result<Json<IngredientDTO>> {
-    let input = CreateIngredient {
-        name: &body.name,
-        description: &body.description,
-        diet_friendly: body.diet_friendly.unwrap_or_default(),
-    };
-    let result = create_ingredient(ingredient_repository, &input).await?;
+    let result = get_ingredient_by_id(ingredient_repository, ingredient_id).await?;
 
     Ok(Json(IngredientDTO {
         id: result.id,

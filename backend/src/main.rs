@@ -1,5 +1,5 @@
-use color_eyre::Result;
 use backend::{api::App, configuration::Settings};
+use color_eyre::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {

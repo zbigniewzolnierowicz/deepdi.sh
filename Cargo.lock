@@ -309,6 +309,7 @@ dependencies = [
  "serde_json",
  "ts-rs",
  "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -2256,6 +2257,7 @@ dependencies = [
  "chrono",
  "thiserror",
  "ts-rs-macros",
+ "uuid",
 ]
 
 [[package]]
