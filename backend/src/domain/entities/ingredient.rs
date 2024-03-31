@@ -1,7 +1,7 @@
 use shrinkwraprs::Shrinkwrap;
 use uuid::Uuid;
 
-#[derive(Shrinkwrap, Debug, Clone)]
+#[derive(Shrinkwrap, Debug, Clone, PartialEq, Eq)]
 pub struct IngredientName(pub String);
 
 #[derive(Shrinkwrap, Debug, Clone)]

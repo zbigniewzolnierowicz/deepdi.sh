@@ -161,6 +161,7 @@ dependencies = [
  "async-trait",
  "axum",
  "color-eyre",
+ "common",
  "config",
  "eyre",
  "secrecy",

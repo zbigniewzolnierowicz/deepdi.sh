@@ -1,9 +1,13 @@
+use std::sync::Arc;
+
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::*;
-use crate::domain::repositories::ingredients::IngredientRepository;
+use crate::domain::repositories::ingredients::{IngredientRepository, IngredientRepositoryError};
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateIngredientError {
     #[error("The provided name was empty")]
     EmptyName,
@@ -11,8 +15,34 @@ pub enum CreateIngredientError {
     EmptyDescription,
     #[error("Wrong diet: {0}")]
     WrongDiet(String),
+    #[error("A conflict has occured.")]
+    Conflict,
     #[error(transparent)]
     Internal(#[from] eyre::Error),
+}
+
+impl IntoResponse for CreateIngredientError {
+    fn into_response(self) -> axum::response::Response {
+        let error_type: &str = &self.as_ref();
+        (
+            StatusCode::BAD_REQUEST,
+            axum::Json(common::error::ErrorMessage::new(
+                error_type,
+                self.to_string(),
+            )),
+        )
+            .into_response()
+    }
+}
+
+impl From<IngredientRepositoryError> for CreateIngredientError {
+    fn from(value: IngredientRepositoryError) -> Self {
+        match value {
+            IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
+            IngredientRepositoryError::Conflict => Self::Conflict,
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl TryFrom<String> for IngredientDescription {
@@ -22,6 +52,16 @@ impl TryFrom<String> for IngredientDescription {
             return Err(CreateIngredientError::EmptyDescription);
         }
         Ok(Self(value))
+    }
+}
+
+impl TryFrom<&str> for IngredientDescription {
+    type Error = CreateIngredientError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            return Err(CreateIngredientError::EmptyDescription);
+        }
+        Ok(Self(value.to_string()))
     }
 }
 
@@ -37,10 +77,10 @@ impl TryFrom<String> for DietFriendly {
     }
 }
 
-pub struct CreateIngredient {
-    name: String,
-    description: String,
-    diet_friendly: Vec<String>,
+pub struct CreateIngredient<'a> {
+    pub name: &'a str,
+    pub description: &'a str,
+    pub diet_friendly: Vec<String>,
 }
 
 impl TryFrom<String> for IngredientName {
@@ -53,16 +93,28 @@ impl TryFrom<String> for IngredientName {
     }
 }
 
+impl TryFrom<&str> for IngredientName {
+    type Error = CreateIngredientError;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            return Err(CreateIngredientError::EmptyName);
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+
 pub async fn create_ingredient(
-    repo: &mut dyn IngredientRepository,
-    input: CreateIngredient,
+    repo: Arc<dyn IngredientRepository>,
+    input: &CreateIngredient<'_>,
 ) -> Result<Ingredient, CreateIngredientError> {
+    let name: IngredientName = input.name.try_into()?;
     let ingredient = Ingredient {
         id: Uuid::now_v7(),
-        name: input.name.try_into()?,
+        name,
         description: input.description.try_into()?,
         diet_friendly: input
             .diet_friendly
+            .clone()
             .into_iter()
             .filter_map(|x| DietFriendly::try_from(x).ok())
             .collect(),
@@ -84,9 +136,9 @@ mod test {
             description: "Description of a tomato".into(),
             diet_friendly: vec!["Vegan".into()],
         };
-        let mut repo = InMemoryIngredientRepository::new();
+        let repo = Arc::new(InMemoryIngredientRepository::new());
 
-        let when = create_ingredient(&mut repo, given).await.unwrap();
+        let when = create_ingredient(repo.clone(), &given).await.unwrap();
 
         // THEN
 
@@ -95,11 +147,13 @@ mod test {
         assert_eq!(when.description.as_ref(), "Description of a tomato");
         assert!(when.diet_friendly.contains(&DietFriendly::Vegan));
 
-        let _result_in_repo = repo
+        assert!(repo
             .0
-            .into_iter()
-            .find(|x| x.id == when.id)
-            .expect("The result is not in the repository");
+            .lock()
+            .unwrap()
+            .clone()
+            .iter()
+            .any(|x| x.id == when.id))
     }
 
     #[tokio::test]
@@ -110,9 +164,9 @@ mod test {
             diet_friendly: vec!["Vegan".into(), "INVALID DIET".into()],
         };
 
-        let mut repo = InMemoryIngredientRepository::new();
+        let repo = Arc::new(InMemoryIngredientRepository::new());
 
-        let when = create_ingredient(&mut repo, given).await.unwrap();
+        let when = create_ingredient(repo.clone(), &given).await.unwrap();
 
         // THEN
 
@@ -128,9 +182,9 @@ mod test {
             diet_friendly: vec![],
         };
 
-        let mut repo = InMemoryIngredientRepository::new();
+        let repo = Arc::new(InMemoryIngredientRepository::new());
 
-        let when = create_ingredient(&mut repo, given).await;
+        let when = create_ingredient(repo.clone(), &given).await;
 
         // THEN
 
@@ -148,9 +202,9 @@ mod test {
             diet_friendly: vec![],
         };
 
-        let mut repo = InMemoryIngredientRepository::new();
+        let repo = Arc::new(InMemoryIngredientRepository::new());
 
-        let when = create_ingredient(&mut repo, given).await;
+        let when = create_ingredient(repo.clone(), &given).await;
 
         // THEN
 
@@ -158,5 +212,36 @@ mod test {
             Err(CreateIngredientError::EmptyDescription) => {}
             _ => unreachable!(),
         }
+    }
+
+    #[tokio::test]
+    async fn incorrect_ingredient_is_not_persisted() {
+        let given = CreateIngredient {
+            name: "".into(),
+            description: "Description of a tomato".into(),
+            diet_friendly: vec![],
+        };
+
+        let repo = Arc::new(InMemoryIngredientRepository::new());
+
+        let when = create_ingredient(repo.clone(), &given).await;
+
+        // THEN
+
+        match when {
+            Err(CreateIngredientError::EmptyName) => {}
+            _ => unreachable!(),
+        };
+
+        assert_eq!(
+            repo.clone()
+                .0
+                .lock()
+                .unwrap()
+                .clone()
+                .into_iter()
+                .any(|x| &x.name.as_str() == &given.name),
+            false
+        )
     }
 }
