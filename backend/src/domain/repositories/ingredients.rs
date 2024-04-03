@@ -11,6 +11,7 @@ pub trait IngredientRepository: Send + Sync {
     async fn insert(&self, ingredient: Ingredient)
         -> Result<Ingredient, IngredientRepositoryError>;
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError>;
+    async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError>;
 }
 
 pub struct InMemoryIngredientRepository(pub Mutex<Vec<Ingredient>>);
@@ -58,6 +59,14 @@ impl IngredientRepository for InMemoryIngredientRepository {
             .ok_or(IngredientRepositoryError::NotFound(id))?;
 
         Ok(ingredient.clone())
+    }
+
+    async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
+        let lock = self.0.lock().map_err(|_| {
+            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
+        })?;
+
+        Ok(lock.iter().cloned().collect())
     }
 }
 

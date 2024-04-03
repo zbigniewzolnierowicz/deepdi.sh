@@ -4,7 +4,7 @@ use uuid::Uuid;
 #[derive(Shrinkwrap, Debug, Clone, PartialEq, Eq)]
 pub struct IngredientName(pub String);
 
-#[derive(Shrinkwrap, Debug, Clone)]
+#[derive(Shrinkwrap, Debug, Clone, PartialEq, Eq)]
 pub struct IngredientDescription(pub String);
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -14,7 +14,7 @@ pub enum DietFriendly {
     GlutenFree,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Ingredient {
     pub id: Uuid,
     pub name: IngredientName,

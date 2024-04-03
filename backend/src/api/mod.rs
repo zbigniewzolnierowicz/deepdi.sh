@@ -12,7 +12,8 @@ use axum::{
 use sqlx::postgres::PgConnectOptions;
 
 use self::routes::{
-    create_ingredient::create_ingredient_route, get_ingredient_by_id::get_ingredient_by_id_route,
+    all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
+    get_ingredient_by_id::get_ingredient_by_id_route,
 };
 
 pub struct App {
@@ -34,6 +35,7 @@ impl App {
         let router = Router::new()
             .route("/ingredient/create", post(create_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
+            .route("/ingredient", get(get_all_ingredients_route))
             .with_state(state);
 
         Ok(App { router })

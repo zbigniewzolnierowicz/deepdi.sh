@@ -116,8 +116,8 @@ mod test {
     #[tokio::test]
     async fn creates_an_ingredient() {
         let given = CreateIngredient {
-            name: "Tomato".into(),
-            description: "Description of a tomato".into(),
+            name: "Tomato",
+            description: "Description of a tomato",
             diet_friendly: vec!["Vegan".into()],
         };
         let repo = Arc::new(InMemoryIngredientRepository::new());
@@ -126,7 +126,6 @@ mod test {
 
         // THEN
 
-        assert!(Uuid::try_from(when.id).is_ok());
         assert_eq!(when.name.as_ref(), "Tomato");
         assert_eq!(when.description.as_ref(), "Description of a tomato");
         assert!(when.diet_friendly.contains(&DietFriendly::Vegan));
@@ -143,8 +142,8 @@ mod test {
     #[tokio::test]
     async fn incorrect_diets_do_not_get_included() {
         let given = CreateIngredient {
-            name: "Tomato".into(),
-            description: "Description of a tomato".into(),
+            name: "Tomato",
+            description: "Description of a tomato",
             diet_friendly: vec!["Vegan".into(), "INVALID DIET".into()],
         };
 
@@ -161,8 +160,8 @@ mod test {
     #[tokio::test]
     async fn empty_name_fails() {
         let given = CreateIngredient {
-            name: "".into(),
-            description: "Description of a tomato".into(),
+            name: "",
+            description: "Description of a tomato",
             diet_friendly: vec![],
         };
 
@@ -181,8 +180,8 @@ mod test {
     #[tokio::test]
     async fn empty_description_fails() {
         let given = CreateIngredient {
-            name: "Tomato".into(),
-            description: "".into(),
+            name: "Tomato",
+            description: "",
             diet_friendly: vec![],
         };
 
@@ -201,8 +200,8 @@ mod test {
     #[tokio::test]
     async fn incorrect_ingredient_is_not_persisted() {
         let given = CreateIngredient {
-            name: "".into(),
-            description: "Description of a tomato".into(),
+            name: "",
+            description: "Description of a tomato",
             diet_friendly: vec![],
         };
 
@@ -217,15 +216,13 @@ mod test {
             _ => unreachable!(),
         };
 
-        assert_eq!(
-            repo.clone()
-                .0
-                .lock()
-                .unwrap()
-                .clone()
-                .into_iter()
-                .any(|x| &x.name.as_str() == &given.name),
-            false
-        )
+        assert!(!repo
+            .clone()
+            .0
+            .lock()
+            .unwrap()
+            .clone()
+            .into_iter()
+            .any(|x| x.name.as_str() == given.name))
     }
 }

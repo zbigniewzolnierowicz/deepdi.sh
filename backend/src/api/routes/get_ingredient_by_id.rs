@@ -9,12 +9,12 @@ use uuid::Uuid;
 
 use crate::{
     api::AppState,
-    domain::ingredients::get_ingredient::{get_ingredient_by_id, GetIngredientError},
+    domain::queries::get_ingredient::{get_ingredient_by_id, GetIngredientError},
 };
 
 impl IntoResponse for GetIngredientError {
     fn into_response(self) -> axum::response::Response {
-        let error_type: &str = &self.as_ref();
+        let error_type: &str = self.as_ref();
         (
             StatusCode::BAD_REQUEST,
             axum::Json(common::error::ErrorMessage::new(

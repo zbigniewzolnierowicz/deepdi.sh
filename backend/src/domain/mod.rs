@@ -1,3 +1,4 @@
+pub mod commands;
 pub mod entities;
-pub mod ingredients;
+pub mod queries;
 pub mod repositories;

@@ -1,3 +1,4 @@
+use eyre::Context;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
@@ -66,14 +67,14 @@ pub struct SessionSettings {
 }
 
 impl Settings {
-    pub fn get() -> Result<Self, config::ConfigError> {
-        let base_path = std::env::current_dir().expect("Could not get current directory");
+    pub fn get() -> color_eyre::Result<Self> {
+        let base_path = std::env::current_dir().wrap_err("Could not get current directory")?;
         let config_path = base_path.join("config");
 
         let environment: Environment = std::env::var("APP_ENV")
             .unwrap_or_else(|_| "dev".into())
             .try_into()
-            .expect("Failed to parse environment");
+            .map_err(|e| eyre::eyre!("{}", e))?;
 
         let env_config = format!("{}.yaml", environment);
 
@@ -86,7 +87,7 @@ impl Settings {
                     .separator("__"),
             )
             .build()?;
-        settings.try_deserialize::<Self>()
+        Ok(settings.try_deserialize::<Self>()?)
     }
 }
 
