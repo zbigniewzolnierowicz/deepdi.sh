@@ -21,17 +21,11 @@ impl IngredientRepository for InMemoryIngredientRepository {
         })?;
 
         if lock.iter().any(|x| x.id == ingredient.id) {
-            return Err(IngredientRepositoryError::Conflict(
-                "id",
-                ingredient.id.to_string(),
-            ));
+            return Err(IngredientRepositoryError::Conflict);
         };
 
         if lock.iter().any(|x| x.name == ingredient.name) {
-            return Err(IngredientRepositoryError::Conflict(
-                "name",
-                ingredient.name.to_string(),
-            ));
+            return Err(IngredientRepositoryError::Conflict);
         };
 
         lock.push(ingredient.clone());

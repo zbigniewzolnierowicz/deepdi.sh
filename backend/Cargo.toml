@@ -10,6 +10,7 @@ color-eyre = "0.6.3"
 common = { version = "0.0.0", path = "../common" }
 config = "0.14.0"
 eyre = "0.6.12"
+rayon = "1.10.0"
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = "1.0.197"
 serde-aux = "4.5.0"

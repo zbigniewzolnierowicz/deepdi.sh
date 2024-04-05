@@ -74,7 +74,12 @@ pub struct WhichDiets(pub Vec<DietFriendly>);
 
 impl From<Vec<String>> for WhichDiets {
     fn from(value: Vec<String>) -> Self {
-        Self(value.iter().filter_map(|v| DietFriendly::from_str(v).ok()).collect())
+        Self(
+            value
+                .iter()
+                .filter_map(|v| DietFriendly::from_str(v).ok())
+                .collect(),
+        )
     }
 }
 

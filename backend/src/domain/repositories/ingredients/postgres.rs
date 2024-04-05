@@ -1,6 +1,5 @@
-use std::error::Error;
-
 use async_trait::async_trait;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -39,21 +38,54 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_one(&self.0)
         .await
         .map_err(|e| match e {
-            sqlx::error::Error::Database(dberror) if dberror.is_unique_violation() => {
-                IngredientRepositoryError::Conflict(dberror.constraint().unwrap_or_default(), "".into())
-            },
-            _ => IngredientRepositoryError::UnknownError(e.into()),
+            sqlx::error::Error::Database(dberr) => {
+                if dberr.is_unique_violation() {
+                    return IngredientRepositoryError::Conflict;
+                };
+                IngredientRepositoryError::UnknownError(dberr.into())
+            }
+            err => IngredientRepositoryError::UnknownError(err.into()),
         })?;
 
         Ok(ingredient.try_into()?)
     }
 
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError> {
-        todo!()
+        let ingredient = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            SELECT id, name, description, diet_friendly
+            FROM ingredients
+            WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_one(&self.0)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => IngredientRepositoryError::NotFound(id),
+            e => IngredientRepositoryError::UnknownError(e.into()),
+        })?;
+
+        Ok(ingredient.try_into()?)
     }
 
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
-        todo!()
+        let ingredients = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            SELECT id, name, description, diet_friendly
+            FROM ingredients;
+            "#
+        )
+        .fetch_all(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .par_iter()
+        .filter_map(|i| i.try_into().ok())
+        .collect();
+
+        Ok(ingredients)
     }
 }
 

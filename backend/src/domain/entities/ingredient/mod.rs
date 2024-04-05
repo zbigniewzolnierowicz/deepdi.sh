@@ -25,15 +25,22 @@ pub struct IngredientModel {
     pub diet_friendly: WhichDiets,
 }
 
+impl TryFrom<&IngredientModel> for Ingredient {
+    type Error = ValidationError;
+    fn try_from(value: &IngredientModel) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: value.id,
+            name: value.name.clone().try_into()?,
+            description: value.description.clone().try_into()?,
+            diet_friendly: value.diet_friendly.clone(),
+        })
+    }
+}
+
 impl TryFrom<IngredientModel> for Ingredient {
     type Error = ValidationError;
     fn try_from(value: IngredientModel) -> Result<Self, Self::Error> {
-        Ok(Self {
-            id: value.id,
-            name: value.name.try_into()?,
-            description: value.description.try_into()?,
-            diet_friendly: value.diet_friendly.into(),
-        })
+        Self::try_from(&value)
     }
 }
 
@@ -60,7 +67,7 @@ impl From<Ingredient> for IngredientModel {
             id,
             name: name.to_string(),
             description: description.to_string(),
-            diet_friendly: diet_friendly.into()
+            diet_friendly: diet_friendly.into(),
         }
     }
 }

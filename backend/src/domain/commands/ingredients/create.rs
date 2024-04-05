@@ -14,8 +14,8 @@ use self::types::{DietFriendly, WhichDiets};
 pub enum CreateIngredientError {
     #[error("The field {0} was empty")]
     EmptyField(&'static str),
-    #[error("A conflict has occured - an ingredient with field {0} of value {1} already exists.")]
-    Conflict(&'static str, String),
+    #[error("A conflict has occured - an ingredient with these parameters already exists.")]
+    Conflict,
     #[error(transparent)]
     Internal(#[from] eyre::Error),
 }
@@ -24,7 +24,7 @@ impl From<IngredientRepositoryError> for CreateIngredientError {
     fn from(value: IngredientRepositoryError) -> Self {
         match value {
             IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
-            IngredientRepositoryError::Conflict(field, value) => Self::Conflict(field, value),
+            IngredientRepositoryError::Conflict => Self::Conflict,
             _ => unreachable!(),
         }
     }

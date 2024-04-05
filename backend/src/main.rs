@@ -5,7 +5,7 @@ use color_eyre::Result;
 async fn main() -> Result<()> {
     color_eyre::install()?;
     let config = Settings::get()?;
-    let app = App::new(config.database.with_db()).await?;
+    let app = App::new(&config).await?;
     let listener = config.application.get_listener().await?;
     app.serve(listener).await?;
 
