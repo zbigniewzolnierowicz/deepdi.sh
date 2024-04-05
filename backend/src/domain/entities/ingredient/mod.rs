@@ -67,7 +67,7 @@ impl From<Ingredient> for IngredientModel {
             id,
             name: name.to_string(),
             description: description.to_string(),
-            diet_friendly: diet_friendly.into(),
+            diet_friendly,
         }
     }
 }

@@ -5,7 +5,8 @@ use std::sync::Arc;
 use crate::{
     configuration::Settings,
     domain::repositories::ingredients::{
-        base::IngredientRepository, postgres::PostgresIngredientRepository,
+        base::IngredientRepositoryService,
+        postgres::PostgresIngredientRepository,
     },
 };
 use axum::{
@@ -25,13 +26,14 @@ pub struct App {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub ingredient_repository: Arc<dyn IngredientRepository>,
+    pub ingredient_repository: IngredientRepositoryService,
 }
 
 impl App {
     pub async fn new(config: &Settings) -> color_eyre::Result<Self> {
         let db = PgPool::connect_lazy_with(config.database.with_db());
-        let ingredient_repository = Arc::new(PostgresIngredientRepository::new(db));
+        let ingredient_repository: IngredientRepositoryService =
+            Arc::new(Box::new(PostgresIngredientRepository::new(db)));
         let state = AppState {
             ingredient_repository,
         };

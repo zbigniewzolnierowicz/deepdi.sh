@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use uuid::Uuid;
 
@@ -12,3 +14,5 @@ pub trait IngredientRepository: Send + Sync {
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError>;
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError>;
 }
+
+pub type IngredientRepositoryService = Arc<Box<dyn IngredientRepository>>;
