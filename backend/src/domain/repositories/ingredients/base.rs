@@ -8,7 +8,7 @@ use crate::domain::entities::ingredient::Ingredient;
 use super::errors::IngredientRepositoryError;
 
 #[async_trait]
-pub trait IngredientRepository: Send + Sync {
+pub trait IngredientRepository: Send + Sync + 'static {
     async fn insert(&self, ingredient: Ingredient)
         -> Result<Ingredient, IngredientRepositoryError>;
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError>;
