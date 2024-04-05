@@ -2,12 +2,9 @@ mod routes;
 
 use std::sync::Arc;
 
-use crate::{
-    configuration::Settings,
-    domain::repositories::ingredients::{
-        base::IngredientRepositoryService,
-        postgres::PostgresIngredientRepository,
-    },
+use crate::domain::repositories::ingredients::{
+    base::{IngredientRepositoryService, IngredientRepository}, in_memory::InMemoryIngredientRepository,
+    postgres::PostgresIngredientRepository,
 };
 use axum::{
     routing::{get, post},
@@ -30,18 +27,27 @@ pub struct AppState {
 }
 
 impl App {
-    pub async fn new(config: &Settings) -> color_eyre::Result<Self> {
-        let db = PgPool::connect_lazy_with(config.database.with_db());
-        let ingredient_repository: IngredientRepositoryService =
-            Arc::new(Box::new(PostgresIngredientRepository::new(db)));
-        let state = AppState {
-            ingredient_repository,
-        };
-        let router = Router::new()
+    fn get_router() -> Router<AppState> {
+        Router::new()
             .route("/ingredient/create", post(create_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
-            .with_state(state);
+    }
+
+    pub async fn with_in_memory() -> color_eyre::Result<Self> {
+        Self::new(InMemoryIngredientRepository::new()).await
+    }
+
+    pub async fn with_db(db: PgPool) -> color_eyre::Result<Self> {
+        Self::new(PostgresIngredientRepository::new(db)).await
+    }
+
+    async fn new<I: IngredientRepository + 'static>(irs: I) -> color_eyre::Result<Self> {
+        let ingredient_repository: IngredientRepositoryService = Arc::new(Box::new(irs));
+        let state = AppState {
+            ingredient_repository,
+        };
+        let router = Self::get_router().with_state(state);
 
         Ok(App { router })
     }
