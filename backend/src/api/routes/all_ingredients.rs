@@ -1,14 +1,12 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use common::IngredientDTO;
 
 use crate::{
     api::AppState,
-    domain::queries::get_all_ingredients::{get_all_ingredients, GetAllIngredientsError},
+    domain::{
+        entities::ingredient::Ingredient,
+        queries::ingredients::get_all::{get_all_ingredients, GetAllIngredientsError},
+    },
 };
 
 impl IntoResponse for GetAllIngredientsError {
@@ -25,6 +23,16 @@ impl IntoResponse for GetAllIngredientsError {
     }
 }
 
+impl From<&Ingredient> for IngredientDTO {
+    fn from(value: &Ingredient) -> Self {
+        Self {
+            id: value.id,
+            name: value.name.to_string(),
+            description: value.description.to_string(),
+        }
+    }
+}
+
 pub async fn get_all_ingredients_route(
     State(AppState {
         ingredient_repository,
@@ -33,14 +41,5 @@ pub async fn get_all_ingredients_route(
 ) -> axum::response::Result<Json<Vec<IngredientDTO>>> {
     let result = get_all_ingredients(ingredient_repository).await?;
 
-    Ok(Json(
-        result
-            .iter()
-            .map(|ing| IngredientDTO {
-                id: ing.id,
-                name: ing.name.to_string(),
-                description: ing.description.to_string(),
-            })
-            .collect(),
-    ))
+    Ok(Json(result.iter().map(IngredientDTO::from).collect()))
 }

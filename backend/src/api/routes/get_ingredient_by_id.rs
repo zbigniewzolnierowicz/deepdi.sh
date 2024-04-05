@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     api::AppState,
-    domain::queries::get_ingredient::{get_ingredient_by_id, GetIngredientError},
+    domain::queries::ingredients::get_by_id::{get_ingredient_by_id, GetIngredientError},
 };
 
 impl IntoResponse for GetIngredientError {

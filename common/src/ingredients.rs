@@ -8,6 +8,7 @@ use uuid::Uuid;
 pub struct CreateIngredientDTO {
     pub name: String,
     pub description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub diet_friendly: Option<Vec<String>>,
 }
 

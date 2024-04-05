@@ -3,7 +3,7 @@ use common::{CreateIngredientDTO, IngredientDTO};
 
 use crate::{
     api::AppState,
-    domain::commands::create_ingredient::{
+    domain::commands::ingredients::create::{
         create_ingredient, CreateIngredient, CreateIngredientError,
     },
 };

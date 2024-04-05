@@ -36,7 +36,7 @@ pub async fn get_ingredient_by_id(
 #[cfg(test)]
 mod tests {
     use crate::domain::{
-        entities::ingredient::{DietFriendly, IngredientDescription, IngredientName},
+        entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName},
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
@@ -68,7 +68,7 @@ mod tests {
         // WHEN
         match get_ingredient_by_id(repo, id).await {
             Err(GetIngredientError::NotFound(missing_id)) => assert_eq!(missing_id, id),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }

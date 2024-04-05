@@ -5,16 +5,15 @@ use uuid::Uuid;
 use crate::domain::entities::ingredient::*;
 use crate::domain::repositories::ingredients::{IngredientRepository, IngredientRepositoryError};
 
+use self::errors::ValidationError;
+use self::types::DietFriendly;
+
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateIngredientError {
-    #[error("The provided name was empty")]
-    EmptyName,
-    #[error("The provided description was empty")]
-    EmptyDescription,
-    #[error("Wrong diet: {0}")]
-    WrongDiet(String),
-    #[error("A conflict has occured.")]
-    Conflict,
+    #[error("The field {0} was empty")]
+    EmptyField(&'static str),
+    #[error("A conflict has occured - an ingredient with field {0} of value {1} already exists.")]
+    Conflict(&'static str, String),
     #[error(transparent)]
     Internal(#[from] eyre::Error),
 }
@@ -23,40 +22,17 @@ impl From<IngredientRepositoryError> for CreateIngredientError {
     fn from(value: IngredientRepositoryError) -> Self {
         match value {
             IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
-            IngredientRepositoryError::Conflict => Self::Conflict,
+            IngredientRepositoryError::Conflict(field, value) => Self::Conflict(field, value),
             _ => unreachable!(),
         }
     }
 }
 
-impl TryFrom<String> for IngredientDescription {
-    type Error = CreateIngredientError;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(CreateIngredientError::EmptyDescription);
-        }
-        Ok(Self(value))
-    }
-}
-
-impl TryFrom<&str> for IngredientDescription {
-    type Error = CreateIngredientError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(CreateIngredientError::EmptyDescription);
-        }
-        Ok(Self(value.to_string()))
-    }
-}
-
-impl TryFrom<String> for DietFriendly {
-    type Error = CreateIngredientError;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        match value.as_str() {
-            "Vegan" => Ok(Self::Vegan),
-            "Vegetarian" => Ok(Self::Vegetarian),
-            "GlutenFree" => Ok(Self::GlutenFree),
-            _ => Err(CreateIngredientError::WrongDiet(value)),
+impl From<ValidationError> for CreateIngredientError {
+    fn from(value: ValidationError) -> Self {
+        match value {
+            ValidationError::EmptyField(field) => Self::EmptyField(field),
+            e => Self::Internal(e.into()),
         }
     }
 }
@@ -67,23 +43,20 @@ pub struct CreateIngredient<'a> {
     pub diet_friendly: Vec<String>,
 }
 
-impl TryFrom<String> for IngredientName {
-    type Error = CreateIngredientError;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(CreateIngredientError::EmptyName);
-        }
-        Ok(Self(value))
-    }
-}
-
-impl TryFrom<&str> for IngredientName {
-    type Error = CreateIngredientError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(CreateIngredientError::EmptyName);
-        }
-        Ok(Self(value.to_string()))
+impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
+    type Error = ValidationError;
+    fn try_from(value: &CreateIngredient<'a>) -> Result<Self, Self::Error> {
+        Ok(Ingredient {
+            id: Uuid::now_v7(),
+            name: value.name.try_into()?,
+            description: value.description.try_into()?,
+            diet_friendly: value
+                .diet_friendly
+                .clone()
+                .into_iter()
+                .filter_map(|x| DietFriendly::try_from(x).ok())
+                .collect(),
+        })
     }
 }
 
@@ -91,18 +64,7 @@ pub async fn create_ingredient(
     repo: Arc<dyn IngredientRepository>,
     input: &CreateIngredient<'_>,
 ) -> Result<Ingredient, CreateIngredientError> {
-    let name: IngredientName = input.name.try_into()?;
-    let ingredient = Ingredient {
-        id: Uuid::now_v7(),
-        name,
-        description: input.description.try_into()?,
-        diet_friendly: input
-            .diet_friendly
-            .clone()
-            .into_iter()
-            .filter_map(|x| DietFriendly::try_from(x).ok())
-            .collect(),
-    };
+    let ingredient = Ingredient::try_from(input)?;
     let ingredient = repo.insert(ingredient).await?;
     Ok(ingredient)
 }
@@ -172,7 +134,7 @@ mod test {
         // THEN
 
         match when {
-            Err(CreateIngredientError::EmptyName) => {}
+            Err(CreateIngredientError::EmptyField("name")) => {}
             _ => unreachable!(),
         }
     }
@@ -192,7 +154,7 @@ mod test {
         // THEN
 
         match when {
-            Err(CreateIngredientError::EmptyDescription) => {}
+            Err(CreateIngredientError::EmptyField("description")) => {}
             _ => unreachable!(),
         }
     }
@@ -212,7 +174,7 @@ mod test {
         // THEN
 
         match when {
-            Err(CreateIngredientError::EmptyName) => {}
+            Err(CreateIngredientError::EmptyField(_)) => {}
             _ => unreachable!(),
         };
 

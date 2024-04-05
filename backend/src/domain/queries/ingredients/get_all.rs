@@ -28,7 +28,7 @@ mod tests {
     use uuid::Uuid;
 
     use crate::domain::{
-        entities::ingredient::{DietFriendly, IngredientDescription, IngredientName},
+        entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName},
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
@@ -60,7 +60,9 @@ mod tests {
         let given_2 = Ingredient {
             id: Uuid::now_v7(),
             name: IngredientName("Meat fries".into()),
-            description: IngredientDescription("Description of meat fries (whatever they are)".into()),
+            description: IngredientDescription(
+                "Description of meat fries (whatever they are)".into(),
+            ),
             diet_friendly: vec![],
         };
 
