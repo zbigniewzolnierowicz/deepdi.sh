@@ -3,7 +3,9 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::*;
-use crate::domain::repositories::ingredients::{IngredientRepository, IngredientRepositoryError};
+use crate::domain::repositories::ingredients::{
+    base::IngredientRepository, errors::IngredientRepositoryError,
+};
 
 use self::errors::ValidationError;
 use self::types::DietFriendly;

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{IngredientRepository, IngredientRepositoryError},
+    repositories::ingredients::{base::IngredientRepository, errors::IngredientRepositoryError},
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]

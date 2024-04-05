@@ -6,25 +6,9 @@ use uuid::Uuid;
 
 use crate::domain::entities::ingredient::Ingredient;
 
-#[async_trait]
-pub trait IngredientRepository: Send + Sync {
-    async fn insert(&self, ingredient: Ingredient)
-        -> Result<Ingredient, IngredientRepositoryError>;
-    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError>;
-    async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError>;
-}
+use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
 pub struct InMemoryIngredientRepository(pub Mutex<Vec<Ingredient>>);
-
-#[derive(thiserror::Error, Debug)]
-pub enum IngredientRepositoryError {
-    #[error("The ingredient with ID of {0} was not found")]
-    NotFound(Uuid),
-    #[error("The ingredient with field {0} of value {1} already exists")]
-    Conflict(&'static str, String),
-    #[error(transparent)]
-    UnknownError(#[from] eyre::Error),
-}
 
 #[async_trait]
 impl IngredientRepository for InMemoryIngredientRepository {
