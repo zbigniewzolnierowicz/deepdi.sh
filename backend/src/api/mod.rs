@@ -3,13 +3,13 @@ mod routes;
 use std::sync::Arc;
 
 use crate::domain::repositories::ingredients::{
-    base::IngredientRepository, InMemoryIngredientRepository,
+    base::IngredientRepository, postgres::PostgresIngredientRepository
 };
 use axum::{
     routing::{get, post},
     Router,
 };
-use sqlx::postgres::PgConnectOptions;
+use sqlx::{postgres::PgConnectOptions, PgPool};
 
 use self::routes::{
     all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
@@ -26,9 +26,9 @@ pub struct AppState {
 }
 
 impl App {
-    pub async fn new(_db_settings: PgConnectOptions) -> color_eyre::Result<Self> {
-        // let db = PgPool::connect_lazy_with(db_settings);
-        let ingredient_repository = Arc::new(InMemoryIngredientRepository::new());
+    pub async fn new(db_settings: PgConnectOptions) -> color_eyre::Result<Self> {
+        let db = PgPool::connect_lazy_with(db_settings);
+        let ingredient_repository = Arc::new(PostgresIngredientRepository::new(db));
         let state = AppState {
             ingredient_repository,
         };

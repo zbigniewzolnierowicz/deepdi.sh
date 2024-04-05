@@ -8,7 +8,7 @@ use crate::domain::repositories::ingredients::{
 };
 
 use self::errors::ValidationError;
-use self::types::DietFriendly;
+use self::types::{DietFriendly, WhichDiets};
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateIngredientError {
@@ -52,12 +52,14 @@ impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
             id: Uuid::now_v7(),
             name: value.name.try_into()?,
             description: value.description.try_into()?,
-            diet_friendly: value
-                .diet_friendly
-                .clone()
-                .into_iter()
-                .filter_map(|x| DietFriendly::try_from(x).ok())
-                .collect(),
+            diet_friendly: WhichDiets(
+                value
+                    .diet_friendly
+                    .clone()
+                    .into_iter()
+                    .filter_map(|x| DietFriendly::try_from(x).ok())
+                    .collect(),
+            ),
         })
     }
 }

@@ -1,9 +1,12 @@
+use std::str::FromStr;
+
 use shrinkwraprs::Shrinkwrap;
-use strum::{EnumString, VariantNames};
+use strum::{Display, EnumString, VariantNames};
 
 use super::errors::ValidationError;
 
-#[derive(Shrinkwrap, Debug, Clone, PartialEq, Eq)]
+#[derive(Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[sqlx(transparent)]
 pub struct IngredientName(pub String);
 
 impl TryFrom<String> for IngredientName {
@@ -23,7 +26,8 @@ impl TryFrom<&str> for IngredientName {
     }
 }
 
-#[derive(Shrinkwrap, Debug, Clone, PartialEq, Eq)]
+#[derive(Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[sqlx(transparent)]
 pub struct IngredientDescription(pub String);
 
 impl TryFrom<String> for IngredientDescription {
@@ -43,7 +47,7 @@ impl TryFrom<&str> for IngredientDescription {
     }
 }
 
-#[derive(VariantNames, EnumString, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(VariantNames, sqlx::Type, EnumString, Display, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DietFriendly {
     Vegan,
     Vegetarian,
@@ -62,5 +66,20 @@ impl TryFrom<String> for DietFriendly {
                 Self::VARIANTS,
             )),
         }
+    }
+}
+
+#[derive(Shrinkwrap, sqlx::Type, sqlx::FromRow, PartialEq, Eq, Clone, Debug)]
+pub struct WhichDiets(pub Vec<DietFriendly>);
+
+impl From<Vec<String>> for WhichDiets {
+    fn from(value: Vec<String>) -> Self {
+        Self(value.iter().filter_map(|v| DietFriendly::from_str(v).ok()).collect())
+    }
+}
+
+impl From<Vec<DietFriendly>> for WhichDiets {
+    fn from(value: Vec<DietFriendly>) -> Self {
+        Self(value)
     }
 }
