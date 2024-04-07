@@ -28,3 +28,14 @@ pub struct IngredientWithAmount {
     pub amount: f64,
     pub name: String,
 }
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
+#[ts(export)]
+pub struct UpdateIngredientDTO {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diet_friendly: Option<Vec<String>>,
+}

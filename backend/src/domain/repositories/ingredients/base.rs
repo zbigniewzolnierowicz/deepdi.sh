@@ -14,7 +14,7 @@ pub trait IngredientRepository: Send + Sync + 'static {
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError>;
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError>;
     async fn update(
-        &mut self,
+        &self,
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError>;

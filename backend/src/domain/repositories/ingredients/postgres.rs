@@ -89,7 +89,7 @@ impl IngredientRepository for PostgresIngredientRepository {
     }
 
     async fn update(
-        &mut self,
+        &self,
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError> {
@@ -118,16 +118,19 @@ impl IngredientRepository for PostgresIngredientRepository {
         let description: Option<String> = changeset.description.map(|n| n.to_string());
         let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
 
+        // TODO: split into many updates depending on which thing is Some (or something else idk)
         let updated_ingredient = sqlx::query_as!(
             IngredientModel,
             r#"
             UPDATE ingredients
             SET
-            name = $1,
-            description = $2,
-            diet_friendly = $3
+            name = $2,
+            description = $3,
+            diet_friendly = $4
+            WHERE id = $1
             RETURNING id, name, description, diet_friendly
             "#,
+            id,
             name,
             description,
             diet_friendly.as_deref(),

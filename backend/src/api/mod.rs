@@ -8,14 +8,14 @@ use crate::domain::repositories::ingredients::{
     postgres::PostgresIngredientRepository,
 };
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use sqlx::PgPool;
 
 use self::routes::{
     all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
-    get_ingredient_by_id::get_ingredient_by_id_route,
+    get_ingredient_by_id::get_ingredient_by_id_route, update_ingredient::update_ingredient_route,
 };
 
 pub struct App {
@@ -31,6 +31,7 @@ impl App {
     fn get_router() -> Router<AppState> {
         Router::new()
             .route("/ingredient/create", post(create_ingredient_route))
+            .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
     }

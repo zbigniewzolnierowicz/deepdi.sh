@@ -55,11 +55,11 @@ impl IngredientRepository for InMemoryIngredientRepository {
     }
 
     async fn update(
-        &mut self,
+        &self,
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError> {
-        let lock = self.0.get_mut().map_err(|_| {
+        let mut lock = self.0.lock().map_err(|_| {
             eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
         })?;
 

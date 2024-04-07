@@ -34,6 +34,8 @@ mod tests {
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[tokio::test]
@@ -77,9 +79,13 @@ mod tests {
         repo.insert(given_2.clone()).await.unwrap();
 
         // WHEN
-        let result = get_all_ingredients(repo).await.unwrap();
+        let mut result = get_all_ingredients(repo).await.unwrap();
+        result.sort_by_key(|k| k.id);
+
+        let mut expected = vec![given_1, given_2];
+        expected.sort_by_key(|k| k.id);
 
         // THEN
-        assert_eq!(result, vec![given_1, given_2]);
+        assert_eq!(result, expected);
     }
 }
