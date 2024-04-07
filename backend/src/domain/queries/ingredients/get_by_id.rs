@@ -3,8 +3,7 @@ use uuid::Uuid;
 use crate::domain::{
     entities::ingredient::Ingredient,
     repositories::ingredients::{
-        base::IngredientRepositoryService,
-        errors::IngredientRepositoryError,
+        base::IngredientRepositoryService, errors::IngredientRepositoryError,
     },
 };
 

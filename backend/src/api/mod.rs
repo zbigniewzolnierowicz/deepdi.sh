@@ -3,7 +3,8 @@ mod routes;
 use std::sync::Arc;
 
 use crate::domain::repositories::ingredients::{
-    base::{IngredientRepositoryService, IngredientRepository}, in_memory::InMemoryIngredientRepository,
+    base::{IngredientRepository, IngredientRepositoryService},
+    in_memory::InMemoryIngredientRepository,
     postgres::PostgresIngredientRepository,
 };
 use axum::{

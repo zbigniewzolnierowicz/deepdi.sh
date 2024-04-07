@@ -3,7 +3,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::entities::ingredient::{Ingredient, IngredientModel};
+use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset, IngredientModel};
 
 use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
@@ -86,6 +86,61 @@ impl IngredientRepository for PostgresIngredientRepository {
         .collect();
 
         Ok(ingredients)
+    }
+
+    async fn update(
+        &mut self,
+        id: Uuid,
+        changeset: IngredientChangeset,
+    ) -> Result<Ingredient, IngredientRepositoryError> {
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        let ingredient_to_update = sqlx::query!(
+            r#"
+            SELECT id
+            FROM ingredients
+            WHERE id = $1"#,
+            id
+        )
+        .fetch_optional(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        if ingredient_to_update.is_none() {
+            return Err(IngredientRepositoryError::NotFound(id));
+        };
+
+        let name: Option<String> = changeset.name.map(|n| n.to_string());
+        let description: Option<String> = changeset.description.map(|n| n.to_string());
+        let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
+
+        let updated_ingredient = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            UPDATE ingredients
+            SET
+            name = $1,
+            description = $2,
+            diet_friendly = $3
+            RETURNING id, name, description, diet_friendly
+            "#,
+            name,
+            description,
+            diet_friendly.as_deref(),
+        )
+        .fetch_one(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        tx.commit()
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        Ok(updated_ingredient.try_into()?)
     }
 }
 

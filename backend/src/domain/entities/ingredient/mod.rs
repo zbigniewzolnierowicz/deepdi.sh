@@ -71,3 +71,9 @@ impl From<Ingredient> for IngredientModel {
         }
     }
 }
+
+pub struct IngredientChangeset {
+    pub name: Option<IngredientName>,
+    pub description: Option<IngredientDescription>,
+    pub diet_friendly: Option<WhichDiets>,
+}

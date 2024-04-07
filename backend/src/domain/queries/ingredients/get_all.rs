@@ -1,7 +1,8 @@
-
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{base::IngredientRepositoryService, errors::IngredientRepositoryError},
+    repositories::ingredients::{
+        base::IngredientRepositoryService, errors::IngredientRepositoryError,
+    },
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -38,7 +39,8 @@ mod tests {
     #[tokio::test]
     async fn returns_empty_vec_when_no_items_inside() {
         // GIVEN
-        let repo: IngredientRepositoryService = Arc::new(Box::new(InMemoryIngredientRepository::new()));
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         // WHEN
         let result = get_all_ingredients(repo).await.unwrap();
@@ -50,7 +52,8 @@ mod tests {
     #[tokio::test]
     async fn returns_vec_of_items_inside() {
         // GIVEN
-        let repo: IngredientRepositoryService = Arc::new(Box::new(InMemoryIngredientRepository::new()));
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
         let given_1 = Ingredient {
             id: Uuid::now_v7(),
             name: IngredientName("Tomato".into()),
