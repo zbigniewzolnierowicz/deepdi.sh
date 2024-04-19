@@ -1,10 +1,10 @@
-use std::sync::Arc;
-
 use uuid::Uuid;
 
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{base::IngredientRepository, errors::IngredientRepositoryError},
+    repositories::ingredients::{
+        base::IngredientRepositoryService, errors::IngredientRepositoryError,
+    },
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -25,7 +25,7 @@ impl From<IngredientRepositoryError> for GetIngredientError {
 }
 
 pub async fn get_ingredient_by_id(
-    repo: Arc<dyn IngredientRepository>,
+    repo: IngredientRepositoryService,
     input: Uuid,
 ) -> Result<Ingredient, GetIngredientError> {
     let result = repo.get_by_id(input).await?;
@@ -35,6 +35,8 @@ pub async fn get_ingredient_by_id(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use crate::domain::{
         entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName},
         repositories::ingredients::InMemoryIngredientRepository,
@@ -45,7 +47,9 @@ mod tests {
     #[tokio::test]
     async fn getting_ingredient_works() {
         // GIVEN
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
+
         let given = Ingredient {
             id: Uuid::now_v7(),
             name: IngredientName("Tomato".into()),
@@ -62,7 +66,8 @@ mod tests {
     #[tokio::test]
     async fn returns_error_if_no_ingredient_with_id() {
         // GIVEN
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
         let id = Uuid::from_u128(0);
 
         // WHEN

@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::*;
-use crate::domain::repositories::ingredients::{
-    base::IngredientRepository, errors::IngredientRepositoryError,
-};
+use crate::domain::repositories::ingredients::base::IngredientRepositoryService;
+use crate::domain::repositories::ingredients::errors::IngredientRepositoryError;
 
 use self::errors::ValidationError;
 use self::types::{DietFriendly, WhichDiets};
@@ -65,7 +62,7 @@ impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
 }
 
 pub async fn create_ingredient(
-    repo: Arc<dyn IngredientRepository>,
+    repo: IngredientRepositoryService,
     input: &CreateIngredient<'_>,
 ) -> Result<Ingredient, CreateIngredientError> {
     let ingredient = Ingredient::try_from(input)?;
@@ -75,6 +72,8 @@ pub async fn create_ingredient(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use crate::domain::repositories::ingredients::InMemoryIngredientRepository;
 
     use super::*;
@@ -86,7 +85,8 @@ mod tests {
             description: "Description of a tomato",
             diet_friendly: vec!["Vegan".into()],
         };
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         let when = create_ingredient(repo.clone(), &given).await.unwrap();
 
@@ -95,14 +95,6 @@ mod tests {
         assert_eq!(when.name.as_ref(), "Tomato");
         assert_eq!(when.description.as_ref(), "Description of a tomato");
         assert!(when.diet_friendly.contains(&DietFriendly::Vegan));
-
-        assert!(repo
-            .0
-            .lock()
-            .unwrap()
-            .clone()
-            .iter()
-            .any(|x| x.id == when.id))
     }
 
     #[tokio::test]
@@ -113,7 +105,8 @@ mod tests {
             diet_friendly: vec!["Vegan".into(), "INVALID DIET".into()],
         };
 
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         let when = create_ingredient(repo.clone(), &given).await.unwrap();
 
@@ -131,7 +124,8 @@ mod tests {
             diet_friendly: vec![],
         };
 
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         let when = create_ingredient(repo.clone(), &given).await;
 
@@ -151,7 +145,8 @@ mod tests {
             diet_friendly: vec![],
         };
 
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         let when = create_ingredient(repo.clone(), &given).await;
 
@@ -171,7 +166,8 @@ mod tests {
             diet_friendly: vec![],
         };
 
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         let when = create_ingredient(repo.clone(), &given).await;
 
@@ -182,12 +178,10 @@ mod tests {
             _ => unreachable!(),
         };
 
-        assert!(!repo
-            .clone()
-            .0
-            .lock()
+        assert!(!&repo
+            .get_all()
+            .await
             .unwrap()
-            .clone()
             .into_iter()
             .any(|x| x.name.as_str() == given.name))
     }

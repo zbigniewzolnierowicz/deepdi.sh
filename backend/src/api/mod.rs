@@ -3,17 +3,19 @@ mod routes;
 use std::sync::Arc;
 
 use crate::domain::repositories::ingredients::{
-    base::IngredientRepository, postgres::PostgresIngredientRepository
+    base::{IngredientRepository, IngredientRepositoryService},
+    in_memory::InMemoryIngredientRepository,
+    postgres::PostgresIngredientRepository,
 };
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
-use sqlx::{postgres::PgConnectOptions, PgPool};
+use sqlx::PgPool;
 
 use self::routes::{
     all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
-    get_ingredient_by_id::get_ingredient_by_id_route,
+    get_ingredient_by_id::get_ingredient_by_id_route, update_ingredient::update_ingredient_route,
 };
 
 pub struct App {
@@ -22,21 +24,32 @@ pub struct App {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub ingredient_repository: Arc<dyn IngredientRepository>,
+    pub ingredient_repository: IngredientRepositoryService,
 }
 
 impl App {
-    pub async fn new(db_settings: PgConnectOptions) -> color_eyre::Result<Self> {
-        let db = PgPool::connect_lazy_with(db_settings);
-        let ingredient_repository = Arc::new(PostgresIngredientRepository::new(db));
+    fn get_router() -> Router<AppState> {
+        Router::new()
+            .route("/ingredient/create", post(create_ingredient_route))
+            .route("/ingredient/:id", put(update_ingredient_route))
+            .route("/ingredient/:id", get(get_ingredient_by_id_route))
+            .route("/ingredient", get(get_all_ingredients_route))
+    }
+
+    pub async fn with_in_memory() -> color_eyre::Result<Self> {
+        Self::new(InMemoryIngredientRepository::new()).await
+    }
+
+    pub async fn with_db(db: PgPool) -> color_eyre::Result<Self> {
+        Self::new(PostgresIngredientRepository::new(db)).await
+    }
+
+    async fn new<I: IngredientRepository + 'static>(irs: I) -> color_eyre::Result<Self> {
+        let ingredient_repository: IngredientRepositoryService = Arc::new(Box::new(irs));
         let state = AppState {
             ingredient_repository,
         };
-        let router = Router::new()
-            .route("/ingredient/create", post(create_ingredient_route))
-            .route("/ingredient/:id", get(get_ingredient_by_id_route))
-            .route("/ingredient", get(get_all_ingredients_route))
-            .with_state(state);
+        let router = Self::get_router().with_state(state);
 
         Ok(App { router })
     }

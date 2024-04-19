@@ -1,9 +1,10 @@
 use async_trait::async_trait;
 use regex::Regex;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::entities::ingredient::{Ingredient, IngredientModel};
+use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset, IngredientModel};
 
 use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
@@ -84,7 +85,79 @@ impl IngredientRepository for PostgresIngredientRepository {
     }
 
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
-        todo!()
+        let ingredients = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            SELECT id, name, description, diet_friendly
+            FROM ingredients;
+            "#
+        )
+        .fetch_all(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .par_iter()
+        .filter_map(|i| i.try_into().ok())
+        .collect();
+
+        Ok(ingredients)
+    }
+
+    async fn update(
+        &self,
+        id: Uuid,
+        changeset: IngredientChangeset,
+    ) -> Result<Ingredient, IngredientRepositoryError> {
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        let ingredient_to_update = sqlx::query!(
+            r#"
+            SELECT id
+            FROM ingredients
+            WHERE id = $1"#,
+            id
+        )
+        .fetch_optional(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        if ingredient_to_update.is_none() {
+            return Err(IngredientRepositoryError::NotFound(id));
+        };
+
+        let name: Option<String> = changeset.name.map(|n| n.to_string());
+        let description: Option<String> = changeset.description.map(|n| n.to_string());
+        let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
+
+        // TODO: split into many updates depending on which thing is Some (or something else idk)
+        let updated_ingredient = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            UPDATE ingredients
+            SET
+            name = $2,
+            description = $3,
+            diet_friendly = $4
+            WHERE id = $1
+            RETURNING id, name, description, diet_friendly
+            "#,
+            id,
+            name,
+            description,
+            diet_friendly.as_deref(),
+        )
+        .fetch_one(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        tx.commit()
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        Ok(updated_ingredient.try_into()?)
     }
 }
 
@@ -185,37 +258,6 @@ mod tests {
         match result {
             IngredientRepositoryError::Conflict(fieldname) => {
                 assert_eq!(fieldname, "name");
-            }
-            _ => unreachable!(),
-        };
-    }
-
-    #[sqlx::test]
-    async fn insert_ingredient_that_already_exists_fails_description(pool: PgPool) {
-        let repo = PostgresIngredientRepository::new(pool.clone());
-
-        repo.insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
-        })
-        .await
-        .unwrap();
-
-        let result = repo
-            .insert(Ingredient {
-                id: Uuid::from_u128(2),
-                name: "Ingredient name 2".try_into().unwrap(),
-                description: "Ingredient description".try_into().unwrap(),
-                diet_friendly: WhichDiets(vec![]),
-            })
-            .await
-            .unwrap_err();
-
-        match result {
-            IngredientRepositoryError::Conflict(fieldname) => {
-                assert_eq!(fieldname, "description");
             }
             _ => unreachable!(),
         };

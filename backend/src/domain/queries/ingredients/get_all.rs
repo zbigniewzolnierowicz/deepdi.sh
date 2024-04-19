@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{base::IngredientRepository, errors::IngredientRepositoryError},
+    repositories::ingredients::{
+        base::IngredientRepositoryService, errors::IngredientRepositoryError,
+    },
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -18,13 +18,15 @@ impl From<IngredientRepositoryError> for GetAllIngredientsError {
 }
 
 pub async fn get_all_ingredients(
-    repo: Arc<dyn IngredientRepository>,
+    repo: IngredientRepositoryService,
 ) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
     Ok(repo.get_all().await?)
 }
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use uuid::Uuid;
 
     use crate::domain::{
@@ -32,12 +34,15 @@ mod tests {
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[tokio::test]
     async fn returns_empty_vec_when_no_items_inside() {
         // GIVEN
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
         // WHEN
         let result = get_all_ingredients(repo).await.unwrap();
@@ -49,7 +54,8 @@ mod tests {
     #[tokio::test]
     async fn returns_vec_of_items_inside() {
         // GIVEN
-        let repo = Arc::new(InMemoryIngredientRepository::new());
+        let repo: IngredientRepositoryService =
+            Arc::new(Box::new(InMemoryIngredientRepository::new()));
         let given_1 = Ingredient {
             id: Uuid::now_v7(),
             name: IngredientName("Tomato".into()),
@@ -70,9 +76,13 @@ mod tests {
         repo.insert(given_2.clone()).await.unwrap();
 
         // WHEN
-        let result = get_all_ingredients(repo).await.unwrap();
+        let mut result = get_all_ingredients(repo).await.unwrap();
+        result.sort_by_key(|k| k.id);
+
+        let mut expected = vec![given_1, given_2];
+        expected.sort_by_key(|k| k.id);
 
         // THEN
-        assert_eq!(result, vec![given_1, given_2]);
+        assert_eq!(result, expected);
     }
 }
