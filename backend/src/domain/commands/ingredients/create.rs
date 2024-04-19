@@ -14,8 +14,8 @@ use self::types::{DietFriendly, WhichDiets};
 pub enum CreateIngredientError {
     #[error("The field {0} was empty")]
     EmptyField(&'static str),
-    #[error("A conflict has occured - an ingredient with field {0} of value {1} already exists.")]
-    Conflict(&'static str, String),
+    #[error("A conflict has occured - an ingredient with field {0} of the given value already exists.")]
+    Conflict(String),
     #[error(transparent)]
     Internal(#[from] eyre::Error),
 }
@@ -24,7 +24,7 @@ impl From<IngredientRepositoryError> for CreateIngredientError {
     fn from(value: IngredientRepositoryError) -> Self {
         match value {
             IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
-            IngredientRepositoryError::Conflict(field, value) => Self::Conflict(field, value),
+            IngredientRepositoryError::Conflict(field) => Self::Conflict(field),
             _ => unreachable!(),
         }
     }
@@ -74,7 +74,7 @@ pub async fn create_ingredient(
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::domain::repositories::ingredients::InMemoryIngredientRepository;
 
     use super::*;

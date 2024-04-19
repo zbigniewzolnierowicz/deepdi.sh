@@ -28,7 +28,7 @@ mod tests {
     use uuid::Uuid;
 
     use crate::domain::{
-        entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName},
+        entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName, WhichDiets},
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
@@ -54,7 +54,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: IngredientName("Tomato".into()),
             description: IngredientDescription("Description of a tomato".into()),
-            diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian],
+            diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian].into(),
         };
 
         let given_2 = Ingredient {
@@ -63,7 +63,7 @@ mod tests {
             description: IngredientDescription(
                 "Description of meat fries (whatever they are)".into(),
             ),
-            diet_friendly: vec![],
+            diet_friendly: WhichDiets(vec![]),
         };
 
         repo.insert(given_1.clone()).await.unwrap();

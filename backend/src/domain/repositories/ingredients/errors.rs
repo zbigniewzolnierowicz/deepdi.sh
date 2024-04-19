@@ -7,8 +7,8 @@ use crate::domain::entities::ingredient::errors::ValidationError;
 pub enum IngredientRepositoryError {
     #[error("The ingredient with ID of {0} was not found")]
     NotFound(Uuid),
-    #[error("The ingredient with field {0} of value {1} already exists")]
-    Conflict(&'static str, String),
+    #[error("The ingredient with field {0} of the given value already exists")]
+    Conflict(String),
     #[error(transparent)]
     ValidationError(#[from] ValidationError),
     #[error(transparent)]

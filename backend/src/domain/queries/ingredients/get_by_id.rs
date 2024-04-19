@@ -50,7 +50,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: IngredientName("Tomato".into()),
             description: IngredientDescription("Description of a tomato".into()),
-            diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian],
+            diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian].into(),
         };
         let insert_result = repo.insert(given.clone()).await.unwrap();
 
