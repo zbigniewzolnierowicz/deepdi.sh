@@ -1,10 +1,9 @@
+use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset, IngredientModel};
 use async_trait::async_trait;
-use regex::Regex;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use regex::Regex;
 use sqlx::PgPool;
 use uuid::Uuid;
-
-use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset, IngredientModel};
 
 use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
@@ -107,12 +106,6 @@ impl IngredientRepository for PostgresIngredientRepository {
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError> {
-        let tx = self
-            .0
-            .begin()
-            .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
-
         let ingredient_to_update = sqlx::query!(
             r#"
             SELECT id
@@ -132,22 +125,69 @@ impl IngredientRepository for PostgresIngredientRepository {
         let description: Option<String> = changeset.description.map(|n| n.to_string());
         let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
 
-        // TODO: split into many updates depending on which thing is Some (or something else idk)
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        if let Some(name) = name {
+            sqlx::query!(
+                r#"
+                    UPDATE ingredients
+                    SET
+                    name = $2
+                    WHERE id = $1
+                    RETURNING id
+                "#,
+                id,
+                name,
+            )
+            .fetch_one(&self.0)
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+        };
+
+        if let Some(description) = description {
+            sqlx::query!(
+                r#"
+                    UPDATE ingredients
+                    SET
+                    description = $2
+                    WHERE id = $1
+                    RETURNING id
+                "#,
+                id,
+                description,
+            )
+            .fetch_one(&self.0)
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+        };
+
+        if let Some(diet_friendly) = diet_friendly {
+            sqlx::query!(
+                r#"
+                    UPDATE ingredients
+                    SET
+                    diet_friendly = $2
+                    WHERE id = $1
+                "#,
+                id,
+                &diet_friendly,
+            )
+            .fetch_one(&self.0)
+            .await
+            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+        };
+
         let updated_ingredient = sqlx::query_as!(
             IngredientModel,
             r#"
-            UPDATE ingredients
-            SET
-            name = $2,
-            description = $3,
-            diet_friendly = $4
-            WHERE id = $1
-            RETURNING id, name, description, diet_friendly
-            "#,
-            id,
-            name,
-            description,
-            diet_friendly.as_deref(),
+            SELECT id, name, description, diet_Friendly
+            FROM ingredients
+            WHERE id = $1"#,
+            id
         )
         .fetch_one(&self.0)
         .await
@@ -163,105 +203,12 @@ impl IngredientRepository for PostgresIngredientRepository {
 
 impl PostgresIngredientRepository {
     pub fn new(pool: PgPool) -> Self {
-        let r = Regex::new(r"^(?:ingredients)_(?<field>.*)_(?:key)|(?<pkey>pkey)").unwrap();
+        #[allow(clippy::expect_used)]
+        let r = Regex::new(r"^(?:ingredients)_(?<field>.*)_(?:key)|(?<pkey>pkey)")
+            .expect("Error in regex creation - this shouldn't happen like, ever.");
         Self(pool, r)
     }
 }
 
 #[cfg(test)]
-mod tests {
-    use sqlx::PgPool;
-
-    use crate::domain::entities::ingredient::types::WhichDiets;
-
-    use super::*;
-
-    #[sqlx::test]
-    async fn insert_ingredient_succeeds(pool: PgPool) {
-        let repo = PostgresIngredientRepository::new(pool.clone());
-
-        repo.insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
-        })
-        .await
-        .unwrap();
-
-        let ingredient = sqlx::query_as!(
-            IngredientModel,
-            "SELECT id, name, description, diet_friendly FROM ingredients WHERE id = $1",
-            Uuid::from_u128(1)
-        )
-        .fetch_all(&pool)
-        .await
-        .unwrap();
-
-        assert_eq!(ingredient.len(), 1);
-    }
-
-    #[sqlx::test]
-    async fn insert_ingredient_that_already_exists_fails_id(pool: PgPool) {
-        let repo = PostgresIngredientRepository::new(pool.clone());
-
-        repo.insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
-        })
-        .await
-        .unwrap();
-
-        let result = repo
-            .insert(Ingredient {
-                id: Uuid::from_u128(1),
-                name: "Ingredient name 2".try_into().unwrap(),
-                description: "Ingredient description 2".try_into().unwrap(),
-                diet_friendly: WhichDiets(vec![]),
-            })
-            .await
-            .unwrap_err();
-
-        match result {
-            IngredientRepositoryError::Conflict(fieldname) => {
-                assert_eq!(fieldname, "id");
-            }
-            _ => unreachable!(),
-        };
-    }
-
-    #[sqlx::test]
-    async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
-        let repo = PostgresIngredientRepository::new(pool.clone());
-
-        repo.insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
-        })
-        .await
-        .unwrap();
-
-        let result = repo
-            .insert(Ingredient {
-                id: Uuid::from_u128(2),
-                name: "Ingredient name".try_into().unwrap(),
-                description: "Ingredient description".try_into().unwrap(),
-                diet_friendly: WhichDiets(vec![]),
-            })
-            .await
-            .unwrap_err();
-
-        match result {
-            IngredientRepositoryError::Conflict(fieldname) => {
-                assert_eq!(fieldname, "name");
-            }
-            _ => unreachable!(),
-        };
-    }
-
-    // TODO: Add tests for get_by_id and get_all
-}
+mod tests;

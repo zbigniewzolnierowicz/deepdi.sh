@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+includes:
+  backend: ./.taskfiles/Backend/Taskfile.yaml
+
+tasks:
+  default: task -l
+  migrate:
+    desc: "Run every migration"
+    cmds:
+      - task: backend:migrate

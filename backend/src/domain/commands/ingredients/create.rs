@@ -11,7 +11,9 @@ use self::types::{DietFriendly, WhichDiets};
 pub enum CreateIngredientError {
     #[error("The field {0} was empty")]
     EmptyField(&'static str),
-    #[error("A conflict has occured - an ingredient with field {0} of the given value already exists.")]
+    #[error(
+        "A conflict has occured - an ingredient with field {0} of the given value already exists."
+    )]
     Conflict(String),
     #[error(transparent)]
     Internal(#[from] eyre::Error),

@@ -30,7 +30,9 @@ mod tests {
     use uuid::Uuid;
 
     use crate::domain::{
-        entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName, WhichDiets},
+        entities::ingredient::types::{
+            DietFriendly, IngredientDescription, IngredientName, WhichDiets,
+        },
         repositories::ingredients::InMemoryIngredientRepository,
     };
 
