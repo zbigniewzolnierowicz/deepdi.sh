@@ -130,7 +130,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             .begin()
             .await
             .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
-
+        
         if let Some(name) = name {
             sqlx::query!(
                 r#"

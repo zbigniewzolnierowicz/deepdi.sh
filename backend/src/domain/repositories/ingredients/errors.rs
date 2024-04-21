@@ -3,6 +3,9 @@ use uuid::Uuid;
 
 use crate::domain::entities::ingredient::errors::ValidationError;
 
+// TODO: split into separate get, update, insert and delete errors that get combined in
+// IngredientRepositoryError
+
 #[derive(Error, Debug)]
 pub enum IngredientRepositoryError {
     #[error("The ingredient with ID of {0} was not found")]
