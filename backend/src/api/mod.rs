@@ -11,6 +11,8 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
+use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
+use color_eyre::Result;
 use sqlx::PgPool;
 
 use self::routes::{
@@ -34,17 +36,11 @@ impl App {
             .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
+            .layer(OtelInResponseLayer::default())
+            .layer(OtelAxumLayer::default())
     }
 
-    pub async fn with_in_memory() -> color_eyre::Result<Self> {
-        Self::new(InMemoryIngredientRepository::new()).await
-    }
-
-    pub async fn with_db(db: PgPool) -> color_eyre::Result<Self> {
-        Self::new(PostgresIngredientRepository::new(db)).await
-    }
-
-    async fn new<I: IngredientRepository + 'static>(irs: I) -> color_eyre::Result<Self> {
+    pub fn new<I: IngredientRepository + 'static>(irs: I) -> Result<Self> {
         let ingredient_repository: IngredientRepositoryService = Arc::new(Box::new(irs));
         let state = AppState {
             ingredient_repository,
@@ -54,8 +50,33 @@ impl App {
         Ok(App { router })
     }
 
-    pub async fn serve(self, listener: tokio::net::TcpListener) -> color_eyre::Result<()> {
+    pub async fn serve(self, listener: tokio::net::TcpListener) -> Result<()> {
         axum::serve(listener, self.router).await?;
         Ok(())
+    }
+}
+
+#[derive(Default)]
+pub struct AppBuilder {
+    postgres_db: Option<PgPool>,
+}
+
+impl AppBuilder {
+    pub fn with_postgres_database(mut self, pool: PgPool) -> Self {
+        self.postgres_db = Some(pool);
+
+        self
+    }
+
+    pub fn build(self) -> Result<App> {
+        if let Some(postgres_db) = self.postgres_db {
+            App::new(PostgresIngredientRepository::new(postgres_db))
+        } else {
+            App::new(InMemoryIngredientRepository::new())
+        }
+    }
+
+    pub fn new() -> Self {
+        Self::default()
     }
 }
