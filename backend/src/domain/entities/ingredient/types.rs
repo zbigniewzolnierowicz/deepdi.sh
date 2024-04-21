@@ -13,7 +13,7 @@ impl TryFrom<String> for IngredientName {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if value.is_empty() {
-            return Err(ValidationError::EmptyField("name"));
+            return Err(ValidationError::EmptyField(vec!["name"]));
         }
         Ok(Self(value))
     }
@@ -40,7 +40,7 @@ impl TryFrom<String> for IngredientDescription {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if value.is_empty() {
-            return Err(ValidationError::EmptyField("description"));
+            return Err(ValidationError::EmptyField(vec!["description"]));
         }
         Ok(Self(value))
     }

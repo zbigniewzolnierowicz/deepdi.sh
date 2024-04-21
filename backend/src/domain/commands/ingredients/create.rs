@@ -32,7 +32,7 @@ impl From<IngredientRepositoryError> for CreateIngredientError {
 impl From<ValidationError> for CreateIngredientError {
     fn from(value: ValidationError) -> Self {
         match value {
-            ValidationError::EmptyField(field) => Self::EmptyField(field),
+            ValidationError::EmptyField(field) => Self::EmptyField(field[0]),
             e => Self::Internal(e.into()),
         }
     }

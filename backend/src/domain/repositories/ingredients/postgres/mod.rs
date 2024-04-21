@@ -1,4 +1,6 @@
-use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset, IngredientModel};
+use crate::domain::entities::ingredient::{
+    errors::ValidationError, Ingredient, IngredientChangeset, IngredientModel,
+};
 use async_trait::async_trait;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use regex::Regex;
@@ -125,12 +127,18 @@ impl IngredientRepository for PostgresIngredientRepository {
         let description: Option<String> = changeset.description.map(|n| n.to_string());
         let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
 
+        if name.is_none() && description.is_none() && diet_friendly.is_none() {
+            return Err(IngredientRepositoryError::ValidationError(
+                ValidationError::EmptyField(vec!["name", "description", "diet_friendly"]),
+            ));
+        };
+
         let tx = self
             .0
             .begin()
             .await
             .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
-        
+
         if let Some(name) = name {
             sqlx::query!(
                 r#"
