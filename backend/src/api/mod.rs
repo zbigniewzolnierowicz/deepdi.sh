@@ -36,7 +36,7 @@ impl App {
             .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
-            .layer(OtelInResponseLayer)
+            .layer(OtelInResponseLayer::default())
             .layer(OtelAxumLayer::default())
     }
 

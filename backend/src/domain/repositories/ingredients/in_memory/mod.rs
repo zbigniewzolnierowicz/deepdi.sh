@@ -12,6 +12,7 @@ pub struct InMemoryIngredientRepository(pub Mutex<HashMap<Uuid, Ingredient>>);
 
 #[async_trait]
 impl IngredientRepository for InMemoryIngredientRepository {
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Insert a new ingredient", skip(self))]
     async fn insert(
         &self,
         ingredient: Ingredient,
@@ -33,6 +34,10 @@ impl IngredientRepository for InMemoryIngredientRepository {
         Ok(ingredient)
     }
 
+    #[tracing::instrument(
+        "[INGREDIENT REPOSITORY] [IN MEMORY] Get ingredient with ID",
+        skip(self)
+    )]
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError> {
         let lock = self.0.lock().map_err(|_| {
             eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
@@ -46,6 +51,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
         Ok(ingredient.clone())
     }
 
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Get all ingredients", skip(self))]
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
         let lock = self.0.lock().map_err(|_| {
             eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
@@ -54,6 +60,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
         Ok(lock.values().cloned().collect())
     }
 
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Update ingredient", skip(self))]
     async fn update(
         &self,
         id: Uuid,

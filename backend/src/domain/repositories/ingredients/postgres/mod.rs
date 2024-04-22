@@ -13,7 +13,10 @@ pub struct PostgresIngredientRepository(pub PgPool, Regex);
 
 #[async_trait]
 impl IngredientRepository for PostgresIngredientRepository {
-    #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Insert a new ingredient", skip(self))]
+    #[tracing::instrument(
+        "[INGREDIENT REPOSITORY] [POSTGRES] Insert a new ingredient",
+        skip(self)
+    )]
     async fn insert(
         &self,
         ingredient: Ingredient,
@@ -43,7 +46,6 @@ impl IngredientRepository for PostgresIngredientRepository {
         .map_err(|e| match e {
             sqlx::error::Error::Database(dberror) if dberror.is_unique_violation() => {
                 let constraint = dberror.constraint().unwrap_or_default().to_string();
-                println!("{:?}", self.1.captures(&constraint));
 
                 if let Some(captures) = self.1.captures(&constraint) {
                     let field = captures.name("field");
@@ -68,9 +70,8 @@ impl IngredientRepository for PostgresIngredientRepository {
 
     #[tracing::instrument(
         "[INGREDIENT REPOSITORY] [POSTGRES] Get ingredient with ID",
-        skip(self),
-        fields(id = id.to_string()))
-    ]
+        skip(self)
+    )]
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError> {
         let ingredient = sqlx::query_as!(
             IngredientModel,
