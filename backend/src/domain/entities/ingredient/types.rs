@@ -106,3 +106,15 @@ impl From<WhichDiets> for Vec<String> {
         val.0.iter().map(|d| d.to_string()).collect()
     }
 }
+
+impl PartialEq<WhichDiets> for Vec<String> {
+    fn eq(&self, other: &WhichDiets) -> bool {
+        self.eq(&other.0)
+    }
+}
+
+impl PartialEq<DietFriendly> for String {
+    fn eq(&self, other: &DietFriendly) -> bool {
+        self == &other.to_string()
+    }
+}

@@ -33,7 +33,7 @@ impl From<&Ingredient> for IngredientDTO {
     }
 }
 
-#[tracing::instrument(skip(ingredient_repository))]
+#[tracing::instrument("[ROUTE] Getting all available ingredients", skip(ingredient_repository))]
 pub async fn get_all_ingredients_route(
     State(AppState {
         ingredient_repository,

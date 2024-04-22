@@ -7,6 +7,7 @@ use crate::domain::{
     },
 };
 
+#[derive(Debug)]
 pub struct UpdateIngredient {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -54,12 +55,15 @@ impl From<IngredientRepositoryError> for UpdateIngredientError {
     }
 }
 
+#[tracing::instrument("[COMMAND] Updating an existing ingredient", skip(repo))]
 pub async fn update_ingredient(
     repo: IngredientRepositoryService,
     id: Uuid,
     input: &UpdateIngredient,
 ) -> Result<Ingredient, UpdateIngredientError> {
+    tracing::info!("Serializing input into a changeset");
     let ingredient: IngredientChangeset = input.try_into()?;
+    tracing::info!("Sending changeset to ingredient repository");
     let result = repo.update(id, ingredient).await?;
     Ok(result)
 }

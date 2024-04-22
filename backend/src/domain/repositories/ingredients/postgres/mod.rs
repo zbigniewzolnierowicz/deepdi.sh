@@ -13,6 +13,7 @@ pub struct PostgresIngredientRepository(pub PgPool, Regex);
 
 #[async_trait]
 impl IngredientRepository for PostgresIngredientRepository {
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Insert a new ingredient", skip(self))]
     async fn insert(
         &self,
         ingredient: Ingredient,
@@ -65,6 +66,11 @@ impl IngredientRepository for PostgresIngredientRepository {
         Ok(ingredient.try_into()?)
     }
 
+    #[tracing::instrument(
+        "[INGREDIENT REPOSITORY] [POSTGRES] Get ingredient with ID",
+        skip(self),
+        fields(id = id.to_string()))
+    ]
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError> {
         let ingredient = sqlx::query_as!(
             IngredientModel,
@@ -85,6 +91,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         Ok(ingredient.try_into()?)
     }
 
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Get all ingredients", skip(self))]
     async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
         let ingredients = sqlx::query_as!(
             IngredientModel,
@@ -103,25 +110,24 @@ impl IngredientRepository for PostgresIngredientRepository {
         Ok(ingredients)
     }
 
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Update ingredient", skip(self))]
     async fn update(
         &self,
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError> {
-        let ingredient_to_update = sqlx::query!(
+        let mut ingredient_to_update = sqlx::query_as!(
+            IngredientModel,
             r#"
-            SELECT id
+            SELECT id, name, description, diet_friendly
             FROM ingredients
             WHERE id = $1"#,
             id
         )
         .fetch_optional(&self.0)
         .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
-
-        if ingredient_to_update.is_none() {
-            return Err(IngredientRepositoryError::NotFound(id));
-        };
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .ok_or_else(|| IngredientRepositoryError::NotFound(id))?;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -140,72 +146,70 @@ impl IngredientRepository for PostgresIngredientRepository {
             .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
 
         if let Some(name) = name {
-            sqlx::query!(
-                r#"
+            if name != ingredient_to_update.name {
+                ingredient_to_update = sqlx::query_as!(
+                    IngredientModel,
+                    r#"
                     UPDATE ingredients
                     SET
                     name = $2
                     WHERE id = $1
-                    RETURNING id
+                    RETURNING id, name, description, diet_friendly
                 "#,
-                id,
-                name,
-            )
-            .fetch_one(&self.0)
-            .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                    id,
+                    name,
+                )
+                .fetch_one(&self.0)
+                .await
+                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+            };
         };
 
         if let Some(description) = description {
-            sqlx::query!(
-                r#"
+            if description != ingredient_to_update.description {
+                ingredient_to_update = sqlx::query_as!(
+                    IngredientModel,
+                    r#"
                     UPDATE ingredients
                     SET
                     description = $2
                     WHERE id = $1
-                    RETURNING id
-                "#,
-                id,
-                description,
-            )
-            .fetch_one(&self.0)
-            .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                    RETURNING id, name, description, diet_friendly
+                    "#,
+                    id,
+                    description,
+                )
+                .fetch_one(&self.0)
+                .await
+                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+            }
         };
 
         if let Some(diet_friendly) = diet_friendly {
-            sqlx::query!(
-                r#"
+            if diet_friendly != ingredient_to_update.diet_friendly {
+                ingredient_to_update = sqlx::query_as!(
+                    IngredientModel,
+                    r#"
                     UPDATE ingredients
                     SET
                     diet_friendly = $2
                     WHERE id = $1
-                "#,
-                id,
-                &diet_friendly,
-            )
-            .fetch_one(&self.0)
-            .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                    RETURNING id, name, description, diet_friendly
+                    "#,
+                    id,
+                    &diet_friendly
+                )
+                .fetch_one(&self.0)
+                .await
+                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+            }
         };
-
-        let updated_ingredient = sqlx::query_as!(
-            IngredientModel,
-            r#"
-            SELECT id, name, description, diet_Friendly
-            FROM ingredients
-            WHERE id = $1"#,
-            id
-        )
-        .fetch_one(&self.0)
-        .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
 
         tx.commit()
             .await
             .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
 
-        Ok(updated_ingredient.try_into()?)
+        Ok(ingredient_to_update.try_into()?)
     }
 }
 

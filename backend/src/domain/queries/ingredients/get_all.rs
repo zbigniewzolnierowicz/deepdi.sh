@@ -17,6 +17,7 @@ impl From<IngredientRepositoryError> for GetAllIngredientsError {
     }
 }
 
+#[tracing::instrument("[QUERY] Get all ingredients", skip(repo))]
 pub async fn get_all_ingredients(
     repo: IngredientRepositoryService,
 ) -> Result<Vec<Ingredient>, GetAllIngredientsError> {

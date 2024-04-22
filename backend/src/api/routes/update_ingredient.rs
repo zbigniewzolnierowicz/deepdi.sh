@@ -38,6 +38,7 @@ impl IntoResponse for UpdateIngredientError {
     }
 }
 
+#[tracing::instrument("[ROUTE] Updating an existing ingredient", skip(ingredient_repository))]
 pub async fn update_ingredient_route(
     Path(ingredient_id): Path<Uuid>,
     State(AppState {

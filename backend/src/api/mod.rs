@@ -11,7 +11,7 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
+use axum_tracing_opentelemetry::middleware::{OtelInResponseLayer, OtelAxumLayer};
 use color_eyre::Result;
 use sqlx::PgPool;
 
@@ -36,7 +36,7 @@ impl App {
             .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
-            .layer(OtelInResponseLayer::default())
+            .layer(OtelInResponseLayer)
             .layer(OtelAxumLayer::default())
     }
 
@@ -51,6 +51,8 @@ impl App {
     }
 
     pub async fn serve(self, listener: tokio::net::TcpListener) -> Result<()> {
+        let addr = listener.local_addr()?;
+        tracing::info!("Serving on {}:{}", addr.ip(), addr.port());
         axum::serve(listener, self.router).await?;
         Ok(())
     }

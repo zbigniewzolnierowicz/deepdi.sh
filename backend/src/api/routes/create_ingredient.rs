@@ -22,7 +22,7 @@ impl IntoResponse for CreateIngredientError {
     }
 }
 
-#[tracing::instrument(skip(ingredient_repository))]
+#[tracing::instrument("[ROUTE] Creating a new ingredient", skip(ingredient_repository))]
 pub async fn create_ingredient_route(
     State(AppState {
         ingredient_repository,

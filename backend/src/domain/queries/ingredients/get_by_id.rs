@@ -24,6 +24,7 @@ impl From<IngredientRepositoryError> for GetIngredientError {
     }
 }
 
+#[tracing::instrument("[QUERY] Get ingredient by ID", skip(repo))]
 pub async fn get_ingredient_by_id(
     repo: IngredientRepositoryService,
     input: Uuid,

@@ -26,6 +26,7 @@ impl IntoResponse for GetIngredientError {
     }
 }
 
+#[tracing::instrument("[ROUTE] Getting ingredient by ID", skip(ingredient_repository))]
 pub async fn get_ingredient_by_id_route(
     Path(ingredient_id): Path<Uuid>,
     State(AppState {

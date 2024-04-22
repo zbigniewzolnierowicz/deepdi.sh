@@ -38,6 +38,7 @@ impl From<ValidationError> for CreateIngredientError {
     }
 }
 
+#[derive(Debug)]
 pub struct CreateIngredient<'a> {
     pub name: &'a str,
     pub description: &'a str,
@@ -63,6 +64,7 @@ impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
     }
 }
 
+#[tracing::instrument("[COMMAND] Creating a new ingredient", skip(repo))]
 pub async fn create_ingredient(
     repo: IngredientRepositoryService,
     input: &CreateIngredient<'_>,
