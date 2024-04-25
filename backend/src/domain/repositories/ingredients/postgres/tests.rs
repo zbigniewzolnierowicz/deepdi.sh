@@ -175,4 +175,76 @@ async fn get_all_returns_empty_vec(pool: PgPool) {
     assert_eq!(result, vec![]);
 }
 
-// TODO: add tests for updates
+#[sqlx::test]
+async fn updating_an_ingredient_success(pool: PgPool) {
+    let repo = PostgresIngredientRepository::new(pool.clone());
+
+    let input = Ingredient {
+        id: Uuid::from_u128(1),
+        name: "Ingredient name 1".try_into().unwrap(),
+        description: "Ingredient description 1".try_into().unwrap(),
+        diet_friendly: WhichDiets(vec![]),
+    };
+    repo.insert(input.clone()).await.unwrap();
+
+    let result = repo
+        .update(
+            input.id,
+            IngredientChangeset {
+                name: Some(IngredientName("Ingredient name changed".to_string())),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(
+        result,
+        Ingredient {
+            name: IngredientName("Ingredient name changed".to_string()),
+            ..input
+        }
+    )
+}
+
+#[sqlx::test]
+async fn updating_with_empty_changeset_fails(pool: PgPool) {
+    let repo = PostgresIngredientRepository::new(pool.clone());
+
+    let input = Ingredient {
+        id: Uuid::from_u128(1),
+        name: "Ingredient name 1".try_into().unwrap(),
+        description: "Ingredient description 1".try_into().unwrap(),
+        diet_friendly: WhichDiets(vec![]),
+    };
+    repo.insert(input.clone()).await.unwrap();
+
+    let error = repo
+        .update(input.id, IngredientChangeset::default())
+        .await
+        .unwrap_err();
+
+    match error {
+        IngredientRepositoryError::ValidationError(ValidationError::EmptyField(fields)) => {
+            assert_eq!(fields, vec!["name", "description", "diet_friendly"]);
+        }
+        _ => unreachable!(),
+    };
+}
+
+#[sqlx::test]
+async fn updating_a_missing_file_fails(pool: PgPool) {
+    let repo = PostgresIngredientRepository::new(pool.clone());
+
+    let error = repo.update(Uuid::from_u128(1), IngredientChangeset {
+        name: Some(IngredientName("This will fail, so this doesn't matter".to_string())),
+        ..Default::default()
+    }).await.unwrap_err();
+
+    match error {
+        IngredientRepositoryError::NotFound(u) => {
+            assert_eq!(u, Uuid::from_u128(1))
+        }
+        _ => unreachable!()
+    }
+}

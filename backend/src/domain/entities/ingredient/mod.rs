@@ -72,7 +72,7 @@ impl From<Ingredient> for IngredientModel {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct IngredientChangeset {
     pub name: Option<IngredientName>,
     pub description: Option<IngredientDescription>,

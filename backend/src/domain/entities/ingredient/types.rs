@@ -9,6 +9,12 @@ use super::errors::ValidationError;
 #[sqlx(transparent)]
 pub struct IngredientName(pub String);
 
+impl std::fmt::Display for IngredientName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 impl TryFrom<String> for IngredientName {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -23,12 +29,6 @@ impl TryFrom<&str> for IngredientName {
     type Error = ValidationError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         Self::try_from(value.to_string())
-    }
-}
-
-impl ToString for IngredientName {
-    fn to_string(&self) -> String {
-        self.0.clone()
     }
 }
 
@@ -53,9 +53,9 @@ impl TryFrom<&str> for IngredientDescription {
     }
 }
 
-impl ToString for IngredientDescription {
-    fn to_string(&self) -> String {
-        self.0.clone()
+impl std::fmt::Display for IngredientDescription {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 

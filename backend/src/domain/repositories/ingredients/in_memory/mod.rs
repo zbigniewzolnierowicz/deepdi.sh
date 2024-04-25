@@ -22,10 +22,12 @@ impl IngredientRepository for InMemoryIngredientRepository {
         })?;
 
         if lock.iter().any(|(id, _)| id == &ingredient.id) {
+            tracing::error!("The ingredient with ID {} already exists.", ingredient.id);
             return Err(IngredientRepositoryError::Conflict("id".to_string()));
         };
 
         if lock.iter().any(|(_id, x)| x.name == ingredient.name) {
+            tracing::error!("The ingredient with name {} already exists.", ingredient.name);
             return Err(IngredientRepositoryError::Conflict("name".to_string()));
         };
 
