@@ -1,15 +1,14 @@
-use sqlx::PgPool;
-
 use super::*;
-use crate::domain::entities::ingredient::types::{
-    IngredientDescription, IngredientName, WhichDiets,
+use crate::domain::entities::ingredient::{
+    errors::ValidationError,
+    types::{IngredientDescription, IngredientName, WhichDiets},
 };
 
 use pretty_assertions::assert_eq;
 
-#[sqlx::test]
-async fn insert_ingredient_succeeds(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn insert_ingredient_succeeds() {
+    let repo = InMemoryIngredientRepository::new();
 
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),
@@ -20,21 +19,14 @@ async fn insert_ingredient_succeeds(pool: PgPool) {
     .await
     .unwrap();
 
-    let ingredient = sqlx::query_as!(
-        IngredientModel,
-        "SELECT id, name, description, diet_friendly FROM ingredients WHERE id = $1",
-        Uuid::from_u128(1)
-    )
-    .fetch_all(&pool)
-    .await
-    .unwrap();
-
+    let lock = repo.0.lock().unwrap();
+    let ingredient: Vec<_> = lock.values().collect();
     assert_eq!(ingredient.len(), 1);
 }
 
-#[sqlx::test]
-async fn insert_ingredient_that_already_exists_fails_id(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn insert_ingredient_that_already_exists_fails_id() {
+    let repo = InMemoryIngredientRepository::new();
 
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),
@@ -63,9 +55,9 @@ async fn insert_ingredient_that_already_exists_fails_id(pool: PgPool) {
     };
 }
 
-#[sqlx::test]
-async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn insert_ingredient_that_already_exists_fails_name() {
+    let repo = InMemoryIngredientRepository::new();
 
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),
@@ -94,9 +86,9 @@ async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
     };
 }
 
-#[sqlx::test]
-async fn get_by_id_returns_ingredient(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn get_by_id_returns_ingredient() {
+    let repo = InMemoryIngredientRepository::new();
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
@@ -114,9 +106,9 @@ async fn get_by_id_returns_ingredient(pool: PgPool) {
     );
 }
 
-#[sqlx::test]
-async fn get_by_id_returns_error_when_missing(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn get_by_id_returns_error_when_missing() {
+    let repo = InMemoryIngredientRepository::new();
 
     let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
 
@@ -128,9 +120,9 @@ async fn get_by_id_returns_error_when_missing(pool: PgPool) {
     }
 }
 
-#[sqlx::test]
-async fn get_all_returns_all_ingredients(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn get_all_returns_all_ingredients() {
+    let repo = InMemoryIngredientRepository::new();
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
@@ -150,9 +142,10 @@ async fn get_all_returns_all_ingredients(pool: PgPool) {
     .unwrap();
 
     let mut result = repo.get_all().await.unwrap();
-    result.sort_by_key(|x| x.id);
 
     assert_eq!(result.len(), 2);
+
+    result.sort_by_key(|x| x.id);
 
     for (index, entry) in result.iter().enumerate() {
         let index = index + 1;
@@ -169,17 +162,17 @@ async fn get_all_returns_all_ingredients(pool: PgPool) {
     }
 }
 
-#[sqlx::test]
-async fn get_all_returns_empty_vec(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn get_all_returns_empty_vec() {
+    let repo = InMemoryIngredientRepository::new();
     let result = repo.get_all().await.unwrap();
 
     assert_eq!(result, vec![]);
 }
 
-#[sqlx::test]
-async fn updating_an_ingredient_success(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn updating_an_ingredient_success() {
+    let repo = InMemoryIngredientRepository::new();
 
     let input = Ingredient {
         id: Uuid::from_u128(1),
@@ -209,9 +202,9 @@ async fn updating_an_ingredient_success(pool: PgPool) {
     )
 }
 
-#[sqlx::test]
-async fn updating_with_empty_changeset_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn updating_with_empty_changeset_fails() {
+    let repo = InMemoryIngredientRepository::new();
 
     let input = Ingredient {
         id: Uuid::from_u128(1),
@@ -234,9 +227,9 @@ async fn updating_with_empty_changeset_fails(pool: PgPool) {
     };
 }
 
-#[sqlx::test]
-async fn updating_a_missing_file_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
+#[tokio::test]
+async fn updating_a_missing_file_fails() {
+    let repo = InMemoryIngredientRepository::new();
 
     let error = repo
         .update(

@@ -11,7 +11,7 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use axum_tracing_opentelemetry::middleware::{OtelInResponseLayer, OtelAxumLayer};
+use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use color_eyre::Result;
 use sqlx::PgPool;
 
