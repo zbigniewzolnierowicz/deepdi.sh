@@ -18,6 +18,7 @@ pub trait IngredientRepository: Send + Sync + 'static {
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, IngredientRepositoryError>;
+    async fn delete(&self, id: Uuid) -> Result<(), IngredientRepositoryError>;
 }
 
 pub type IngredientRepositoryService = Arc<Box<dyn IngredientRepository>>;

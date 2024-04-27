@@ -3,13 +3,12 @@ use crate::domain::entities::ingredient::{
 };
 use async_trait::async_trait;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use regex::Regex;
-use sqlx::PgPool;
+use sqlx::{postgres::PgDatabaseError, PgPool, error::Error as SQLXError};
 use uuid::Uuid;
 
 use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
-pub struct PostgresIngredientRepository(pub PgPool, Regex);
+pub struct PostgresIngredientRepository(pub PgPool);
 
 #[async_trait]
 impl IngredientRepository for PostgresIngredientRepository {
@@ -44,22 +43,24 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_one(&self.0)
         .await
         .map_err(|e| match e {
-            sqlx::error::Error::Database(dberror) if dberror.is_unique_violation() => {
-                let constraint = dberror.constraint().unwrap_or_default().to_string();
+            SQLXError::Database(dberror) if dberror.is_unique_violation() => {
+                let db = dberror.try_downcast_ref::<PgDatabaseError>();
 
-                if let Some(captures) = self.1.captures(&constraint) {
-                    let field = captures.name("field");
-                    let id = captures.name("pkey");
-
-                    if let Some(field) = field {
-                        IngredientRepositoryError::Conflict(field.as_str().to_string())
-                    } else if id.is_some() {
-                        IngredientRepositoryError::Conflict("id".to_string())
+                if let Some(db) = db {
+                    if let Some(field) = db.column() {
+                        IngredientRepositoryError::Conflict(field.to_string())
                     } else {
-                        IngredientRepositoryError::Conflict(constraint)
+                        // See below
+                        IngredientRepositoryError::Conflict("".to_string())
                     }
                 } else {
-                    IngredientRepositoryError::Conflict(constraint)
+                    // This is for when the downcast is for the wrong database (in case I want to
+                    // implement more)
+                    // This is horrifically ugly and should never hit production
+                    // but hehe silly :PPP
+                    IngredientRepositoryError::Conflict(
+                        dberror.constraint().unwrap_or_default().to_string(),
+                    )
                 }
             }
             _ => IngredientRepositoryError::UnknownError(e.into()),
@@ -85,7 +86,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_one(&self.0)
         .await
         .map_err(|e| match e {
-            sqlx::error::Error::RowNotFound => IngredientRepositoryError::NotFound(id),
+            SQLXError::RowNotFound => IngredientRepositoryError::NotFound(id),
             _ => IngredientRepositoryError::UnknownError(e.into()),
         })?;
 
@@ -212,14 +213,15 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         Ok(ingredient_to_update.try_into()?)
     }
+
+    async fn delete(&self, _id: Uuid) -> Result<(), IngredientRepositoryError> {
+        todo!()
+    }
 }
 
 impl PostgresIngredientRepository {
     pub fn new(pool: PgPool) -> Self {
-        #[allow(clippy::expect_used)]
-        let r = Regex::new(r"^(?:ingredients)_(?<field>.*)_(?:key)|(?<pkey>pkey)")
-            .expect("Error in regex creation - this shouldn't happen like, ever.");
-        Self(pool, r)
+        Self(pool)
     }
 }
 

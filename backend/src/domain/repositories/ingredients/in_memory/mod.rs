@@ -108,6 +108,10 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
         Ok(ingredient.clone())
     }
+
+    async fn delete(&self, _id: Uuid) -> Result<(), IngredientRepositoryError> {
+        todo!()
+    }
 }
 
 impl InMemoryIngredientRepository {
