@@ -10,7 +10,7 @@ use opentelemetry_sdk::{
 };
 use tracing::Subscriber;
 use tracing_opentelemetry::OpenTelemetryLayer;
-use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, registry::LookupSpan};
+use tracing_subscriber::{layer::SubscriberExt, registry::LookupSpan, EnvFilter, Layer};
 
 pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
 where
@@ -53,15 +53,41 @@ where
                 .with_exporter(exporter)
                 .with_trace_config(
                     opentelemetry_sdk::trace::config()
-                        .with_resource(otel_rsrc)
+                        .with_resource(otel_rsrc.clone())
                         .with_sampler(Sampler::AlwaysOn),
                 )
                 .install_batch(opentelemetry_sdk::runtime::Tokio)?,
         ))
 }
+pub fn build_loglevel_filter_layer() -> tracing_subscriber::filter::EnvFilter {
+    // filter what is output on log (fmt)
+    // std::env::set_var("RUST_LOG", "warn,otel::tracing=info,otel=debug");
+    std::env::set_var(
+        "RUST_LOG",
+        format!(
+            // `otel::tracing` should be a level info to emit opentelemetry trace & span
+            // `otel::setup` set to debug to log detected resources, configuration read and infered
+            "{},otel::tracing=trace,otel=debug,h2=info",
+            std::env::var("RUST_LOG")
+                .or_else(|_| std::env::var("OTEL_LOG_LEVEL"))
+                .unwrap_or_else(|_| "info".to_string())
+        ),
+    );
+    EnvFilter::from_default_env()
+}
+
+pub fn build_logger_text<S>() -> Box<dyn Layer<S> + Send + Sync + 'static>
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+{
+    Box::new(tracing_logfmt_otel::layer())
+}
 
 pub fn init_tracing() -> color_eyre::Result<()> {
-    let subscriber = tracing_subscriber::registry().with(build_otel_layer()?);
+    let subscriber = tracing_subscriber::registry()
+        .with(build_otel_layer()?)
+        .with(build_loglevel_filter_layer())
+        .with(build_logger_text());
     tracing::subscriber::set_global_default(subscriber)?;
     Ok(())
 }
