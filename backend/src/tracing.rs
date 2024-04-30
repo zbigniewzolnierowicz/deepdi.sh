@@ -1,22 +1,22 @@
+#![allow(clippy::unwrap_used)]
 use std::time::Duration;
 
 use opentelemetry::{propagation::TextMapCompositePropagator, KeyValue};
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::{
+    metrics::reader::{DefaultAggregationSelector, DefaultTemporalitySelector},
     propagation::{BaggagePropagator, TraceContextPropagator},
     resource::{EnvResourceDetector, SdkProvidedResourceDetector, TelemetryResourceDetector},
+    runtime,
     trace::{Sampler, Tracer},
     Resource,
 };
 use tracing::Subscriber;
-use tracing_opentelemetry::OpenTelemetryLayer;
+use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 use tracing_subscriber::{layer::SubscriberExt, registry::LookupSpan, EnvFilter, Layer};
 
-pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let otel_rsrc = Resource::from_detectors(
+fn build_resource() -> Resource {
+    Resource::from_detectors(
         Duration::from_secs(3),
         vec![
             Box::new(SdkProvidedResourceDetector),
@@ -33,7 +33,30 @@ where
             opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
             "0.0.0",
         ),
-    ]));
+    ]))
+}
+
+fn build_metrics() -> opentelemetry_sdk::metrics::SdkMeterProvider {
+    let exporter = opentelemetry_otlp::new_exporter()
+        .tonic()
+        .with_endpoint("grpc://localhost:4317");
+
+    opentelemetry_otlp::new_pipeline()
+        .metrics(runtime::Tokio)
+        .with_exporter(exporter)
+        .with_period(std::time::Duration::from_secs(3))
+        .with_resource(build_resource())
+        .with_aggregation_selector(DefaultAggregationSelector::new())
+        .with_temporality_selector(DefaultTemporalitySelector::new())
+        .build()
+        .unwrap()
+}
+
+pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+{
+    let otel_rsrc = build_resource();
 
     let composite_propagator = TextMapCompositePropagator::new(vec![
         Box::new(TraceContextPropagator::new()),
@@ -86,6 +109,7 @@ where
 pub fn init_tracing() -> color_eyre::Result<()> {
     let subscriber = tracing_subscriber::registry()
         .with(build_otel_layer()?)
+        .with(MetricsLayer::new(build_metrics()))
         .with(build_loglevel_filter_layer())
         .with(build_logger_text());
     tracing::subscriber::set_global_default(subscriber)?;

@@ -33,6 +33,7 @@ opentelemetry-stdout = { version = "0.3.0", features = ["metrics", "trace"] }
 opentelemetry-otlp = { version = "0.15.0", features = ["logs", "trace", "metrics"] }
 opentelemetry-semantic-conventions = "0.14.0"
 tracing-logfmt-otel = "0.2.0"
+opentelemetry_api = { version = "0.20.0", features = ["logs", "metrics"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"

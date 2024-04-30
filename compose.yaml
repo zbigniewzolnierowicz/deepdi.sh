@@ -16,6 +16,7 @@ services:
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_PORT=6379
+  # TODO: Replace with grafana + otel_collector
   jaeger:
     image: jaegertracing/all-in-one:1.56 
     restart: always
