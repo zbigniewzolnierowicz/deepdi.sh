@@ -251,3 +251,32 @@ async fn updating_a_missing_file_fails() {
         _ => unreachable!(),
     }
 }
+
+#[tokio::test]
+async fn deleting_works() {
+    let repo = InMemoryIngredientRepository::new();
+
+    let input = Ingredient {
+        id: Uuid::from_u128(1),
+        name: "Ingredient name 1".try_into().unwrap(),
+        description: "Ingredient description 1".try_into().unwrap(),
+        diet_friendly: WhichDiets(vec![]),
+    };
+
+    let insert_result = repo.insert(input).await.unwrap();
+
+    match repo.delete(insert_result.id).await {
+        Ok(()) => {}
+        Err(_) => unreachable!(),
+    };
+}
+
+#[tokio::test]
+async fn deleting_nonexistent_ingredient_errors() {
+    let repo = InMemoryIngredientRepository::new();
+
+    match repo.delete(Uuid::from_u128(0)).await {
+        Err(IngredientRepositoryError::NotFound(id)) => assert_eq!(id, Uuid::from_u128(0)),
+        _ => unreachable!(),
+    };
+}

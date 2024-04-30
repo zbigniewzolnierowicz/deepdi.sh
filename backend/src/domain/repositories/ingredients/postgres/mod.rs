@@ -1,14 +1,26 @@
+use std::{collections::HashMap, sync::OnceLock};
+
 use crate::domain::entities::ingredient::{
     errors::ValidationError, Ingredient, IngredientChangeset, IngredientModel,
 };
 use async_trait::async_trait;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use sqlx::{postgres::PgDatabaseError, PgPool, error::Error as SQLXError};
+use sqlx::{error::Error as SQLXError, PgPool};
 use uuid::Uuid;
 
 use super::{base::IngredientRepository, errors::IngredientRepositoryError};
 
 pub struct PostgresIngredientRepository(pub PgPool);
+
+/// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
+/// This function maps
+fn constraint_to_field(field: &str) -> &str {
+    static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
+    let m = HASHMAP.get_or_init(|| {
+        HashMap::from_iter([("ingredients_name_key", "name"), ("ingredients_pkey", "id")])
+    });
+    m.get(field).unwrap_or(&field)
+}
 
 #[async_trait]
 impl IngredientRepository for PostgresIngredientRepository {
@@ -44,24 +56,9 @@ impl IngredientRepository for PostgresIngredientRepository {
         .await
         .map_err(|e| match e {
             SQLXError::Database(dberror) if dberror.is_unique_violation() => {
-                let db = dberror.try_downcast_ref::<PgDatabaseError>();
-
-                if let Some(db) = db {
-                    if let Some(field) = db.column() {
-                        IngredientRepositoryError::Conflict(field.to_string())
-                    } else {
-                        // See below
-                        IngredientRepositoryError::Conflict("".to_string())
-                    }
-                } else {
-                    // This is for when the downcast is for the wrong database (in case I want to
-                    // implement more)
-                    // This is horrifically ugly and should never hit production
-                    // but hehe silly :PPP
-                    IngredientRepositoryError::Conflict(
-                        dberror.constraint().unwrap_or_default().to_string(),
-                    )
-                }
+                IngredientRepositoryError::Conflict(
+                    constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
+                )
             }
             _ => IngredientRepositoryError::UnknownError(e.into()),
         })?;
@@ -214,8 +211,19 @@ impl IngredientRepository for PostgresIngredientRepository {
         Ok(ingredient_to_update.try_into()?)
     }
 
-    async fn delete(&self, _id: Uuid) -> Result<(), IngredientRepositoryError> {
-        todo!()
+    #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Delete an ingredient", skip(self))]
+    async fn delete(&self, id: Uuid) -> Result<(), IngredientRepositoryError> {
+        let ingredient_to_delete = self.get_by_id(id).await?;
+
+        sqlx::query!(
+            "DELETE FROM ingredients WHERE id = $1",
+            ingredient_to_delete.id
+        )
+        .execute(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+
+        Ok(())
     }
 }
 

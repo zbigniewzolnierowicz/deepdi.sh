@@ -7,6 +7,8 @@ use crate::domain::entities::ingredient::types::{
 
 use pretty_assertions::assert_eq;
 
+// TODO: rewrite to use testcontainers
+
 #[sqlx::test]
 async fn insert_ingredient_succeeds(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool.clone());
@@ -88,7 +90,7 @@ async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
 
     match result {
         IngredientRepositoryError::Conflict(fieldname) => {
-            assert_eq!(fieldname, "name");
+            assert_eq!(fieldname, "name".to_string());
         }
         _ => unreachable!(),
     };
@@ -257,4 +259,33 @@ async fn updating_a_missing_file_fails(pool: PgPool) {
         }
         _ => unreachable!(),
     }
+}
+
+#[sqlx::test]
+async fn deleting_works(pool: PgPool) {
+    let repo = PostgresIngredientRepository::new(pool.clone());
+
+    let input = Ingredient {
+        id: Uuid::from_u128(1),
+        name: "Ingredient name 1".try_into().unwrap(),
+        description: "Ingredient description 1".try_into().unwrap(),
+        diet_friendly: WhichDiets(vec![]),
+    };
+
+    let insert_result = repo.insert(input).await.unwrap();
+
+    match repo.delete(insert_result.id).await {
+        Ok(()) => {}
+        Err(_) => unreachable!(),
+    };
+}
+
+#[sqlx::test]
+async fn deleting_nonexistent_ingredient_errors(pool: PgPool) {
+    let repo = PostgresIngredientRepository::new(pool.clone());
+
+    match repo.delete(Uuid::from_u128(0)).await {
+        Err(IngredientRepositoryError::NotFound(id)) => assert_eq!(id, Uuid::from_u128(0)),
+        _ => unreachable!(),
+    };
 }
