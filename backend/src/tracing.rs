@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use std::time::Duration;
 
 use opentelemetry::{propagation::TextMapCompositePropagator, KeyValue};
@@ -36,20 +35,19 @@ fn build_resource() -> Resource {
     ]))
 }
 
-fn build_metrics() -> opentelemetry_sdk::metrics::SdkMeterProvider {
+fn build_metrics() -> color_eyre::Result<opentelemetry_sdk::metrics::SdkMeterProvider> {
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
         .with_endpoint("grpc://localhost:4317");
 
-    opentelemetry_otlp::new_pipeline()
+    Ok(opentelemetry_otlp::new_pipeline()
         .metrics(runtime::Tokio)
         .with_exporter(exporter)
         .with_period(std::time::Duration::from_secs(3))
         .with_resource(build_resource())
         .with_aggregation_selector(DefaultAggregationSelector::new())
         .with_temporality_selector(DefaultTemporalitySelector::new())
-        .build()
-        .unwrap()
+        .build()?)
 }
 
 pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
@@ -109,7 +107,7 @@ where
 pub fn init_tracing() -> color_eyre::Result<()> {
     let subscriber = tracing_subscriber::registry()
         .with(build_otel_layer()?)
-        .with(MetricsLayer::new(build_metrics()))
+        .with(MetricsLayer::new(build_metrics()?))
         .with(build_loglevel_filter_layer())
         .with(build_logger_text());
     tracing::subscriber::set_global_default(subscriber)?;
