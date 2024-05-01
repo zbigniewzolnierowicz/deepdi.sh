@@ -72,6 +72,16 @@ impl From<Ingredient> for IngredientModel {
     }
 }
 
+impl From<IngredientModel> for common::IngredientDTO {
+    fn from(value: IngredientModel) -> Self {
+        Self {
+            id: value.id,
+            name: value.name.to_string(),
+            description: value.description.to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct IngredientChangeset {
     pub name: Option<IngredientName>,

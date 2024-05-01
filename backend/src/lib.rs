@@ -2,5 +2,5 @@
 
 pub mod api;
 pub mod configuration;
-mod domain;
+pub mod domain;
 pub mod tracing;

@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
+use serde::{Deserialize, Serialize};
 use shrinkwraprs::Shrinkwrap;
 use strum::{Display, EnumString, VariantNames};
 
 use super::errors::ValidationError;
 
-#[derive(Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
 #[sqlx(transparent)]
 pub struct IngredientName(pub String);
 
@@ -32,7 +33,7 @@ impl TryFrom<&str> for IngredientName {
     }
 }
 
-#[derive(Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
 #[sqlx(transparent)]
 pub struct IngredientDescription(pub String);
 
@@ -59,7 +60,19 @@ impl std::fmt::Display for IngredientDescription {
     }
 }
 
-#[derive(VariantNames, sqlx::Type, EnumString, Display, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(
+    Serialize,
+    Deserialize,
+    VariantNames,
+    sqlx::Type,
+    EnumString,
+    Display,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Copy,
+)]
 pub enum DietFriendly {
     Vegan,
     Vegetarian,
@@ -81,7 +94,9 @@ impl TryFrom<String> for DietFriendly {
     }
 }
 
-#[derive(Shrinkwrap, sqlx::Type, sqlx::FromRow, PartialEq, Eq, Clone, Debug)]
+#[derive(
+    Serialize, Deserialize, Shrinkwrap, sqlx::Type, sqlx::FromRow, PartialEq, Eq, Clone, Debug,
+)]
 pub struct WhichDiets(pub Vec<DietFriendly>);
 
 impl From<Vec<String>> for WhichDiets {

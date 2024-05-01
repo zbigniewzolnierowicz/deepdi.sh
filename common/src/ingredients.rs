@@ -12,7 +12,7 @@ pub struct CreateIngredientDTO {
     pub diet_friendly: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
+#[derive(Serialize, Deserialize, Debug, ToSchema, TS, PartialEq, Eq)]
 #[ts(export)]
 pub struct IngredientDTO {
     pub id: Uuid,

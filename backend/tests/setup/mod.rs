@@ -8,22 +8,30 @@ use tokio::net::TcpListener;
 
 pub struct TestApp {
     /// We are storing this, because if this goes out of scope, the container will be cleaned up.
-    _db_image: ContainerAsync<Postgres>,
+    _db: ContainerAsync<Postgres>,
     pub addr: SocketAddr,
+    pub db: PgPool,
 }
 
 impl TestApp {
     pub async fn new() -> Self {
-        let node = Postgres::default().start().await;
+        let username = "recipes";
+        let password = "recipes";
+        let database = "recipes";
 
-        dbg!(node.id());
+        let node = Postgres::default()
+            .with_user(username)
+            .with_password(password)
+            .with_db_name(database)
+            .start()
+            .await;
 
         let db_opts = PgConnectOptions::new()
             .host(&node.get_host().await.to_string())
             .port(node.get_host_port_ipv4(5432).await)
-            .username("postgres")
-            .password("postgres")
-            .database("postgres");
+            .username(username)
+            .password(password)
+            .database(database);
 
         let db: PgPool = PgPool::connect_with(db_opts).await.unwrap();
 
@@ -33,7 +41,7 @@ impl TestApp {
         let addr = listener.local_addr().unwrap();
 
         let app = AppBuilder::new()
-            .with_postgres_database(db)
+            .with_postgres_database(db.clone())
             .build()
             .unwrap();
 
@@ -42,8 +50,13 @@ impl TestApp {
         });
 
         TestApp {
-            _db_image: node,
+            _db: node,
             addr,
+            db,
         }
+    }
+
+    pub fn get_base(&self, rest: &str) -> String {
+        format!("http://{}/{}", self.addr, rest)
     }
 }
