@@ -26,11 +26,11 @@ fn build_resource() -> Resource {
     .merge(&mut Resource::new(vec![
         KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_NAME,
-            "backend",
+            env!("CARGO_PKG_NAME"),
         ),
         KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
-            "0.0.0",
+            env!("CARGO_PKG_VERSION"),
         ),
     ]))
 }
