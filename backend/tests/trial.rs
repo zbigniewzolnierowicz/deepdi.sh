@@ -2,13 +2,9 @@ mod setup;
 
 #[tokio::test]
 async fn testing_test() {
-    let addr = setup::setup().await;
+    let app = setup::TestApp::new().await;
 
-    let client = reqwest::Client::builder().build().unwrap();
-
-    let res = client
-        .get(format!("http://localhost:{}/ingredient", addr.port()))
-        .send()
+    let res = reqwest::get(format!("http://localhost:{}/ingredient", app.addr.port()))
         .await
         .unwrap();
 
