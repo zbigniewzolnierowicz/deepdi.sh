@@ -8,5 +8,7 @@ async fn testing_test() {
         .await
         .unwrap();
 
-    assert_eq!(res.text().await.unwrap(), "[]");
+    let body = res.json::<Vec<()>>().await.unwrap();
+
+    assert_eq!(body, vec![]);
 }
