@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use backend::api::AppBuilder;
-use sqlx::PgPool;
+use sqlx::{postgres::PgConnectOptions, PgPool};
 use testcontainers::runners::AsyncRunner;
 use testcontainers_modules::postgres::Postgres;
 use tokio::net::TcpListener;
@@ -9,13 +9,16 @@ use tokio::net::TcpListener;
 async fn db_setup() -> PgPool {
     let node = Postgres::default().start().await;
 
-    // prepare connection string
-    let connection_string = &format!(
-        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
-        node.get_host_port_ipv4(5432).await
-    );
+    dbg!(node.id());
 
-    let db: PgPool = PgPool::connect(connection_string).await.unwrap();
+    let db_opts = PgConnectOptions::new()
+        .host(&node.get_host().await.to_string())
+        .port(node.get_host_port_ipv4(5432).await)
+        .username("postgres")
+        .password("postgres")
+        .database("postgres");
+
+    let db: PgPool = PgPool::connect_with(db_opts).await.unwrap();
 
     sqlx::migrate!().run(&db).await.unwrap();
 
@@ -28,8 +31,8 @@ pub async fn setup() -> SocketAddr {
     let pool = db_setup().await;
 
     // A check for checking if the database *actually* connected
-    let res = sqlx::query!("SELECT 1 as test").fetch_one(&pool).await.unwrap();
-    dbg!(res);
+    let res = sqlx::query!("SELECT 1 as test").fetch_one(&pool).await;
+    dbg!(res.unwrap());
 
     tokio::spawn(async move {
         let app = AppBuilder::new()
