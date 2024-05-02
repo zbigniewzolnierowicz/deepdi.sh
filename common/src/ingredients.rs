@@ -18,6 +18,7 @@ pub struct IngredientDTO {
     pub id: Uuid,
     pub name: String,
     pub description: String,
+    pub diet_friendly: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, TS)]

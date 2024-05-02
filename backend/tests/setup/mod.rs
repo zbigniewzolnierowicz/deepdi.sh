@@ -8,7 +8,7 @@ use tokio::net::TcpListener;
 
 pub struct TestApp {
     /// We are storing this, because if this goes out of scope, the container will be cleaned up.
-    _db: ContainerAsync<Postgres>,
+    _db_container: ContainerAsync<Postgres>,
     pub addr: SocketAddr,
     pub db: PgPool,
 }
@@ -50,7 +50,7 @@ impl TestApp {
         });
 
         TestApp {
-            _db: node,
+            _db_container: node,
             addr,
             db,
         }

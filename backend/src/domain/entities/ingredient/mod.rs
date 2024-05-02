@@ -78,6 +78,7 @@ impl From<IngredientModel> for common::IngredientDTO {
             id: value.id,
             name: value.name.to_string(),
             description: value.description.to_string(),
+            diet_friendly: value.diet_friendly.into(),
         }
     }
 }

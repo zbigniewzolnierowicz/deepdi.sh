@@ -35,10 +35,7 @@ pub async fn get_ingredient_by_id_route(
     }): State<AppState>,
 ) -> axum::response::Result<Json<IngredientDTO>> {
     let result = get_ingredient_by_id(ingredient_repository, ingredient_id).await?;
+    let result: IngredientDTO = (&result).into();
 
-    Ok(Json(IngredientDTO {
-        id: result.id,
-        name: result.name.to_string(),
-        description: result.description.to_string(),
-    }))
+    Ok(Json(result))
 }
