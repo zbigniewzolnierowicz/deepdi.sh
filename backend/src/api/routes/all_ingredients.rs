@@ -23,6 +23,17 @@ impl IntoResponse for GetAllIngredientsError {
     }
 }
 
+impl From<Ingredient> for IngredientDTO {
+    fn from(value: Ingredient) -> Self {
+        Self {
+            id: value.id,
+            name: value.name.to_string(),
+            description: value.description.to_string(),
+            diet_friendly: value.diet_friendly.clone().into(),
+        }
+    }
+}
+
 impl From<&Ingredient> for IngredientDTO {
     fn from(value: &Ingredient) -> Self {
         Self {

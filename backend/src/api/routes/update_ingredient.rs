@@ -48,7 +48,6 @@ pub async fn update_ingredient_route(
     Json(body): Json<UpdateIngredientDTO>,
 ) -> Result<Json<IngredientDTO>, UpdateIngredientError> {
     let result = update_ingredient(ingredient_repository, ingredient_id, &body.into()).await?;
-    let result: IngredientDTO = (&result).into();
 
-    Ok(Json(result))
+    Ok(Json(result.into()))
 }

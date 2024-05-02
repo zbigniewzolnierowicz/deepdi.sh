@@ -127,6 +127,12 @@ impl InMemoryIngredientRepository {
     }
 }
 
+impl Default for InMemoryIngredientRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl From<HashMap<Uuid, Ingredient>> for InMemoryIngredientRepository {
     fn from(value: HashMap<Uuid, Ingredient>) -> Self {
         Self(value.into())

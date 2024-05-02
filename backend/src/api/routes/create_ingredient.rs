@@ -36,7 +36,6 @@ pub async fn create_ingredient_route(
         diet_friendly: body.diet_friendly.unwrap_or_default(),
     };
     let result = create_ingredient(ingredient_repository, &input).await?;
-    let result: IngredientDTO = (&result).into();
 
-    Ok(Json(result))
+    Ok(Json(result.into()))
 }
