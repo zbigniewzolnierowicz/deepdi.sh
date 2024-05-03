@@ -73,6 +73,7 @@ impl std::fmt::Display for IngredientDescription {
     Clone,
     Copy,
 )]
+#[strum(serialize_all = "snake_case")]
 pub enum DietFriendly {
     Vegan,
     Vegetarian,
@@ -82,10 +83,10 @@ pub enum DietFriendly {
 impl TryFrom<String> for DietFriendly {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        match value.as_str() {
-            "Vegan" => Ok(Self::Vegan),
-            "Vegetarian" => Ok(Self::Vegetarian),
-            "GlutenFree" => Ok(Self::GlutenFree),
+        match value.to_lowercase().as_str() {
+            "vegan" => Ok(Self::Vegan),
+            "vegetarian" => Ok(Self::Vegetarian),
+            "gluten_free" => Ok(Self::GlutenFree),
             _ => Err(ValidationError::DoesNotMatch(
                 "diet_friendly",
                 Self::VARIANTS,
