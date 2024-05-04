@@ -1,3 +1,5 @@
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
+
 use backend::{api::AppBuilder, configuration::Settings, tracing::init_tracing};
 use color_eyre::Result;
 

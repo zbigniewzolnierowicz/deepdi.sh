@@ -7,10 +7,23 @@ includes:
 
 tasks:
   default: task -l
-  prepare:
+  db:prepare:
     desc: "Prepare SQLx for offline"
     cmd: cargo sqlx prepare --workspace -- --tests
-  migrate:
+  db:migrate:
     desc: "Run every migration"
     cmds:
       - task: backend:migrate
+  db:check:
+    desc: "Check if SQLx prepared files are generated"
+    cmd: cargo sqlx prepare --workspace --check -- --tests
+  test:
+    desc: "Testing the application"
+    cmd: "cargo nextest run"
+    env:
+      SQLX_OFFLINE: true
+  test:coverage:
+    desc: "Test the application (with coverage)"
+    cmd: "cargo llvm-cov nextest"
+    env:
+      SQLX_OFFLINE: true

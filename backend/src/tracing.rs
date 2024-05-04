@@ -14,7 +14,7 @@ use tracing::Subscriber;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 use tracing_subscriber::{layer::SubscriberExt, registry::LookupSpan, EnvFilter, Layer};
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 fn build_resource() -> Resource {
     Resource::from_detectors(
         Duration::from_secs(3),
@@ -36,7 +36,7 @@ fn build_resource() -> Resource {
     ]))
 }
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 fn build_metrics() -> color_eyre::Result<opentelemetry_sdk::metrics::SdkMeterProvider> {
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
@@ -52,7 +52,7 @@ fn build_metrics() -> color_eyre::Result<opentelemetry_sdk::metrics::SdkMeterPro
         .build()?)
 }
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
@@ -84,7 +84,7 @@ where
         ))
 }
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 pub fn build_loglevel_filter_layer() -> tracing_subscriber::filter::EnvFilter {
     // filter what is output on log (fmt)
     // std::env::set_var("RUST_LOG", "warn,otel::tracing=info,otel=debug");
@@ -102,7 +102,7 @@ pub fn build_loglevel_filter_layer() -> tracing_subscriber::filter::EnvFilter {
     EnvFilter::from_default_env()
 }
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 pub fn build_logger_text<S>() -> Box<dyn Layer<S> + Send + Sync + 'static>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
@@ -110,7 +110,7 @@ where
     Box::new(tracing_logfmt_otel::layer())
 }
 
-#[cfg(not(tarpaulin_include))]
+#[cfg_attr(coverage_nightly, coverage(off))]
 pub fn init_tracing() -> color_eyre::Result<()> {
     let subscriber = tracing_subscriber::registry()
         .with(build_otel_layer()?)
