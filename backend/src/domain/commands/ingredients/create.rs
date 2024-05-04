@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::*;
-use crate::domain::repositories::ingredients::base::IngredientRepositoryService;
 use crate::domain::repositories::ingredients::errors::IngredientRepositoryError;
+use crate::domain::repositories::ingredients::IngredientRepositoryService;
 
 use self::errors::ValidationError;
 use self::types::{DietFriendly, WhichDiets};

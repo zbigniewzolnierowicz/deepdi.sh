@@ -9,11 +9,16 @@ use self::{
     types::{DietFriendly, IngredientDescription, IngredientName, WhichDiets},
 };
 
+// TODO: Consider ingredients that are variants of other ingredients
+// i.e.: soy sauce (dark, light)
+
+// TODO: Include possible substitutes
 #[derive(FromRow, Debug, Clone, PartialEq, Eq)]
 pub struct Ingredient {
     pub id: Uuid,
     pub name: IngredientName,
     pub description: IngredientDescription,
+    // TODO: change to diet_violations for easier filtering
     pub diet_friendly: WhichDiets,
 }
 

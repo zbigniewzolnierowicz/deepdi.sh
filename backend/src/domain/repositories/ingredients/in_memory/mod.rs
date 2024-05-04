@@ -8,7 +8,7 @@ use crate::domain::entities::ingredient::{
     errors::ValidationError, Ingredient, IngredientChangeset,
 };
 
-use super::{base::IngredientRepository, errors::IngredientRepositoryError};
+use super::{errors::IngredientRepositoryError, IngredientRepository};
 
 pub struct InMemoryIngredientRepository(pub Mutex<HashMap<Uuid, Ingredient>>);
 

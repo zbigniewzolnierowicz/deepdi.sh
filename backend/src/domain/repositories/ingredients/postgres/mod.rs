@@ -8,7 +8,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use sqlx::{error::Error as SQLXError, PgPool};
 use uuid::Uuid;
 
-use super::{base::IngredientRepository, errors::IngredientRepositoryError};
+use super::{errors::IngredientRepositoryError, IngredientRepository};
 
 pub struct PostgresIngredientRepository(pub PgPool);
 

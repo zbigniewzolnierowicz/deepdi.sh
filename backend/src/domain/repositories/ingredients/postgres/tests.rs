@@ -7,8 +7,6 @@ use crate::domain::entities::ingredient::types::{
 
 use pretty_assertions::assert_eq;
 
-// TODO: rewrite to use testcontainers
-
 #[sqlx::test]
 async fn insert_ingredient_succeeds(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool.clone());

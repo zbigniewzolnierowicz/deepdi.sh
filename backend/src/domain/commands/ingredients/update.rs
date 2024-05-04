@@ -2,9 +2,7 @@ use uuid::Uuid;
 
 use crate::domain::{
     entities::ingredient::{errors::ValidationError, Ingredient, IngredientChangeset},
-    repositories::ingredients::{
-        base::IngredientRepositoryService, errors::IngredientRepositoryError,
-    },
+    repositories::ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
 };
 
 #[derive(Debug)]

@@ -29,7 +29,11 @@ async fn inserting_ingredient_succeeds() {
         id: uuid::Uuid::from_u128(0),
         name: "Tomato".to_string(),
         description: "Tomatoes are very squishy".to_string(),
-        diet_friendly: vec!["vegan".to_string(), "vegetarian".to_string(), "gluten_free".to_string()],
+        diet_friendly: vec![
+            "vegan".to_string(),
+            "vegetarian".to_string(),
+            "gluten_free".to_string(),
+        ],
     };
 
     assert_eq!(body.name, expected_body.name);
@@ -77,5 +81,12 @@ async fn incorrect_diets_are_ignored() {
 
     let body = request.json::<IngredientDTO>().await.unwrap();
 
-    assert_eq!(body.diet_friendly, vec!["vegan".to_string(), "vegetarian".to_string(), "gluten_free".to_string()]);
+    assert_eq!(
+        body.diet_friendly,
+        vec![
+            "vegan".to_string(),
+            "vegetarian".to_string(),
+            "gluten_free".to_string()
+        ]
+    );
 }
