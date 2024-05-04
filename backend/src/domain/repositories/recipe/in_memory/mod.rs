@@ -20,11 +20,6 @@ impl RecipeRepository for InMemoryRecipeRepository {
             return Err(RecipeRepositoryError::Conflict("id".to_string()));
         };
 
-        if lock.iter().any(|(_id, x)| x.name == input.name) {
-            tracing::error!("The recipe with name {} already exists.", input.name);
-            return Err(RecipeRepositoryError::Conflict("name".to_string()));
-        };
-
         lock.insert(input.id, input.clone());
 
         Ok(input)
