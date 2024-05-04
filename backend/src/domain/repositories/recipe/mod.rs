@@ -9,6 +9,7 @@ use self::errors::RecipeRepositoryError;
 
 #[async_trait]
 pub trait RecipeRepository: Send + Sync + 'static {
+    // TODO: Include user information
     async fn insert(&self, input: Recipe) -> Result<Recipe, RecipeRepositoryError>;
 }
 

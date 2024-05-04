@@ -1,9 +1,10 @@
 use std::time::Duration;
 
+use color_eyre::Result;
 use opentelemetry::{propagation::TextMapCompositePropagator, KeyValue};
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::{
-    metrics::reader::{DefaultAggregationSelector, DefaultTemporalitySelector},
+    metrics::{reader::{DefaultAggregationSelector, DefaultTemporalitySelector}, SdkMeterProvider},
     propagation::{BaggagePropagator, TraceContextPropagator},
     resource::{EnvResourceDetector, SdkProvidedResourceDetector, TelemetryResourceDetector},
     runtime,
@@ -37,7 +38,7 @@ fn build_resource() -> Resource {
 }
 
 #[cfg_attr(coverage_nightly, coverage(off))]
-fn build_metrics() -> color_eyre::Result<opentelemetry_sdk::metrics::SdkMeterProvider> {
+fn build_metrics() -> Result<SdkMeterProvider> {
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
         .with_endpoint("grpc://localhost:4317");
@@ -53,7 +54,7 @@ fn build_metrics() -> color_eyre::Result<opentelemetry_sdk::metrics::SdkMeterPro
 }
 
 #[cfg_attr(coverage_nightly, coverage(off))]
-pub fn build_otel_layer<S>() -> color_eyre::Result<OpenTelemetryLayer<S, Tracer>>
+pub fn build_otel_layer<S>() -> Result<OpenTelemetryLayer<S, Tracer>>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
@@ -111,7 +112,7 @@ where
 }
 
 #[cfg_attr(coverage_nightly, coverage(off))]
-pub fn init_tracing() -> color_eyre::Result<()> {
+pub fn init_tracing() -> Result<()> {
     let subscriber = tracing_subscriber::registry()
         .with(build_otel_layer()?)
         .with(MetricsLayer::new(build_metrics()?))
