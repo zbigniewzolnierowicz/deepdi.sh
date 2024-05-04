@@ -32,3 +32,13 @@ tasks:
     cmd: "cargo llvm-cov nextest --lcov --output-path lcov.info"
     env:
       SQLX_OFFLINE: true
+  unused:
+    desc: "Check for unused dependencies"
+    cmds:
+      - task: backend:unused
+      - task: frontend:unused
+  frontend:unused:
+    desc: "Check for unused dependencies on the frontend"
+    cmd: "npx knip"
+    dir: "frontend"
+    ignore_error: true

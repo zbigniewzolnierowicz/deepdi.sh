@@ -29,11 +29,9 @@ tracing-opentelemetry = { version = "0.23", features = ["metrics"] }
 tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
 opentelemetry = "0.22"
 opentelemetry_sdk = { version = "0.22.0", default-features = false, features = ["trace", "metrics", "rt-tokio"] }
-opentelemetry-stdout = { version = "0.3.0", features = ["metrics", "trace"] }
 opentelemetry-otlp = { version = "0.15.0", features = ["logs", "trace", "metrics"] }
 opentelemetry-semantic-conventions = "0.14.0"
 tracing-logfmt-otel = "0.2.0"
-opentelemetry_api = { version = "0.20.0", features = ["logs", "metrics"] }
 testcontainers = { version = "0.16.6", features = ["blocking"] }
 testcontainers-modules = { version = "0.4.0", features = ["postgres"] }
 reqwest = { version = "0.12.4", features = ["json"] }

@@ -7,3 +7,7 @@ tasks:
     desc: "[BACKEND] run database migration"
     cmd: cargo sqlx migrate run
     dir: backend
+  unused:
+    desc: "[BACKEND] Check for unused dependencies"
+    cmd: "cargo +nightly udeps --all-targets"
+    ignore_error: true
