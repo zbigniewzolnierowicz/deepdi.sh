@@ -1,34 +1,22 @@
-use actix_session::storage::RedisSessionStore;
-use backend::telemetry;
-use secrecy::ExposeSecret;
-use sqlx::postgres::PgPoolOptions;
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
+
+use backend::{api::AppBuilder, configuration::Settings, tracing::init_tracing};
+use color_eyre::Result;
+
+use sqlx::PgPool;
 
 #[tokio::main]
-async fn main() -> color_eyre::eyre::Result<()> {
+async fn main() -> Result<()> {
     color_eyre::install()?;
 
-    let subscriber = telemetry::get_subscriber("recipes".into(), "info".into(), std::io::stdout);
-    telemetry::init_subscriber(subscriber);
+    // TODO: add more log points
+    init_tracing()?;
 
-    let config =
-        backend::configuration::Settings::get().expect("Could not read configuration file");
-    let connection_pool = PgPoolOptions::new().connect_lazy_with(config.database.with_db());
+    let config = Settings::get()?;
+    let db = PgPool::connect_lazy_with(config.database.with_db());
+    let app = AppBuilder::new().with_postgres_database(db).build()?;
+    let listener = config.application.get_listener().await?;
+    app.serve(listener).await?;
 
-    let redis_conn = config.session.get_redis_connection_string();
-    let session = RedisSessionStore::new(redis_conn.clone())
-        .await
-        .expect("Could not connect to redis");
-    let session_key = actix_web::cookie::Key::from(config.session.key.expose_secret().as_bytes());
-    let redis = redis::Client::open(redis_conn).expect("Could not connect to Redis");
-
-    let server = backend::run(
-        std::net::TcpListener::bind((config.application.host, config.application.port))?,
-        connection_pool,
-        session,
-        session_key,
-        redis,
-    )?;
-
-    server.await?;
     Ok(())
 }

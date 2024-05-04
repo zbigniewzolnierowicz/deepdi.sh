@@ -1,10 +1,9 @@
+use eyre::Context;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::{
-    postgres::{PgConnectOptions, PgSslMode},
-    ConnectOptions,
-};
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use tokio::net::TcpListener;
 
 #[derive(strum::Display, Debug)]
 pub enum Environment {
@@ -29,21 +28,21 @@ impl TryFrom<String> for Environment {
     }
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
     pub session: SessionSettings,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct DatabaseSettings {
     pub username: String,
     pub password: Secret<String>,
@@ -55,7 +54,7 @@ pub struct DatabaseSettings {
     pub require_ssl: bool,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct SessionSettings {
     pub key: Secret<String>,
     pub host: String,
@@ -68,14 +67,15 @@ pub struct SessionSettings {
 }
 
 impl Settings {
-    pub fn get() -> Result<Self, config::ConfigError> {
-        let base_path = std::env::current_dir().expect("Could not get current directory");
+    #[tracing::instrument("Getting configuration")]
+    pub fn get() -> color_eyre::Result<Self> {
+        let base_path = std::env::current_dir().wrap_err("Could not get current directory")?;
         let config_path = base_path.join("config");
 
         let environment: Environment = std::env::var("APP_ENV")
             .unwrap_or_else(|_| "dev".into())
             .try_into()
-            .expect("Failed to parse environment");
+            .map_err(|e| eyre::eyre!("{}", e))?;
 
         let env_config = format!("{}.yaml", environment);
 
@@ -88,15 +88,14 @@ impl Settings {
                     .separator("__"),
             )
             .build()?;
-        settings.try_deserialize::<Self>()
+        Ok(settings.try_deserialize::<Self>()?)
     }
 }
 
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db()
-            .database(&self.database_name)
-            .log_statements(tracing_log::log::LevelFilter::Trace)
+        self.without_db().database(&self.database_name)
+        // .log_statements(tracing_log::log::LevelFilter::Trace)
     }
 
     pub fn without_db(&self) -> PgConnectOptions {
@@ -127,5 +126,11 @@ impl SessionSettings {
             self.port
         )
         .to_string()
+    }
+}
+
+impl ApplicationSettings {
+    pub async fn get_listener(&self) -> color_eyre::Result<TcpListener> {
+        Ok(TcpListener::bind((self.host.clone(), self.port)).await?)
     }
 }

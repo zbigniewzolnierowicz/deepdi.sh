@@ -4,38 +4,37 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-actix-multipart = "0.6.1"
-actix-session = { git = "https://github.com/zbigniewzolnierowicz/actix-extras", features = ["redis-rs-session", "redis-rs-tls-session-rustls"] }
-actix-web = "4.5.1"
-bcrypt = "0.15.0"
-chrono = { version = "0.4.34", features = ["serde"] }
-color-eyre = "0.6.2"
+async-trait = "0.1.79"
+axum = { version = "0.7.5", features = ["multipart"] }
+color-eyre = "0.6.3"
 common = { version = "0.0.0", path = "../common" }
 config = "0.14.0"
-display_json = "0.2.1"
 eyre = "0.6.12"
-futures = "0.3.30"
-futures-util = "0.3.30"
-mime = "0.3.17"
-rayon = "1.8.1"
-redis = "0.24.0"
+regex = "1.10.4"
+rayon = "1.10.0"
 secrecy = { version = "0.8.0", features = ["serde"] }
-serde = { version = "1.0.196", features = ["derive"] }
-serde-aux = "4.4.0"
-serde_json = "1.0.113"
+serde = "1.0.197"
+serde-aux = "4.5.0"
+serde_json = "1.0.115"
 shrinkwraprs = "0.3.0"
-sqlx = { version = "0.7.3", features = ["runtime-tokio", "postgres", "uuid", "chrono", "tls-rustls"] }
+sqlx = { version = "0.7.4", features = ["runtime-tokio", "postgres", "tls-rustls", "uuid"] }
 strum = { version = "0.26.1", features = ["derive", "strum_macros"] }
 strum_macros = "0.26.1"
-thiserror = "1.0.57"
+thiserror = "1.0.58"
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
+uuid = { version = "1.8.0", features = ["v7", "serde"] }
+axum-tracing-opentelemetry = "0.18.0"
 tracing = "0.1.40"
-tracing-actix-web = { version = "0.7.9", features = ["opentelemetry_0_21"] }
-tracing-bunyan-formatter = "0.3.9"
-tracing-error = "0.2.0"
-tracing-log = "0.2.0"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter", "chrono", "serde"] }
-utoipa = { version = "4.2.0", features = ["actix_extras", "chrono"] }
-utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
-uuid = { version = "1.7.0", features = ["v4", "serde"] }
-validator = "0.16.1"
+tracing-opentelemetry = { version = "0.23", features = ["metrics"] }
+tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
+opentelemetry = "0.22"
+opentelemetry_sdk = { version = "0.22.0", default-features = false, features = ["trace", "metrics", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.15.0", features = ["logs", "trace", "metrics"] }
+opentelemetry-semantic-conventions = "0.14.0"
+tracing-logfmt-otel = "0.2.0"
+testcontainers = { version = "0.16.6", features = ["blocking"] }
+testcontainers-modules = { version = "0.4.0", features = ["postgres"] }
+reqwest = { version = "0.12.4", features = ["json"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.0"
