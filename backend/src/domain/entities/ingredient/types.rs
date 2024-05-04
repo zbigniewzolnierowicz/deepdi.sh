@@ -16,6 +16,7 @@ impl std::fmt::Display for IngredientName {
     }
 }
 
+// TODO: add doctest
 impl TryFrom<String> for IngredientName {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -37,6 +38,7 @@ impl TryFrom<&str> for IngredientName {
 #[sqlx(transparent)]
 pub struct IngredientDescription(pub String);
 
+// TODO: add doctest
 impl TryFrom<String> for IngredientDescription {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -100,6 +102,7 @@ impl TryFrom<String> for DietFriendly {
 )]
 pub struct WhichDiets(pub Vec<DietFriendly>);
 
+// TODO: add doctest
 impl From<Vec<String>> for WhichDiets {
     fn from(value: Vec<String>) -> Self {
         Self(

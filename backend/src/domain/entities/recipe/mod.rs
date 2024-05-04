@@ -10,7 +10,9 @@ pub struct Recipe {
     pub id: Uuid,
     pub name: String,
     pub description: String,
+    // TODO: add newtype for checking if the steps list is not empty
     pub steps: Vec<String>,
+    // TODO: add newtype for checking if the ingredients list is not empty
     pub ingredients: Vec<IngredientWithAmount>,
     pub time: HashMap<String, std::time::Duration>,
     pub servings: ServingsType,
