@@ -27,3 +27,8 @@ tasks:
     cmd: "cargo llvm-cov nextest"
     env:
       SQLX_OFFLINE: true
+  test:coverage:ci:
+    desc: "Test the application (with coverage)"
+    cmd: "cargo llvm-cov nextest --lcov --output-path lcov.info"
+    env:
+      SQLX_OFFLINE: true
