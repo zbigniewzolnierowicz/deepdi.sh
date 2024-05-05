@@ -1,5 +1,6 @@
 pub mod errors;
 pub mod in_memory;
+pub mod postgres;
 
 use crate::domain::entities::recipe::Recipe;
 use async_trait::async_trait;

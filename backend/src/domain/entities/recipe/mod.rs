@@ -1,6 +1,8 @@
 pub mod errors;
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use uuid::Uuid;
 
 use super::ingredient::Ingredient;
@@ -24,21 +26,23 @@ pub enum ServingsType {
     Exact(u16),
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, FromRow)]
 pub struct IngredientWithAmount {
     pub ingredient: Ingredient,
+    #[sqlx(json)]
     pub amount: IngredientUnit,
     pub notes: Option<String>,
     pub optional: bool,
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "tag")]
 pub enum IngredientUnit {
-    Mililiters(f64),
-    Grams(f64),
-    Teaspoons(f64),
-    Cup(f64),
-    Other(String, f64),
+    Mililiters { amount: f64 },
+    Grams { amount: f64 },
+    Teaspoons { amount: f64 },
+    Cup { amount: f64 },
+    Other { amount: f64, unit: String },
 }
 
 impl IngredientUnit {
@@ -47,10 +51,12 @@ impl IngredientUnit {
     /// ```rust
     /// use crate::backend::domain::entities::recipe::IngredientUnit;
     ///
-    /// assert_eq!(IngredientUnit::from_tablespoons(4.0), IngredientUnit::Teaspoons(12.0))
+    /// assert_eq!(IngredientUnit::from_tablespoons(4.0), IngredientUnit::Teaspoons { amount: 12.0 })
     /// ```
     pub fn from_tablespoons(tablespoons: f64) -> Self {
-        Self::Teaspoons(tablespoons * 3.0)
+        Self::Teaspoons {
+            amount: tablespoons * 3.0,
+        }
     }
 }
 
