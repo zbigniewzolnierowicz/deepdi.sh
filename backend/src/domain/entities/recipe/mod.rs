@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use super::ingredient::Ingredient;
+use super::ingredient::{Ingredient, IngredientModel};
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, FromRow)]
 pub struct Recipe {
     pub id: Uuid,
     pub name: String,
@@ -20,23 +20,22 @@ pub struct Recipe {
     pub servings: ServingsType,
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "tag")]
 pub enum ServingsType {
-    FromTo(u16, u16),
-    Exact(u16),
+    FromTo { from: u16, to: u16 },
+    Exact { value: u16 },
 }
 
-#[derive(PartialEq, Debug, Clone, FromRow)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct IngredientWithAmount {
     pub ingredient: Ingredient,
-    #[sqlx(json)]
     pub amount: IngredientUnit,
     pub notes: Option<String>,
     pub optional: bool,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "tag")]
 pub enum IngredientUnit {
     Mililiters { amount: f64 },
     Grams { amount: f64 },

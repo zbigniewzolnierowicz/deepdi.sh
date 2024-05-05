@@ -22,7 +22,7 @@ pub struct Ingredient {
     pub diet_friendly: WhichDiets,
 }
 
-#[derive(FromRow, Debug, Clone)]
+#[derive(FromRow, Debug, Clone, PartialEq, sqlx::Decode)]
 pub struct IngredientModel {
     pub id: Uuid,
     pub name: String,

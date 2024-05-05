@@ -19,7 +19,7 @@ pub fn recipe_fixture() -> Recipe {
             ("Prep time".to_string(), Duration::from_secs(15 * 60)),
             ("Cook time".to_string(), Duration::from_secs(10 * 60))
         ]),
-        servings: ServingsType::Exact(4),
+        servings: ServingsType::Exact { value: 4 },
         ingredients: vec![
             IngredientWithAmount {
                 ingredient: Ingredient {
@@ -54,138 +54,6 @@ pub fn recipe_fixture() -> Recipe {
                 notes: None,
                 optional: false
 
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(3),
-                    name: "Light soy sauce".try_into().unwrap(),
-                    description: "Soy sauce that is light".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian]),
-                },
-                amount: IngredientUnit::Cup { amount: (0.5) },
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(4),
-                    name: "Dark soy sauce".try_into().unwrap(),
-                    description: "Soy sauce that is dark".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian]),
-                },
-                amount: IngredientUnit::Cup { amount: (1.0) },
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(5),
-                    name: "Sugar".try_into().unwrap(),
-                    description: "Sugar description".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(2.0),
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(6),
-                    name: "Rice vinegar".try_into().unwrap(),
-                    description: "Vinegar made out of rice".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(2.0),
-                notes: Some("Or any other non-balsamic vinegar".to_string()),
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(7),
-                    name: "Rice vinegar".try_into().unwrap(),
-                    description: "Vinegar made out of rice".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(2.0),
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(8),
-                    name: "Vegetable stock".try_into().unwrap(),
-                    description: "Stock made out of vegetables".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::Cup { amount: (0.25) },
-                notes: Some("or water".to_string()),
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(9),
-                    name: "Vegetable stock".try_into().unwrap(),
-                    description: "Stock made out of vegetables".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::Cup { amount: (0.25) },
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(10),
-                    name: "Shaoxin wine".try_into().unwrap(),
-                    description: "Shaoxin wine description".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![]),
-                },
-                amount: IngredientUnit::from_tablespoons(2.0),
-                notes: Some("or dry cherry wine".to_string()),
-                optional: true
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(11),
-                    name: "Cornstarch".try_into().unwrap(),
-                    description: "Cornstarch desc".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(0.5),
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(12),
-                    name: "Sesame oil".try_into().unwrap(),
-                    description: "Oil made out of sesame".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(0.5),
-                notes: None,
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(13),
-                    name: "Peanut oil".try_into().unwrap(),
-                    description: "Oil made out of peanuts".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::from_tablespoons(2.5),
-                notes: Some("any oil will do".to_string()),
-                optional: false
-            },
-            IngredientWithAmount {
-                ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(14),
-                    name: "Ginger".try_into().unwrap(),
-                    description: "Spicy root".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
-                },
-                amount: IngredientUnit::Grams { amount: (75.0) },
-                notes: None,
-                optional: true
             },
         ],
         steps: vec![

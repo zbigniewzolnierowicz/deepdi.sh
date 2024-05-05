@@ -13,7 +13,7 @@ use super::{errors::IngredientRepositoryError, IngredientRepository};
 pub struct PostgresIngredientRepository(pub PgPool);
 
 /// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
-/// This function maps
+/// This function maps constraints to fields
 fn constraint_to_field(field: &str) -> &str {
     static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
     let m = HASHMAP.get_or_init(|| {

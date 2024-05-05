@@ -17,7 +17,7 @@ serde = "1.0.197"
 serde-aux = "4.5.0"
 serde_json = "1.0.115"
 shrinkwraprs = "0.3.0"
-sqlx = { version = "0.7.4", features = ["runtime-tokio", "postgres", "tls-rustls", "uuid"] }
+sqlx = { version = "0.7.4", features = ["runtime-tokio", "postgres", "tls-rustls", "uuid", "json", "chrono"] }
 strum = { version = "0.26.1", features = ["derive", "strum_macros"] }
 strum_macros = "0.26.1"
 thiserror = "1.0.58"
@@ -35,6 +35,7 @@ tracing-logfmt-otel = "0.2.0"
 testcontainers = { version = "0.16.6", features = ["blocking"] }
 testcontainers-modules = { version = "0.4.0", features = ["postgres"] }
 reqwest = { version = "0.12.4", features = ["json"] }
+chrono = { version = "0.4.38", features = ["serde"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"

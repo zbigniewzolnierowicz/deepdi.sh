@@ -1,20 +1,144 @@
 use async_trait::async_trait;
-use sqlx::PgPool;
+use sqlx::{Error as SQLXError, PgPool};
+use std::{collections::HashMap, sync::OnceLock};
 
-use crate::domain::entities::recipe::Recipe;
+use crate::domain::entities::recipe::{IngredientWithAmount, Recipe};
+use crate::domain::entities::ingredient::IngredientModel;
 
 use super::{errors::RecipeRepositoryError, RecipeRepository};
 
 pub struct PostgresRecipeRepository(pub PgPool);
 
+/// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
+/// This function maps constraints to fields
+fn constraint_to_field(field: &str) -> &str {
+    static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
+    let m = HASHMAP.get_or_init(|| {
+        HashMap::from_iter([("ingredients_name_key", "name"), ("ingredients_pkey", "id")])
+    });
+    m.get(field).unwrap_or(&field)
+}
+
+fn map_error_to_internal(e: SQLXError) -> RecipeRepositoryError {
+    match e {
+        SQLXError::Database(dberror) if dberror.is_unique_violation() => {
+            RecipeRepositoryError::Conflict(
+                constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
+            )
+        }
+        e => RecipeRepositoryError::UnknownError(e.into()),
+    }
+}
+
 #[async_trait]
 impl RecipeRepository for PostgresRecipeRepository {
-    async fn insert(
-        &self,
-        _input: Recipe,
-    ) -> Result<Recipe, RecipeRepositoryError> {
+    async fn insert(&self, input: Recipe) -> Result<Recipe, RecipeRepositoryError> {
+        let time = serde_json::to_value(&input.time)
+            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+
+        let servings = serde_json::to_value(&input.servings)
+            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+
+        let tx = self.0.begin().await.map_err(map_error_to_internal)?;
+
+        let result = sqlx::query!(
+            r#"INSERT INTO recipes
+            (id, name, description, steps, time, servings, metadata)
+            VALUES
+            ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id"#,
+            input.id,
+            input.name,
+            input.description,
+            &input.steps,
+            time,
+            servings,
+            serde_json::json!({})
+        )
+        .fetch_one(&self.0)
+        .await
+        .map_err(map_error_to_internal)?;
+
+        for ingredient in input.ingredients {
+            let amount = serde_json::to_value(ingredient.amount)
+                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+
+            sqlx::query!(
+                r#"
+                INSERT INTO ingredients_recipes
+                (recipe_id, ingredient_id, amount, notes, optional)
+                VALUES
+                ($1, $2, $3, $4, $5)
+                "#,
+                result.id,
+                ingredient.ingredient.id,
+                amount,
+                ingredient.notes,
+                ingredient.optional
+            )
+            .execute(&self.0)
+            .await
+            .map_err(map_error_to_internal)?;
+        }
+
+        tx.commit().await.map_err(map_error_to_internal)?;
+
+        let inserted = sqlx::query!(
+            r#"
+            SELECT
+            r.id,
+            r.name,
+            r.description,
+            r.steps,
+            r.time,
+            r.servings
+            FROM recipes AS r
+            JOIN ingredients_recipes AS ir ON r.id = ir.recipe_id
+            JOIN ingredients AS i ON ir.ingredient_id = i.id
+            WHERE r.id = $1
+            "#,
+            result.id
+        )
+        .fetch_one(&self.0)
+        .await
+        .map_err(map_error_to_internal)?;
+
+        let inserted_ingredients = sqlx::query_as!(
+            IngredientWithAmount,
+            r#"
+            SELECT
+            ir.amount,
+            ir.notes,
+            ir.optional,
+            (
+                i.id,
+                i.name,
+                i.description,
+                i.diet_friendly
+            ) as "ingredient!: IngredientModel"
+            FROM ingredients_recipes AS ir
+            JOIN ingredients AS i
+                ON i.id = ir.ingredient_id
+            WHERE ir.recipe_id = $1
+            "#,
+            result.id
+        )
+        .fetch_all(&self.0)
+        .await
+        .map_err(map_error_to_internal)?;
+
+        dbg!(&inserted);
+        dbg!(&inserted_ingredients);
+
         todo!();
     }
 }
 
-#[cfg(test)] mod tests;
+impl PostgresRecipeRepository {
+    fn new(pool: PgPool) -> Self {
+        Self(pool)
+    }
+}
+
+#[cfg(test)]
+mod tests;
