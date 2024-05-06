@@ -2,7 +2,7 @@ repos:
 - repo: local
   hooks:
     - id: sqlx-prepare-check
-      name: SQLX Prepare check
+      name: Check if the prepared queries are correct
       entry: task db:check
       language: system
       pass_filenames: false

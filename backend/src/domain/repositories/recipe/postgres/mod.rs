@@ -59,6 +59,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         .await
         .map_err(map_error_to_internal)?;
 
+        // TODO: Parallelize or turn into a single query somehow
         for ingredient in input.ingredients {
             let amount = serde_json::to_value(ingredient.amount)
                 .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
