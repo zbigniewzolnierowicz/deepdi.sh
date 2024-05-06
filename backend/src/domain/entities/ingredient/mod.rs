@@ -27,7 +27,7 @@ pub struct IngredientModel {
     pub id: Uuid,
     pub name: String,
     pub description: String,
-    pub diet_friendly: WhichDiets,
+    pub diet_friendly: Vec<String>,
 }
 
 impl TryFrom<&IngredientModel> for Ingredient {
@@ -37,7 +37,7 @@ impl TryFrom<&IngredientModel> for Ingredient {
             id: value.id,
             name: value.name.clone().try_into()?,
             description: value.description.clone().try_into()?,
-            diet_friendly: value.diet_friendly.clone(),
+            diet_friendly: value.diet_friendly.clone().into(),
         })
     }
 }
@@ -72,7 +72,7 @@ impl From<Ingredient> for IngredientModel {
             id,
             name: name.to_string(),
             description: description.to_string(),
-            diet_friendly,
+            diet_friendly: diet_friendly.into(),
         }
     }
 }

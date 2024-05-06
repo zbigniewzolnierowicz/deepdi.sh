@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n            r.id,\n            r.name,\n            r.description,\n            r.steps,\n            r.time,\n            r.servings\n            FROM recipes AS r\n            JOIN ingredients_recipes AS ir ON r.id = ir.recipe_id\n            JOIN ingredients AS i ON ir.ingredient_id = i.id\n            WHERE r.id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "steps",
+        "type_info": "VarcharArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "time",
+        "type_info": "Json"
+      },
+      {
+        "ordinal": 5,
+        "name": "servings",
+        "type_info": "Json"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ce6227a31c94631d9c3922a7cf9463648b649ae90014ca903e31600f26b73570"
+}

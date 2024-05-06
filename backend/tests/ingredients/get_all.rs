@@ -26,7 +26,10 @@ async fn getting_all_with_full_database_returns_in_array() {
         id: Uuid::from_u128(1),
         name: "Tomato".to_string(),
         description: "Very yummy tomato".to_string(),
-        diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian].into(),
+        diet_friendly: vec![
+            DietFriendly::Vegan.to_string(),
+            DietFriendly::Vegetarian.to_string(),
+        ],
     }];
 
     let tx = app.db.begin().await.unwrap();
@@ -35,7 +38,6 @@ async fn getting_all_with_full_database_returns_in_array() {
         let diet_friendly: Vec<String> = ingredient
             .clone()
             .diet_friendly
-            .0
             .into_iter()
             .map(|d| d.to_string())
             .collect();

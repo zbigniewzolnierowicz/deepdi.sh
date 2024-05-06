@@ -5,9 +5,11 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use self::errors::ValidationError;
+
 use super::ingredient::{Ingredient, IngredientModel};
 
-#[derive(PartialEq, Debug, Clone, FromRow)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Recipe {
     pub id: Uuid,
     pub name: String,
@@ -33,6 +35,27 @@ pub struct IngredientWithAmount {
     pub amount: IngredientUnit,
     pub notes: Option<String>,
     pub optional: bool,
+}
+
+#[derive(FromRow, PartialEq, Debug, Clone)]
+pub struct IngredientWithAmountModel {
+    pub ingredient: IngredientModel,
+    pub amount: serde_json::Value,
+    pub notes: Option<String>,
+    pub optional: bool,
+}
+
+impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
+    type Error = ValidationError;
+    fn try_from(value: &IngredientWithAmountModel) -> Result<Self, Self::Error> {
+        Ok(Self {
+            optional: value.optional,
+            notes: value.notes.clone(),
+            amount: serde_json::from_value(value.amount.clone())
+                .map_err(|e| ValidationError::DeserializationFailed("amount", e))?,
+            ingredient: value.ingredient.clone().try_into()?
+        })
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]

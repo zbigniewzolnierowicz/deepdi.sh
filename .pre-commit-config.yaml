@@ -1,0 +1,9 @@
+repos:
+- repo: local
+  hooks:
+    - id: sqlx-prepare-check
+      name: SQLX Prepare check
+      entry: task db:check
+      language: system
+      types: [rust]
+      pass_filenames: false

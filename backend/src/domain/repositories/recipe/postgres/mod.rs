@@ -2,8 +2,8 @@ use async_trait::async_trait;
 use sqlx::{Error as SQLXError, PgPool};
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::domain::entities::recipe::{IngredientWithAmount, Recipe};
 use crate::domain::entities::ingredient::IngredientModel;
+use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
 
 use super::{errors::RecipeRepositoryError, RecipeRepository};
 
@@ -83,6 +83,8 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         tx.commit().await.map_err(map_error_to_internal)?;
 
+        // TODO: There's got to be a way to turn this into a single query
+
         let inserted = sqlx::query!(
             r#"
             SELECT
@@ -104,7 +106,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         .map_err(map_error_to_internal)?;
 
         let inserted_ingredients = sqlx::query_as!(
-            IngredientWithAmount,
+            IngredientWithAmountModel,
             r#"
             SELECT
             ir.amount,
@@ -127,10 +129,24 @@ impl RecipeRepository for PostgresRecipeRepository {
         .await
         .map_err(map_error_to_internal)?;
 
-        dbg!(&inserted);
-        dbg!(&inserted_ingredients);
+        let ingredients = inserted_ingredients
+                .iter()
+                .map(IngredientWithAmount::try_from)
+                .collect::<Result<Vec<_>, _>>()?;
 
-        todo!();
+        let recipe = Recipe {
+            id: inserted.id,
+            name: inserted.name,
+            description: inserted.description,
+            steps: inserted.steps,
+            time: serde_json::from_value(inserted.time)
+                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?,
+            servings: serde_json::from_value(inserted.servings)
+                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?,
+            ingredients,
+        };
+
+        Ok(recipe)
     }
 }
 
