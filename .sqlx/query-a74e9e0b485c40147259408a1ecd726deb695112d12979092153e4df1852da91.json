@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n            ir.amount,\n            ir.notes,\n            ir.optional,\n            (\n                i.id,\n                i.name,\n                i.description,\n                i.diet_friendly\n            ) as \"ingredient!: IngredientModel\"\n            FROM ingredients_recipes AS ir\n            JOIN ingredients AS i\n                ON i.id = ir.ingredient_id\n            WHERE ir.recipe_id = $1\n            ",
+  "query": "SELECT\nir.amount,\nir.notes,\nir.optional,\n(\n    i.id,\n    i.name,\n    i.description,\n    i.diet_friendly\n) as \"ingredient!: IngredientModel\"\nFROM ingredients_recipes AS ir\nJOIN ingredients AS i\n    ON i.id = ir.ingredient_id\nWHERE ir.recipe_id = $1\n",
   "describe": {
     "columns": [
       {
@@ -36,5 +36,5 @@
       null
     ]
   },
-  "hash": "1a697be7680e10eab0f1c963f33754677d76a55322580d25ca0173d8134edb1c"
+  "hash": "a74e9e0b485c40147259408a1ecd726deb695112d12979092153e4df1852da91"
 }

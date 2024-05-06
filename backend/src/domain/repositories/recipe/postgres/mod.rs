@@ -85,44 +85,17 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         // TODO: There's got to be a way to turn this into a single query
 
-        let inserted = sqlx::query!(
-            r#"
-            SELECT
-            r.id,
-            r.name,
-            r.description,
-            r.steps,
-            r.time,
-            r.servings
-            FROM recipes AS r
-            JOIN ingredients_recipes AS ir ON r.id = ir.recipe_id
-            JOIN ingredients AS i ON ir.ingredient_id = i.id
-            WHERE r.id = $1
-            "#,
+        let inserted = sqlx::query_file!(
+            "queries/get_recipe.sql",
             result.id
         )
         .fetch_one(&self.0)
         .await
         .map_err(map_error_to_internal)?;
 
-        let inserted_ingredients = sqlx::query_as!(
+        let inserted_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
-            r#"
-            SELECT
-            ir.amount,
-            ir.notes,
-            ir.optional,
-            (
-                i.id,
-                i.name,
-                i.description,
-                i.diet_friendly
-            ) as "ingredient!: IngredientModel"
-            FROM ingredients_recipes AS ir
-            JOIN ingredients AS i
-                ON i.id = ir.ingredient_id
-            WHERE ir.recipe_id = $1
-            "#,
+            "queries/get_ingredients_for_recipe.sql",
             result.id
         )
         .fetch_all(&self.0)
@@ -151,6 +124,7 @@ impl RecipeRepository for PostgresRecipeRepository {
 }
 
 impl PostgresRecipeRepository {
+    #[allow(dead_code)] // TODO: Remove after connecting to the API
     fn new(pool: PgPool) -> Self {
         Self(pool)
     }
