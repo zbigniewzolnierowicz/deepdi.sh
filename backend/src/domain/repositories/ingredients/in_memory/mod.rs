@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Mutex,
+};
 
 use async_trait::async_trait;
 use eyre::eyre;
@@ -118,6 +121,40 @@ impl IngredientRepository for InMemoryIngredientRepository {
         lock.remove(&ingredient.id);
 
         Ok(())
+    }
+
+    async fn get_all_by_id(
+        &self,
+        ids: &Vec<Uuid>,
+    ) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
+        let lock = self.0.lock().map_err(|_| {
+            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
+        })?;
+
+        let mut missing_ids: HashSet<Uuid> = HashSet::from_iter(ids.iter().cloned());
+
+        let collect = lock
+            .clone()
+            .into_iter()
+            .filter_map(|(id, ingredient)| {
+                dbg!(&id);
+                dbg!(&ids);
+                if ids.contains(&id) {
+                    missing_ids.remove(&id);
+                    Some(ingredient)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        if !missing_ids.is_empty() {
+            Err(IngredientRepositoryError::MultipleMissing(
+                missing_ids.iter().cloned().collect(),
+            ))
+        } else {
+            Ok(collect)
+        }
     }
 }
 

@@ -225,6 +225,10 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         Ok(())
     }
+
+    async fn get_all_by_id(&self, ids: &Vec<Uuid>) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
+        todo!()
+    }
 }
 
 impl PostgresIngredientRepository {

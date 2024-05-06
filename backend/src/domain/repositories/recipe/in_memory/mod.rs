@@ -28,7 +28,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
 impl InMemoryRecipeRepository {
     #[allow(dead_code)]
-    fn new() -> Self {
+    pub fn new() -> Self {
         InMemoryRecipeRepository(Mutex::new(HashMap::new()))
     }
 }
