@@ -5,5 +5,5 @@ repos:
       name: SQLX Prepare check
       entry: task db:check
       language: system
-      types: [rust]
       pass_filenames: false
+
