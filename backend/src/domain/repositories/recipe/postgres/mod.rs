@@ -85,13 +85,10 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         // TODO: There's got to be a way to turn this into a single query
 
-        let inserted = sqlx::query_file!(
-            "queries/get_recipe.sql",
-            result.id
-        )
-        .fetch_one(&self.0)
-        .await
-        .map_err(map_error_to_internal)?;
+        let inserted = sqlx::query_file!("queries/get_recipe.sql", result.id)
+            .fetch_one(&self.0)
+            .await
+            .map_err(map_error_to_internal)?;
 
         let inserted_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
@@ -103,19 +100,23 @@ impl RecipeRepository for PostgresRecipeRepository {
         .map_err(map_error_to_internal)?;
 
         let ingredients = inserted_ingredients
-                .iter()
-                .map(IngredientWithAmount::try_from)
-                .collect::<Result<Vec<_>, _>>()?;
+            .iter()
+            .map(IngredientWithAmount::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let time = serde_json::from_value(inserted.time)
+            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+
+        let servings = serde_json::from_value(inserted.servings)
+            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
 
         let recipe = Recipe {
             id: inserted.id,
             name: inserted.name,
             description: inserted.description,
             steps: inserted.steps,
-            time: serde_json::from_value(inserted.time)
-                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?,
-            servings: serde_json::from_value(inserted.servings)
-                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?,
+            time,
+            servings,
             ingredients,
         };
 
