@@ -1,6 +1,8 @@
 pub mod errors;
-use std::collections::HashMap;
+use std::{collections::HashMap, num::ParseFloatError};
 
+use once_cell::sync::Lazy;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -45,6 +47,8 @@ pub struct IngredientWithAmountModel {
     pub optional: bool,
 }
 
+// TODO: write doctests
+// TODO: make more graceful errors
 impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
     type Error = ValidationError;
     fn try_from(value: &IngredientWithAmountModel) -> Result<Self, Self::Error> {
@@ -53,7 +57,7 @@ impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
             notes: value.notes.clone(),
             amount: serde_json::from_value(value.amount.clone())
                 .map_err(|e| ValidationError::DeserializationFailed("amount", e))?,
-            ingredient: value.ingredient.clone().try_into()?
+            ingredient: value.ingredient.clone().try_into()?,
         })
     }
 }
@@ -65,6 +69,50 @@ pub enum IngredientUnit {
     Teaspoons { amount: f64 },
     Cup { amount: f64 },
     Other { amount: f64, unit: String },
+}
+
+impl Default for IngredientUnit {
+    fn default() -> Self {
+        Self::Grams { amount: 0.0 }
+    }
+}
+
+#[allow(clippy::unwrap_used)]
+fn find_amount_and_unit(haystack: &str) -> Option<(String, String)> {
+    static RE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"(?<amount>\d+|\d+\.\d+)\s?(?<unit>\w+)").unwrap());
+    let haystack = haystack.to_lowercase();
+    let captures = RE.captures(&haystack)?;
+
+    Some((
+        captures.name("amount")?.as_str().to_string(),
+        captures.name("unit")?.as_str().to_string(),
+    ))
+}
+
+impl TryFrom<String> for IngredientUnit {
+    type Error = ValidationError;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let (amount, unit) = find_amount_and_unit(&value).ok_or(ValidationError::Unknown(
+            eyre::eyre!("Invalid measurement format"),
+        ))?;
+
+        let amount: f64 = amount
+            .parse()
+            .map_err(|e: ParseFloatError| ValidationError::Unknown(e.into()))?;
+
+        match unit.as_str() {
+            "gram" | "g" | "gr" => Ok(Self::Grams { amount }),
+            "mililiter" | "ml" => Ok(Self::Mililiters { amount }),
+            "cup" => Ok(Self::Cup { amount }),
+            "teaspoon" | "tsp" => Ok(Self::Teaspoons { amount }),
+            "tablespoon" | "tbsp" => Ok(Self::from_tablespoons(amount)),
+            u => Ok(Self::Other {
+                unit: u.to_string(),
+                amount,
+            }),
+        }
+    }
 }
 
 impl IngredientUnit {

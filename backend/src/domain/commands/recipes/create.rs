@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::Recipe,
+    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, ServingsType},
     repositories::{
         ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
         recipe::{errors::RecipeRepositoryError, RecipeRepositoryService},
@@ -14,6 +14,7 @@ use crate::domain::{
 pub enum CreateRecipeError {
     #[error("Could not find the ingredients with the following IDs: {0:?}")]
     IngredientsNotFound(Vec<Uuid>),
+
     #[error(transparent)]
     Unknown(#[from] eyre::Report),
 }
@@ -46,10 +47,12 @@ pub struct CreateRecipe<'a> {
     pub ingredients: Vec<IngredientAmountData>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct IngredientAmountData {
     pub ingredient_id: Uuid,
-    pub amount: String,
+    pub amount: IngredientUnit,
+    pub optional: bool,
+    pub notes: Option<String>,
 }
 
 pub async fn create_recipe(
@@ -58,15 +61,48 @@ pub async fn create_recipe(
     input: &CreateRecipe<'_>,
 ) -> Result<Recipe, CreateRecipeError> {
     let ingredient_ids: Vec<Uuid> = input.ingredients.iter().map(|i| i.ingredient_id).collect();
-    let ingredients_in_recipe = ingredient_repo
+
+    // FIXME: There's probably a better way to do this
+    let ingredients_in_recipe: Vec<_> = ingredient_repo
         .get_all_by_id(&ingredient_ids)
         .await
-        .map_err(CreateRecipeError::from)?;
+        .map_err(CreateRecipeError::from)?
+        .into_iter()
+        .zip(&input.ingredients)
+        .map(
+            |(
+                ingredient,
+                IngredientAmountData {
+                    amount,
+                    optional,
+                    notes,
+                    ..
+                },
+            )| {
+                IngredientWithAmount {
+                    ingredient,
+                    amount: amount.clone(),
+                    notes: notes.clone(),
+                    optional: *optional,
+                }
+            },
+        )
+        .collect();
 
-    dbg!(&ingredient_ids);
-    dbg!(ingredients_in_recipe);
+    let recipe = recipe_repo
+        .insert(Recipe {
+            id: Uuid::now_v7(),
+            name: input.name.to_string(),
+            description: input.description.to_string(),
+            steps: input.steps.clone(),
+            ingredients: ingredients_in_recipe.clone(),
+            time: input.time.clone(),
+            servings: ServingsType::Exact { value: 1 }, // FIXME: replace with
+                                                        // actual value
+        })
+        .await?;
 
-    todo!();
+    Ok(recipe)
 }
 
 #[cfg(test)]
@@ -74,8 +110,11 @@ mod tests {
     use std::sync::Arc;
 
     use super::*;
-    use crate::domain::repositories::{
-        ingredients::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
+    use crate::domain::{
+        entities::ingredient::{types::DietFriendly, Ingredient, IngredientModel},
+        repositories::{
+            ingredients::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
+        },
     };
 
     #[tokio::test]
@@ -98,7 +137,8 @@ mod tests {
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
                     ingredient_id: Uuid::from_u128(0),
-                    amount: "1 gram".to_string(),
+                    amount: IngredientUnit::Grams { amount: 1.0 },
+                    ..Default::default()
                 }],
             },
         )
@@ -106,5 +146,54 @@ mod tests {
         .unwrap_err();
 
         assert!(matches!(result, CreateRecipeError::IngredientsNotFound(_)));
+    }
+
+    #[tokio::test]
+    async fn create_recipe_with_proper_ingredients() {
+        let ingredients: HashMap<Uuid, Ingredient> = HashMap::from([(
+            Uuid::from_u128(0),
+            IngredientModel {
+                id: Uuid::from_u128(0),
+                name: "Ingredient Zero".to_string(),
+                description: "Description of ingredient zero".to_string(),
+                diet_friendly: vec![
+                    DietFriendly::Vegan.to_string(),
+                    DietFriendly::Vegetarian.to_string(),
+                    DietFriendly::GlutenFree.to_string(),
+                ],
+            }
+            .try_into()
+            .unwrap(),
+        )]);
+
+        let internal_ingredient_repo: InMemoryIngredientRepository = ingredients.into();
+        let ingredient_repo: IngredientRepositoryService =
+            Arc::new(Box::new(internal_ingredient_repo));
+
+        let recipe_repo: RecipeRepositoryService =
+            Arc::new(Box::new(InMemoryRecipeRepository::new()));
+
+        let result = create_recipe(
+            recipe_repo,
+            ingredient_repo,
+            &CreateRecipe {
+                name: "Recipe test",
+                description: "This is a test for the recipe",
+                time: HashMap::from([(
+                    "Prep time".to_string(),
+                    std::time::Duration::from_secs(60),
+                )]),
+                steps: vec!["Try screaming at the food".to_string()],
+                ingredients: vec![IngredientAmountData {
+                    ingredient_id: Uuid::from_u128(0),
+                    amount: IngredientUnit::Grams { amount: 1.0 },
+                    ..Default::default()
+                }],
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(Uuid::get_version(&result.id), Some(uuid::Version::SortRand));
     }
 }

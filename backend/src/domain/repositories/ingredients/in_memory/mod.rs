@@ -125,7 +125,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
     async fn get_all_by_id(
         &self,
-        ids: &Vec<Uuid>,
+        ids: &[Uuid],
     ) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
         let lock = self.0.lock().map_err(|_| {
             eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
@@ -137,8 +137,6 @@ impl IngredientRepository for InMemoryIngredientRepository {
             .clone()
             .into_iter()
             .filter_map(|(id, ingredient)| {
-                dbg!(&id);
-                dbg!(&ids);
                 if ids.contains(&id) {
                     missing_ids.remove(&id);
                     Some(ingredient)

@@ -11,6 +11,9 @@ pub enum ValidationError {
     #[error("Failed to deserialize field {0}")]
     DeserializationFailed(&'static str, #[source] serde_json::Error),
 
+    #[error("Failed to compute measurement from the following string: {0}")]
+    MeasurementComputation(String),
+
     #[error(transparent)]
     Unknown(#[from] eyre::Error),
 }

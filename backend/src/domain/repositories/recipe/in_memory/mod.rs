@@ -26,10 +26,21 @@ impl RecipeRepository for InMemoryRecipeRepository {
     }
 }
 
+impl Default for InMemoryRecipeRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl InMemoryRecipeRepository {
-    #[allow(dead_code)]
     pub fn new() -> Self {
-        InMemoryRecipeRepository(Mutex::new(HashMap::new()))
+        Self(Mutex::new(HashMap::new()))
+    }
+}
+
+impl From<HashMap<uuid::Uuid, Recipe>> for InMemoryRecipeRepository {
+    fn from(value: HashMap<uuid::Uuid, Recipe>) -> Self {
+        Self(Mutex::new(value))
     }
 }
 

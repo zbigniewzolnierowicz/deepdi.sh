@@ -257,6 +257,7 @@ dependencies = [
  "common",
  "config",
  "eyre",
+ "once_cell",
  "opentelemetry 0.22.0",
  "opentelemetry-otlp",
  "opentelemetry-semantic-conventions",
