@@ -28,7 +28,7 @@ pub fn recipe_fixture() -> Recipe {
                     description: "It's tofu".try_into().unwrap(),
                     diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
                 },
-                amount: IngredientUnit::Grams { amount: (400.0) },
+                amount: IngredientUnit::Grams(400.0),
                 notes: None,
                 optional: false
             },

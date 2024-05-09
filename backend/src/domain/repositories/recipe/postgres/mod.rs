@@ -127,7 +127,7 @@ impl RecipeRepository for PostgresRecipeRepository {
 
 impl PostgresRecipeRepository {
     #[allow(dead_code)] // TODO: Remove after connecting to the API
-    fn new(pool: PgPool) -> Self {
+    pub fn new(pool: PgPool) -> Self {
         Self(pool)
     }
 }

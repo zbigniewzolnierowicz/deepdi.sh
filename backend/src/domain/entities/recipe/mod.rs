@@ -64,8 +64,8 @@ impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub enum IngredientUnit {
-    Mililiters { amount: f64 },
-    Grams { amount: f64 },
+    Mililiters(f64),
+    Grams(f64),
     Teaspoons { amount: f64 },
     Cup { amount: f64 },
     Other { amount: f64, unit: String },
@@ -73,7 +73,7 @@ pub enum IngredientUnit {
 
 impl Default for IngredientUnit {
     fn default() -> Self {
-        Self::Grams { amount: 0.0 }
+        Self::Grams(0.0)
     }
 }
 
@@ -90,6 +90,7 @@ fn find_amount_and_unit(haystack: &str) -> Option<(String, String)> {
     ))
 }
 
+// TODO: this is probably redundant, since we're doing this
 impl TryFrom<String> for IngredientUnit {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -101,9 +102,11 @@ impl TryFrom<String> for IngredientUnit {
             .parse()
             .map_err(|e: ParseFloatError| ValidationError::Unknown(e.into()))?;
 
-        match unit.as_str() {
-            "gram" | "g" | "gr" => Ok(Self::Grams { amount }),
-            "mililiter" | "ml" => Ok(Self::Mililiters { amount }),
+        let unit = unit.strip_suffix('s').unwrap_or(&unit);
+
+        match unit {
+            "gram" | "g" | "gr" => Ok(Self::Grams(amount)),
+            "mililiter" | "ml" => Ok(Self::Mililiters(amount)),
             "cup" => Ok(Self::Cup { amount }),
             "teaspoon" | "tsp" => Ok(Self::Teaspoons { amount }),
             "tablespoon" | "tbsp" => Ok(Self::from_tablespoons(amount)),

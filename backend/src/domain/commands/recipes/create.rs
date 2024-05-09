@@ -1,9 +1,12 @@
 use std::collections::HashMap;
 
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, ServingsType},
+    entities::recipe::{
+        errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
+    },
     repositories::{
         ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
         recipe::{errors::RecipeRepositoryError, RecipeRepositoryService},
@@ -16,6 +19,9 @@ pub enum CreateRecipeError {
     IngredientsNotFound(Vec<Uuid>),
 
     #[error(transparent)]
+    Validation(#[from] ValidationError),
+
+    #[error(transparent)]
     Unknown(#[from] eyre::Report),
 }
 
@@ -23,6 +29,7 @@ impl From<RecipeRepositoryError> for CreateRecipeError {
     fn from(value: RecipeRepositoryError) -> Self {
         match value {
             RecipeRepositoryError::UnknownError(e) => Self::Unknown(e),
+            RecipeRepositoryError::ValidationError(e) => Self::Validation(e),
             _ => unreachable!(),
         }
     }
@@ -45,9 +52,10 @@ pub struct CreateRecipe<'a> {
     pub steps: Vec<String>,
     pub time: HashMap<String, std::time::Duration>,
     pub ingredients: Vec<IngredientAmountData>,
+    pub servings: ServingsType,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Deserialize)]
 pub struct IngredientAmountData {
     pub ingredient_id: Uuid,
     pub amount: IngredientUnit,
@@ -97,8 +105,7 @@ pub async fn create_recipe(
             steps: input.steps.clone(),
             ingredients: ingredients_in_recipe.clone(),
             time: input.time.clone(),
-            servings: ServingsType::Exact { value: 1 }, // FIXME: replace with
-                                                        // actual value
+            servings: input.servings.clone(),
         })
         .await?;
 
@@ -109,11 +116,14 @@ pub async fn create_recipe(
 mod tests {
     use std::sync::Arc;
 
+    use sqlx::PgPool;
+
     use super::*;
     use crate::domain::{
         entities::ingredient::{types::DietFriendly, Ingredient, IngredientModel},
         repositories::{
-            ingredients::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
+            ingredients::{postgres::PostgresIngredientRepository, InMemoryIngredientRepository},
+            recipe::{in_memory::InMemoryRecipeRepository, postgres::PostgresRecipeRepository},
         },
     };
 
@@ -137,9 +147,10 @@ mod tests {
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
                     ingredient_id: Uuid::from_u128(0),
-                    amount: IngredientUnit::Grams { amount: 1.0 },
+                    amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
+                servings: ServingsType::FromTo { from: 1, to: 2 },
             },
         )
         .await
@@ -186,9 +197,82 @@ mod tests {
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
                     ingredient_id: Uuid::from_u128(0),
-                    amount: IngredientUnit::Grams { amount: 1.0 },
+                    amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
+                servings: ServingsType::FromTo { from: 1, to: 2 },
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(Uuid::get_version(&result.id), Some(uuid::Version::SortRand));
+        assert_eq!(&result.name, "Recipe test");
+        assert_eq!(
+            result.ingredients,
+            vec![IngredientWithAmount {
+                ingredient: IngredientModel {
+                    id: Uuid::from_u128(0),
+                    name: "Ingredient Zero".to_string(),
+                    description: "Description of ingredient zero".to_string(),
+                    diet_friendly: vec![
+                        DietFriendly::Vegan.to_string(),
+                        DietFriendly::Vegetarian.to_string(),
+                        DietFriendly::GlutenFree.to_string(),
+                    ],
+                }
+                .try_into()
+                .unwrap(),
+                amount: IngredientUnit::Grams(1.0),
+                notes: None,
+                optional: false,
+            }]
+        )
+    }
+
+    #[sqlx::test]
+    async fn create_recipe_with_proper_ingredients_postgres(pool: PgPool) {
+        let ingredient_repo: IngredientRepositoryService =
+            Arc::new(Box::new(PostgresIngredientRepository::new(pool.clone())));
+
+        ingredient_repo
+            .insert(
+                IngredientModel {
+                    id: Uuid::from_u128(0),
+                    name: "Ingredient Zero".to_string(),
+                    description: "Description of ingredient zero".to_string(),
+                    diet_friendly: vec![
+                        DietFriendly::Vegan.to_string(),
+                        DietFriendly::Vegetarian.to_string(),
+                        DietFriendly::GlutenFree.to_string(),
+                    ],
+                }
+                .try_into()
+                .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        let recipe_repo: RecipeRepositoryService =
+            Arc::new(Box::new(PostgresRecipeRepository::new(pool)));
+
+        let result = create_recipe(
+            recipe_repo,
+            ingredient_repo,
+            &CreateRecipe {
+                name: "Recipe test",
+                description: "This is a test for the recipe",
+                time: HashMap::from([(
+                    "Prep time".to_string(),
+                    std::time::Duration::from_secs(60),
+                )]),
+                steps: vec!["Try screaming at the food".to_string()],
+                ingredients: vec![IngredientAmountData {
+                    ingredient_id: Uuid::from_u128(0),
+                    amount: IngredientUnit::Grams(1.0),
+                    ..Default::default()
+                }],
+                servings: ServingsType::FromTo { from: 1, to: 2 },
             },
         )
         .await

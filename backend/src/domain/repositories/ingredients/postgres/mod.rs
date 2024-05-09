@@ -4,7 +4,7 @@ use crate::domain::entities::ingredient::{
     errors::ValidationError, Ingredient, IngredientChangeset, IngredientModel,
 };
 use async_trait::async_trait;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use sqlx::{error::Error as SQLXError, PgPool};
 use uuid::Uuid;
 
@@ -226,8 +226,31 @@ impl IngredientRepository for PostgresIngredientRepository {
         Ok(())
     }
 
-    async fn get_all_by_id(&self, _ids: &[Uuid]) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
-        todo!()
+    async fn get_all_by_id(
+        &self,
+        ids: &[Uuid],
+    ) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
+        let results: Result<Vec<Ingredient>, IngredientRepositoryError> = sqlx::query_as!(
+            IngredientModel,
+            r#"
+            SELECT id, name, description, diet_friendly
+            FROM ingredients
+            WHERE id = ANY($1)
+            "#,
+            ids
+        )
+        .fetch_all(&self.0)
+        .await
+        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .into_par_iter()
+        .map(|ingredient| {
+            ingredient
+                .try_into()
+                .map_err(IngredientRepositoryError::from)
+        })
+        .collect();
+
+        results
     }
 }
 
