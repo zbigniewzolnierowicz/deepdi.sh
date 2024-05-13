@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use serde::Deserialize;
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::{
@@ -13,7 +14,7 @@ use crate::domain::{
     },
 };
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateRecipeError {
     #[error("Could not find the ingredients with the following IDs: {0:?}")]
     IngredientsNotFound(Vec<Uuid>),
@@ -55,7 +56,7 @@ pub struct CreateRecipe<'a> {
     pub servings: ServingsType,
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct IngredientAmountData {
     pub ingredient_id: Uuid,
     pub amount: IngredientUnit,
@@ -75,7 +76,7 @@ pub async fn create_recipe(
         .get_all_by_id(&ingredient_ids)
         .await
         .map_err(CreateRecipeError::from)?
-        .into_iter()
+        .into_par_iter()
         .zip(&input.ingredients)
         .map(
             |(
@@ -103,7 +104,7 @@ pub async fn create_recipe(
             name: input.name.to_string(),
             description: input.description.to_string(),
             steps: input.steps.clone(),
-            ingredients: ingredients_in_recipe.clone(),
+            ingredients: ingredients_in_recipe,
             time: input.time.clone(),
             servings: input.servings.clone(),
         })
@@ -150,7 +151,7 @@ mod tests {
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
-                servings: ServingsType::FromTo { from: 1, to: 2 },
+                servings: ServingsType::FromTo(1, 2),
             },
         )
         .await
@@ -200,7 +201,7 @@ mod tests {
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
-                servings: ServingsType::FromTo { from: 1, to: 2 },
+                servings: ServingsType::FromTo(1, 2),
             },
         )
         .await
@@ -228,6 +229,38 @@ mod tests {
                 optional: false,
             }]
         )
+    }
+    #[sqlx::test]
+    async fn create_recipe_without_proper_ingredients_postgres(pool: PgPool) {
+        let ingredient_repo: IngredientRepositoryService =
+            Arc::new(Box::new(PostgresIngredientRepository::new(pool.clone())));
+
+        let recipe_repo: RecipeRepositoryService =
+            Arc::new(Box::new(PostgresRecipeRepository::new(pool)));
+
+        let result = create_recipe(
+            recipe_repo,
+            ingredient_repo,
+            &CreateRecipe {
+                name: "Recipe test",
+                description: "This is a test for the recipe",
+                time: HashMap::from([(
+                    "Prep time".to_string(),
+                    std::time::Duration::from_secs(60),
+                )]),
+                steps: vec!["Try screaming at the food".to_string()],
+                ingredients: vec![IngredientAmountData {
+                    ingredient_id: Uuid::from_u128(0),
+                    amount: IngredientUnit::Grams(1.0),
+                    ..Default::default()
+                }],
+                servings: ServingsType::FromTo(1, 2),
+            },
+        )
+        .await
+        .unwrap_err();
+
+        assert!(matches!(result, CreateRecipeError::IngredientsNotFound(_)));
     }
 
     #[sqlx::test]
@@ -272,7 +305,7 @@ mod tests {
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
-                servings: ServingsType::FromTo { from: 1, to: 2 },
+                servings: ServingsType::FromTo(1, 2),
             },
         )
         .await

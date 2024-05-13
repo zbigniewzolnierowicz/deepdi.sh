@@ -2,9 +2,15 @@ mod routes;
 
 use std::sync::Arc;
 
-use crate::domain::repositories::ingredients::{
-    in_memory::InMemoryIngredientRepository, postgres::PostgresIngredientRepository,
-    IngredientRepository, IngredientRepositoryService,
+use crate::domain::repositories::{
+    ingredients::{
+        in_memory::InMemoryIngredientRepository, postgres::PostgresIngredientRepository,
+        IngredientRepository, IngredientRepositoryService,
+    },
+    recipe::{
+        in_memory::InMemoryRecipeRepository, postgres::PostgresRecipeRepository, RecipeRepository,
+        RecipeRepositoryService,
+    },
 };
 use axum::{
     routing::{get, post, put},
@@ -15,8 +21,12 @@ use color_eyre::Result;
 use sqlx::PgPool;
 
 use self::routes::{
-    all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
-    get_ingredient_by_id::get_ingredient_by_id_route, update_ingredient::update_ingredient_route,
+    ingredients::{
+        all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
+        get_ingredient_by_id::get_ingredient_by_id_route,
+        update_ingredient::update_ingredient_route,
+    },
+    recipes::create_recipe::create_recipe_route,
 };
 
 pub struct App {
@@ -26,6 +36,7 @@ pub struct App {
 #[derive(Clone)]
 pub struct AppState {
     pub ingredient_repository: IngredientRepositoryService,
+    pub recipe_repository: RecipeRepositoryService,
 }
 
 impl App {
@@ -35,14 +46,20 @@ impl App {
             .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
+            .route("/recipe/create", post(create_recipe_route))
             .layer(OtelInResponseLayer)
             .layer(OtelAxumLayer::default())
     }
 
-    pub fn new<I: IngredientRepository + 'static>(irs: I) -> Result<Self> {
+    pub fn new<I: IngredientRepository + 'static, R: RecipeRepository + 'static>(
+        irs: I,
+        rrs: R,
+    ) -> Result<Self> {
         let ingredient_repository: IngredientRepositoryService = Arc::new(Box::new(irs));
+        let recipe_repository: RecipeRepositoryService = Arc::new(Box::new(rrs));
         let state = AppState {
             ingredient_repository,
+            recipe_repository,
         };
         let router = Self::get_router().with_state(state);
 
@@ -71,9 +88,15 @@ impl AppBuilder {
 
     pub fn build(self) -> Result<App> {
         if let Some(postgres_db) = self.postgres_db {
-            App::new(PostgresIngredientRepository::new(postgres_db))
+            App::new(
+                PostgresIngredientRepository::new(postgres_db.clone()),
+                PostgresRecipeRepository::new(postgres_db),
+            )
         } else {
-            App::new(InMemoryIngredientRepository::new())
+            App::new(
+                InMemoryIngredientRepository::new(),
+                InMemoryRecipeRepository::new(),
+            )
         }
     }
 

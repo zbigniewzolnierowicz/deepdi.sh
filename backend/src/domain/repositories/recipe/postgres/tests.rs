@@ -14,7 +14,10 @@ async fn creating_recipe_works(pool: PgPool) {
 
     let recipe = recipe_fixture();
     for ir in recipe.ingredients.clone() {
-        ingredient_repo.insert(ir.ingredient).await.expect("Could not insert an ingredient due to an error somewhere.");
+        ingredient_repo
+            .insert(ir.ingredient)
+            .await
+            .expect("Could not insert an ingredient due to an error somewhere.");
     }
     let result = repo.insert(recipe.clone()).await.unwrap();
     assert_eq!(recipe, result);

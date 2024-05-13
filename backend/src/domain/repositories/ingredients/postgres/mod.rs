@@ -241,7 +241,10 @@ impl IngredientRepository for PostgresIngredientRepository {
         )
         .fetch_all(&self.0)
         .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .map_err(|e| match e {
+            SQLXError::RowNotFound => IngredientRepositoryError::MultipleMissing(ids.to_vec()),
+            e => IngredientRepositoryError::UnknownError(e.into()),
+        })?
         .into_par_iter()
         .map(|ingredient| {
             ingredient
@@ -250,7 +253,22 @@ impl IngredientRepository for PostgresIngredientRepository {
         })
         .collect();
 
-        results
+        let results = results?;
+
+        let results_ids: Vec<Uuid> = results.iter().map(|i| i.id).collect();
+
+        let omitted_ids: Vec<Uuid> = ids
+            .to_vec()
+            .iter()
+            .filter(|id| !results_ids.contains(id))
+            .cloned()
+            .collect();
+
+        if omitted_ids.is_empty() {
+            Ok(results)
+        } else {
+            Err(IngredientRepositoryError::MultipleMissing(omitted_ids))
+        }
     }
 }
 

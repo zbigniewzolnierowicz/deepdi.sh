@@ -4,7 +4,10 @@ use color_eyre::Result;
 use opentelemetry::{propagation::TextMapCompositePropagator, KeyValue};
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::{
-    metrics::{reader::{DefaultAggregationSelector, DefaultTemporalitySelector}, SdkMeterProvider},
+    metrics::{
+        reader::{DefaultAggregationSelector, DefaultTemporalitySelector},
+        SdkMeterProvider,
+    },
     propagation::{BaggagePropagator, TraceContextPropagator},
     resource::{EnvResourceDetector, SdkProvidedResourceDetector, TelemetryResourceDetector},
     runtime,

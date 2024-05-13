@@ -19,7 +19,7 @@ pub fn recipe_fixture() -> Recipe {
             ("Prep time".to_string(), Duration::from_secs(15 * 60)),
             ("Cook time".to_string(), Duration::from_secs(10 * 60))
         ]),
-        servings: ServingsType::Exact { value: 4 },
+        servings: ServingsType::Exact(4),
         ingredients: vec![
             IngredientWithAmount {
                 ingredient: Ingredient {

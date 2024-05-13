@@ -25,10 +25,10 @@ pub struct Recipe {
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "tag")]
+#[serde(rename_all = "snake_case")]
 pub enum ServingsType {
-    FromTo { from: u16, to: u16 },
-    Exact { value: u16 },
+    FromTo(u16, u16),
+    Exact(u16),
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -63,11 +63,12 @@ impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IngredientUnit {
     Mililiters(f64),
     Grams(f64),
-    Teaspoons { amount: f64 },
-    Cup { amount: f64 },
+    Teaspoons(f64),
+    Cups(f64),
     Other { amount: f64, unit: String },
 }
 
@@ -90,7 +91,7 @@ fn find_amount_and_unit(haystack: &str) -> Option<(String, String)> {
     ))
 }
 
-// TODO: this is probably redundant, since we're doing this
+// TODO: this is probably redundant, might have to move this to the frontend
 impl TryFrom<String> for IngredientUnit {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -107,8 +108,8 @@ impl TryFrom<String> for IngredientUnit {
         match unit {
             "gram" | "g" | "gr" => Ok(Self::Grams(amount)),
             "mililiter" | "ml" => Ok(Self::Mililiters(amount)),
-            "cup" => Ok(Self::Cup { amount }),
-            "teaspoon" | "tsp" => Ok(Self::Teaspoons { amount }),
+            "cup" => Ok(Self::Cups(amount)),
+            "teaspoon" | "tsp" => Ok(Self::Teaspoons(amount)),
             "tablespoon" | "tbsp" => Ok(Self::from_tablespoons(amount)),
             u => Ok(Self::Other {
                 unit: u.to_string(),
@@ -124,12 +125,10 @@ impl IngredientUnit {
     /// ```rust
     /// use crate::backend::domain::entities::recipe::IngredientUnit;
     ///
-    /// assert_eq!(IngredientUnit::from_tablespoons(4.0), IngredientUnit::Teaspoons { amount: 12.0 })
+    /// assert_eq!(IngredientUnit::from_tablespoons(4.0), IngredientUnit::Teaspoons(12.0))
     /// ```
     pub fn from_tablespoons(tablespoons: f64) -> Self {
-        Self::Teaspoons {
-            amount: tablespoons * 3.0,
-        }
+        Self::Teaspoons(tablespoons * 3.0)
     }
 }
 
