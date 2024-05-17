@@ -1,10 +1,10 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use ts_rs::TS;
 use utoipa::ToSchema;
 
-#[derive(Serialize, ToSchema, TS)]
+#[derive(Serialize, Deserialize, ToSchema, TS, Debug)]
 #[aliases(ErrorMessageWithJsonValue = ErrorMessage<Value>)]
 #[ts(export)]
 pub struct ErrorMessage<T: Serialize> {
