@@ -11,7 +11,7 @@ async fn inserts_recipe_correctly() {
     let ingredient_create_path = app.get_base("ingredient/create");
     let recipe_create_path = app.get_base("recipe/create");
 
-    let ingredients = vec![serde_json::json!({
+    let ingredients_input = vec![serde_json::json!({
         "name": "Cucumber",
         "description": "A cucumber description.",
         "diet_friendly": [
@@ -21,9 +21,9 @@ async fn inserts_recipe_correctly() {
         ]
     })];
 
-    let mut ingredient_ids: Vec<uuid::Uuid> = vec![];
+    let mut ingredients: Vec<IngredientDTO> = vec![];
 
-    for ingredient in ingredients {
+    for ingredient in ingredients_input {
         let result: IngredientDTO = client
             .post(&ingredient_create_path)
             .json(&ingredient)
@@ -34,17 +34,17 @@ async fn inserts_recipe_correctly() {
             .await
             .unwrap();
 
-        ingredient_ids.push(result.id);
+        ingredients.push(result);
     }
 
     let data = serde_json::json!({
         "name": "A diced cucumber",
         "description": "Cucumber that's been diced",
-        "ingredients": ingredient_ids
+        "ingredients": ingredients
             .iter()
-            .map(|id| {
+            .map(|ingredient| {
                 serde_json::json!({
-                    "ingredient_id": *id,
+                    "ingredient_id": ingredient.id,
                     "optional": false,
                     "amount": {
                         "grams": 100.0
@@ -77,12 +77,20 @@ async fn inserts_recipe_correctly() {
         "time": {
             "Prep time": 6000
         },
+        "ingredients": ingredients
+            .iter()
+            .map(|ing| serde_json::json!({
+                "ingredient": ing,
+                "optional": false
+            }))
+            .collect::<Vec<_>>(),
         "steps": ["Get a cucumber", "Dice it"],
         "servings": {
             "exact": 1
         },
     });
 
+    assert_eq!(result.ingredients.len(), 1);
     assert_json_include!(actual: result, expected: expected);
 }
 

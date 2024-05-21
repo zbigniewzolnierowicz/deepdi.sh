@@ -1,3 +1,3 @@
 mod ingredients;
-mod setup;
 mod recipes;
+mod setup;

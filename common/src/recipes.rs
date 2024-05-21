@@ -17,7 +17,7 @@ pub struct CreateRecipeDTO {
     pub servings: ServingsTypeDTO,
 }
 
-#[derive(Deserialize, Serialize, TS)]
+#[derive(Deserialize, Serialize, TS, Debug)]
 #[ts(export)]
 pub struct RecipeDTO {
     pub name: String,
