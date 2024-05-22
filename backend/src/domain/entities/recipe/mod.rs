@@ -1,8 +1,6 @@
 pub mod errors;
-use std::{collections::HashMap, num::ParseFloatError};
+use std::collections::HashMap;
 
-use once_cell::sync::Lazy;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -78,47 +76,6 @@ impl Default for IngredientUnit {
     }
 }
 
-#[allow(clippy::unwrap_used)]
-fn find_amount_and_unit(haystack: &str) -> Option<(String, String)> {
-    static RE: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"(?<amount>\d+|\d+\.\d+)\s?(?<unit>\w+)").unwrap());
-    let haystack = haystack.to_lowercase();
-    let captures = RE.captures(&haystack)?;
-
-    Some((
-        captures.name("amount")?.as_str().to_string(),
-        captures.name("unit")?.as_str().to_string(),
-    ))
-}
-
-// TODO: this is probably redundant, might have to move this to the frontend
-impl TryFrom<String> for IngredientUnit {
-    type Error = ValidationError;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        let (amount, unit) = find_amount_and_unit(&value).ok_or(ValidationError::Unknown(
-            eyre::eyre!("Invalid measurement format"),
-        ))?;
-
-        let amount: f64 = amount
-            .parse()
-            .map_err(|e: ParseFloatError| ValidationError::Unknown(e.into()))?;
-
-        let unit = unit.strip_suffix('s').unwrap_or(&unit);
-
-        match unit {
-            "gram" | "g" | "gr" => Ok(Self::Grams(amount)),
-            "mililiter" | "ml" => Ok(Self::Mililiters(amount)),
-            "cup" => Ok(Self::Cups(amount)),
-            "teaspoon" | "tsp" => Ok(Self::Teaspoons(amount)),
-            "tablespoon" | "tbsp" => Ok(Self::from_tablespoons(amount)),
-            u => Ok(Self::Other {
-                unit: u.to_string(),
-                amount,
-            }),
-        }
-    }
-}
-
 impl IngredientUnit {
     /// Converts tablespoons to teaspoons
     /// 1 tbsp = 3 tsp
@@ -131,12 +88,3 @@ impl IngredientUnit {
         Self::Teaspoons(tablespoons * 3.0)
     }
 }
-
-/* pub struct CreateRecipe {
-    name: String,
-    description: String,
-    steps: Vec<String>,
-    ingredients: Vec<IngredientWithAmount>,
-    time: HashMap<String, std::time::Duration>,
-    servings: ServingsType,
-} */
