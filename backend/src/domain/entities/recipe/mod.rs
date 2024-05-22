@@ -45,7 +45,6 @@ pub struct IngredientWithAmountModel {
     pub optional: bool,
 }
 
-// TODO: write doctests
 // TODO: make more graceful errors
 impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
     type Error = ValidationError;
@@ -57,6 +56,13 @@ impl TryFrom<&IngredientWithAmountModel> for IngredientWithAmount {
                 .map_err(|e| ValidationError::DeserializationFailed("amount", e))?,
             ingredient: value.ingredient.clone().try_into()?,
         })
+    }
+}
+
+impl TryFrom<IngredientWithAmountModel> for IngredientWithAmount {
+    type Error = ValidationError;
+    fn try_from(value: IngredientWithAmountModel) -> Result<Self, Self::Error> {
+        Self::try_from(&value)
     }
 }
 
@@ -88,3 +94,6 @@ impl IngredientUnit {
         Self::Teaspoons(tablespoons * 3.0)
     }
 }
+
+#[cfg(test)]
+mod tests;
