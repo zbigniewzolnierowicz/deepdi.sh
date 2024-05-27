@@ -30,3 +30,22 @@ async fn inserting_recipe_with_same_id_fails() {
 
     assert!(matches!(error, RecipeRepositoryError::Conflict(a) if a == "id"));
 }
+
+#[tokio::test]
+async fn getting_a_recipe_by_id_succeeds() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    let result = repo.get_by_id(result.id).await.unwrap();
+
+    assert_eq!(recipe, result);
+}
+
+#[tokio::test]
+async fn getting_a_nonexistent_recipe_by_id_fails() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.get_by_id(recipe.id).await.unwrap_err();
+
+    assert!(matches!(result, RecipeRepositoryError::NotFound(_)));
+}
