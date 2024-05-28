@@ -20,6 +20,7 @@ pub struct CreateRecipeDTO {
 #[derive(Deserialize, Serialize, TS, Debug)]
 #[ts(export)]
 pub struct RecipeDTO {
+    pub id: String,
     pub name: String,
     pub description: String,
     pub steps: Vec<String>,

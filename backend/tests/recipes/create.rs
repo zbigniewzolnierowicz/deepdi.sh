@@ -1,6 +1,7 @@
 use assert_json_diff::assert_json_include;
 use common::{ingredients::IngredientDTO, RecipeDTO};
-use reqwest::Client;
+use pretty_assertions::assert_eq;
+use reqwest::{Client, StatusCode};
 
 use crate::setup::TestApp;
 
@@ -128,6 +129,8 @@ async fn inserting_recipe_with_incorrect_ingredients_fails() {
         .await
         .unwrap();
 
+    assert_eq!(result.status(), StatusCode::BAD_REQUEST);
+
     let result = result
         .json::<common::error::ErrorMessageWithJsonValue>()
         .await
@@ -197,6 +200,8 @@ async fn inserting_recipe_with_partially_incorrect_ingredients() {
         .send()
         .await
         .unwrap();
+
+    assert_eq!(result.status(), StatusCode::BAD_REQUEST);
 
     let result = result
         .json::<common::error::ErrorMessageWithJsonValue>()

@@ -1,6 +1,7 @@
 pub mod errors;
 use std::collections::HashMap;
 
+use common::{IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -22,11 +23,47 @@ pub struct Recipe {
     pub servings: ServingsType,
 }
 
+impl From<Recipe> for RecipeDTO {
+    fn from(value: Recipe) -> Self {
+        Self {
+            id: value.id.to_string(),
+            ingredients: value.ingredients.into_iter().map(|i| i.into()).collect(),
+            name: value.name,
+            description: value.description,
+            steps: value.steps,
+            time: value
+                .time
+                .into_iter()
+                .map(|(k, v)| (k, v.as_secs()))
+                .collect(),
+            servings: value.servings.into(),
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ServingsType {
     FromTo(u16, u16),
     Exact(u16),
+}
+
+impl From<ServingsType> for ServingsTypeDTO {
+    fn from(value: ServingsType) -> Self {
+        match value {
+            ServingsType::Exact(a) => Self::Exact(a),
+            ServingsType::FromTo(a, b) => Self::FromTo(a, b),
+        }
+    }
+}
+
+impl From<ServingsTypeDTO> for ServingsType {
+    fn from(value: ServingsTypeDTO) -> Self {
+        match value {
+            ServingsTypeDTO::Exact(a) => Self::Exact(a),
+            ServingsTypeDTO::FromTo(a, b) => Self::FromTo(a, b),
+        }
+    }
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -35,6 +72,17 @@ pub struct IngredientWithAmount {
     pub amount: IngredientUnit,
     pub notes: Option<String>,
     pub optional: bool,
+}
+
+impl From<IngredientWithAmount> for IngredientWithAmountDTO {
+    fn from(value: IngredientWithAmount) -> Self {
+        Self {
+            ingredient: value.ingredient.into(),
+            optional: value.optional,
+            notes: value.notes,
+            amount: value.amount.into(),
+        }
+    }
 }
 
 #[derive(FromRow, PartialEq, Debug, Clone)]
@@ -79,6 +127,30 @@ pub enum IngredientUnit {
 impl Default for IngredientUnit {
     fn default() -> Self {
         Self::Grams(0.0)
+    }
+}
+
+impl From<IngredientUnitDTO> for IngredientUnit {
+    fn from(value: IngredientUnitDTO) -> Self {
+        match value {
+            IngredientUnitDTO::Cups(amount) => Self::Cups(amount),
+            IngredientUnitDTO::Grams(amount) => Self::Grams(amount),
+            IngredientUnitDTO::Mililiters(amount) => Self::Mililiters(amount),
+            IngredientUnitDTO::Teaspoons(amount) => Self::Teaspoons(amount),
+            IngredientUnitDTO::Other { amount, unit } => Self::Other { amount, unit },
+        }
+    }
+}
+
+impl From<IngredientUnit> for IngredientUnitDTO {
+    fn from(value: IngredientUnit) -> Self {
+        match value {
+            IngredientUnit::Cups(amount) => Self::Cups(amount),
+            IngredientUnit::Grams(amount) => Self::Grams(amount),
+            IngredientUnit::Mililiters(amount) => Self::Mililiters(amount),
+            IngredientUnit::Teaspoons(amount) => Self::Teaspoons(amount),
+            IngredientUnit::Other { amount, unit } => Self::Other { amount, unit },
+        }
     }
 }
 

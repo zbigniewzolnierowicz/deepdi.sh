@@ -1,4 +1,4 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::State, Json};
 use common::{CreateIngredientDTO, IngredientDTO};
 
 use crate::{
@@ -7,20 +7,6 @@ use crate::{
         create_ingredient, CreateIngredient, CreateIngredientError,
     },
 };
-
-impl IntoResponse for CreateIngredientError {
-    fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        (
-            StatusCode::BAD_REQUEST,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
-    }
-}
 
 #[tracing::instrument("[ROUTE] Creating a new ingredient", skip(ingredient_repository))]
 pub async fn create_ingredient_route(

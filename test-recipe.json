@@ -1,0 +1,21 @@
+{
+  "name": "Trial recipe",
+  "description": "A big recipe",
+  "steps": ["Crack your head against the pavement"],
+  "time": {
+    "Prep time": 1200
+  },
+  "ingredients": [
+    {
+      "ingredient_id": "018fc017-acc4-7ba6-b8ac-81df604914b7",
+      "amount": {
+        "grams": 100.0
+      },
+      "optional": false,
+      "notes": null
+    }
+  ],
+  "servings": {
+    "from_to": [2, 4]
+  }
+}

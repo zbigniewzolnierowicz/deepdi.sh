@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use sqlx::{Error as SQLXError, PgPool};
 use std::{collections::HashMap, sync::OnceLock};
+use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
@@ -14,18 +15,20 @@ pub struct PostgresRecipeRepository(pub PgPool);
 fn constraint_to_field(field: &str) -> &str {
     static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
     let m = HASHMAP.get_or_init(|| {
-        HashMap::from_iter([("ingredients_name_key", "name"), ("ingredients_pkey", "id")])
+        HashMap::from_iter([
+            ("ingredients_name_key", "ingredient name"),
+            ("ingredients_pkey", "ingredient id"),
+            ("recipes_pkey", "recipe id"),
+        ])
     });
     m.get(field).unwrap_or(&field)
 }
 
 fn map_error_to_internal(e: SQLXError) -> RecipeRepositoryError {
     match e {
-        SQLXError::Database(dberror) if dberror.is_unique_violation() => {
-            RecipeRepositoryError::Conflict(
-                constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
-            )
-        }
+        SQLXError::Database(dberror) => RecipeRepositoryError::Conflict(
+            constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
+        ),
         e => RecipeRepositoryError::UnknownError(e.into()),
     }
 }
@@ -84,38 +87,43 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         tx.commit().await.map_err(map_error_to_internal)?;
 
-        // TODO: There's got to be a way to turn this into a single query
+        self.get_by_id(&result.id).await
+    }
 
-        let inserted = sqlx::query_file!("queries/get_recipe.sql", result.id)
+    async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, RecipeRepositoryError> {
+        let result = sqlx::query_file!("queries/get_recipe.sql", id)
             .fetch_one(&self.0)
             .await
-            .map_err(map_error_to_internal)?;
+            .map_err(|e| match e {
+                SQLXError::RowNotFound => RecipeRepositoryError::NotFound(*id),
+                _ => RecipeRepositoryError::UnknownError(e.into()),
+            })?;
 
-        let inserted_ingredients = sqlx::query_file_as!(
+        let result_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
             "queries/get_ingredients_for_recipe.sql",
-            result.id
+            id
         )
         .fetch_all(&self.0)
         .await
-        .map_err(map_error_to_internal)?;
+        .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
 
-        let ingredients = inserted_ingredients
+        let ingredients = result_ingredients
             .iter()
             .map(IngredientWithAmount::try_from)
             .collect::<Result<Vec<_>, _>>()?;
 
-        let time = serde_json::from_value(inserted.time)
+        let time = serde_json::from_value(result.time)
             .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
 
-        let servings = serde_json::from_value(inserted.servings)
+        let servings = serde_json::from_value(result.servings)
             .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
 
         let recipe = Recipe {
-            id: inserted.id,
-            name: inserted.name,
-            description: inserted.description,
-            steps: inserted.steps,
+            id: result.id,
+            name: result.name,
+            description: result.description,
+            steps: result.steps,
             time,
             servings,
             ingredients,
@@ -126,7 +134,6 @@ impl RecipeRepository for PostgresRecipeRepository {
 }
 
 impl PostgresRecipeRepository {
-    #[allow(dead_code)] // TODO: Remove after connecting to the API
     pub fn new(pool: PgPool) -> Self {
         Self(pool)
     }
