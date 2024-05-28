@@ -1,7 +1,5 @@
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
-    response::IntoResponse,
     Json,
 };
 use common::IngredientDTO;
@@ -12,20 +10,6 @@ use crate::{
     domain::queries::ingredients::get_by_id::{get_ingredient_by_id, GetIngredientError},
 };
 
-impl IntoResponse for GetIngredientError {
-    fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        (
-            StatusCode::BAD_REQUEST,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
-    }
-}
-
 #[tracing::instrument("[ROUTE] Getting ingredient by ID", skip(ingredient_repository))]
 pub async fn get_ingredient_by_id_route(
     Path(ingredient_id): Path<Uuid>,
@@ -33,7 +17,7 @@ pub async fn get_ingredient_by_id_route(
         ingredient_repository,
         ..
     }): State<AppState>,
-) -> axum::response::Result<Json<IngredientDTO>> {
+) -> Result<Json<IngredientDTO>, GetIngredientError> {
     let result = get_ingredient_by_id(ingredient_repository, ingredient_id).await?;
 
     Ok(Json(result.into()))

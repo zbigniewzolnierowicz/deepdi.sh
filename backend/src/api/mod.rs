@@ -26,7 +26,7 @@ use self::routes::{
         get_ingredient_by_id::get_ingredient_by_id_route,
         update_ingredient::update_ingredient_route,
     },
-    recipes::create_recipe::create_recipe_route,
+    recipes::{create_recipe::create_recipe_route, get_recipe_by_id::get_recipe_by_id_route},
 };
 
 pub struct App {
@@ -47,6 +47,7 @@ impl App {
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
             .route("/ingredient", get(get_all_ingredients_route))
             .route("/recipe/create", post(create_recipe_route))
+            .route("/recipe/:id", get(get_recipe_by_id_route))
             .layer(OtelInResponseLayer)
             .layer(OtelAxumLayer::default())
     }

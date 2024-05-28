@@ -26,7 +26,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
         Ok(input)
     }
 
-    async fn get_by_id(&self, id: Uuid) -> Result<Recipe, RecipeRepositoryError> {
+    async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, RecipeRepositoryError> {
         let lock = self.0.lock().map_err(|_| {
             eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
         })?;
@@ -34,7 +34,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
         let result = lock
             .get(&id)
             .cloned()
-            .ok_or_else(|| RecipeRepositoryError::NotFound(id));
+            .ok_or_else(|| RecipeRepositoryError::NotFound(*id));
 
         result
     }

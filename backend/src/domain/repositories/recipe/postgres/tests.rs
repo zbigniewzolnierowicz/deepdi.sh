@@ -40,6 +40,33 @@ async fn inserting_recipe_with_same_id_fails(pool: PgPool) {
 
     let error = repo.insert(recipe.clone()).await.unwrap_err();
 
-    assert!(matches!(error, RecipeRepositoryError::Conflict(a) if a == "id"));
+    assert!(matches!(error, RecipeRepositoryError::Conflict(a) if a == "recipe id"));
 }
 
+#[sqlx::test]
+async fn getting_recipe_by_id_works(pool: PgPool) {
+    let repo = PostgresRecipeRepository::new(pool.clone());
+    let ingredient_repo = PostgresIngredientRepository::new(pool);
+
+    let recipe = recipe_fixture();
+    for ir in recipe.ingredients.clone() {
+        ingredient_repo
+            .insert(ir.ingredient)
+            .await
+            .expect("Could not insert an ingredient due to an error somewhere.");
+    }
+
+    repo.insert(recipe.clone()).await.unwrap();
+
+    let result = repo.get_by_id(&recipe.id).await.unwrap();
+
+    assert_eq!(result, recipe);
+}
+
+#[sqlx::test]
+async fn getting_a_nonexistent_recipe_errors(pool: PgPool) {
+    let repo = PostgresRecipeRepository::new(pool.clone());
+    let error = repo.get_by_id(&Uuid::from_u128(0)).await.unwrap_err();
+
+    assert!(matches!(error, RecipeRepositoryError::NotFound(id) if id == Uuid::from_u128(0)));
+}

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
+use axum::response::IntoResponse;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -24,6 +26,25 @@ pub enum CreateRecipeError {
 
     #[error(transparent)]
     Unknown(#[from] eyre::Report),
+}
+
+impl IntoResponse for CreateRecipeError {
+    fn into_response(self) -> axum::response::Response {
+        let error_type: &str = self.as_ref();
+        let status = match self {
+            Self::IngredientsNotFound(_) => StatusCode::BAD_REQUEST,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+
+        (
+            status,
+            axum::Json(common::error::ErrorMessage::new(
+                error_type,
+                self.to_string(),
+            )),
+        )
+            .into_response()
+    }
 }
 
 impl From<RecipeRepositoryError> for CreateRecipeError {

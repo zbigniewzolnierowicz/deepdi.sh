@@ -1,3 +1,6 @@
+use axum::response::IntoResponse;
+use common::UpdateIngredientDTO;
+use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::domain::{
@@ -10,6 +13,16 @@ pub struct UpdateIngredient {
     pub name: Option<String>,
     pub description: Option<String>,
     pub diet_friendly: Option<Vec<String>>,
+}
+
+impl From<UpdateIngredientDTO> for UpdateIngredient {
+    fn from(value: UpdateIngredientDTO) -> Self {
+        Self {
+            name: value.name,
+            description: value.description,
+            diet_friendly: value.diet_friendly,
+        }
+    }
 }
 
 impl TryFrom<&UpdateIngredient> for IngredientChangeset {
@@ -39,6 +52,20 @@ impl TryFrom<&UpdateIngredient> for IngredientChangeset {
 pub enum UpdateIngredientError {
     #[error(transparent)]
     Internal(#[from] eyre::Error),
+}
+
+impl IntoResponse for UpdateIngredientError {
+    fn into_response(self) -> axum::response::Response {
+        let error_type: &str = self.as_ref();
+        (
+            StatusCode::BAD_REQUEST,
+            axum::Json(common::error::ErrorMessage::new(
+                error_type,
+                self.to_string(),
+            )),
+        )
+            .into_response()
+    }
 }
 
 impl From<ValidationError> for UpdateIngredientError {

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use sqlx::{Error as SQLXError, PgPool};
-use uuid::Uuid;
 use std::{collections::HashMap, sync::OnceLock};
+use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
@@ -15,18 +15,20 @@ pub struct PostgresRecipeRepository(pub PgPool);
 fn constraint_to_field(field: &str) -> &str {
     static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
     let m = HASHMAP.get_or_init(|| {
-        HashMap::from_iter([("ingredients_name_key", "name"), ("ingredients_pkey", "id"), ("recipes_pkey", "id")])
+        HashMap::from_iter([
+            ("ingredients_name_key", "ingredient name"),
+            ("ingredients_pkey", "ingredient id"),
+            ("recipes_pkey", "recipe id"),
+        ])
     });
     m.get(field).unwrap_or(&field)
 }
 
 fn map_error_to_internal(e: SQLXError) -> RecipeRepositoryError {
     match e {
-        SQLXError::Database(dberror) => {
-            RecipeRepositoryError::Conflict(
-                constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
-            )
-        }
+        SQLXError::Database(dberror) => RecipeRepositoryError::Conflict(
+            constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
+        ),
         e => RecipeRepositoryError::UnknownError(e.into()),
     }
 }
@@ -85,14 +87,17 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         tx.commit().await.map_err(map_error_to_internal)?;
 
-        self.get_by_id(result.id).await
+        self.get_by_id(&result.id).await
     }
 
-    async fn get_by_id(&self, id: Uuid) -> Result<Recipe, RecipeRepositoryError> {
+    async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, RecipeRepositoryError> {
         let result = sqlx::query_file!("queries/get_recipe.sql", id)
             .fetch_one(&self.0)
             .await
-            .map_err(map_error_to_internal)?;
+            .map_err(|e| match e {
+                SQLXError::RowNotFound => RecipeRepositoryError::NotFound(*id),
+                _ => RecipeRepositoryError::UnknownError(e.into()),
+            })?;
 
         let result_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
@@ -101,7 +106,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         )
         .fetch_all(&self.0)
         .await
-        .map_err(map_error_to_internal)?;
+        .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
 
         let ingredients = result_ingredients
             .iter()
