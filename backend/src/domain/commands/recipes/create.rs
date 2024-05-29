@@ -11,8 +11,8 @@ use crate::domain::{
         errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
     },
     repositories::{
-        ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
-        recipe::{errors::RecipeRepositoryError, RecipeRepositoryService},
+        ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
+        recipe::{errors::InsertRecipeError, RecipeRepositoryService},
     },
 };
 
@@ -47,22 +47,22 @@ impl IntoResponse for CreateRecipeError {
     }
 }
 
-impl From<RecipeRepositoryError> for CreateRecipeError {
-    fn from(value: RecipeRepositoryError) -> Self {
+impl From<InsertRecipeError> for CreateRecipeError {
+    fn from(value: InsertRecipeError) -> Self {
         match value {
-            RecipeRepositoryError::UnknownError(e) => Self::Unknown(e),
-            RecipeRepositoryError::ValidationError(e) => Self::Validation(e),
-            _ => unreachable!(),
+            InsertRecipeError::ValidationError(e) => Self::Validation(e),
+            e => Self::Unknown(e.into()),
         }
     }
 }
 
-impl From<IngredientRepositoryError> for CreateRecipeError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<GetAllIngredientsError> for CreateRecipeError {
+    fn from(value: GetAllIngredientsError) -> Self {
         match value {
-            IngredientRepositoryError::UnknownError(e) => Self::Unknown(e),
-            IngredientRepositoryError::MultipleMissing(ids) => Self::IngredientsNotFound(ids),
-            _ => unreachable!(),
+            GetAllIngredientsError::MultipleIngredientsMissing(ids) => {
+                Self::IngredientsNotFound(ids)
+            }
+            e => Self::Unknown(e.into()),
         }
     }
 }

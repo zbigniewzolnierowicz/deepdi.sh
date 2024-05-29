@@ -8,7 +8,13 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use sqlx::{error::Error as SQLXError, PgPool};
 use uuid::Uuid;
 
-use super::{errors::IngredientRepositoryError, IngredientRepository};
+use super::{
+    errors::{
+        DeleteIngredientError, GetAllIngredientsError, GetIngredientByIdError,
+        InsertIngredientError, UpdateIngredientError,
+    },
+    IngredientRepository,
+};
 
 pub struct PostgresIngredientRepository(pub PgPool);
 
@@ -28,10 +34,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         "[INGREDIENT REPOSITORY] [POSTGRES] Insert a new ingredient",
         skip(self)
     )]
-    async fn insert(
-        &self,
-        ingredient: Ingredient,
-    ) -> Result<Ingredient, IngredientRepositoryError> {
+    async fn insert(&self, ingredient: Ingredient) -> Result<Ingredient, InsertIngredientError> {
         let diet_friendly: Vec<String> = ingredient
             .clone()
             .diet_friendly
@@ -56,11 +59,11 @@ impl IngredientRepository for PostgresIngredientRepository {
         .await
         .map_err(|e| match e {
             SQLXError::Database(dberror) if dberror.is_unique_violation() => {
-                IngredientRepositoryError::Conflict(
+                InsertIngredientError::Conflict(
                     constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
                 )
             }
-            _ => IngredientRepositoryError::UnknownError(e.into()),
+            _ => InsertIngredientError::UnknownError(e.into()),
         })?;
 
         Ok(ingredient.try_into()?)
@@ -70,7 +73,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         "[INGREDIENT REPOSITORY] [POSTGRES] Get ingredient with ID",
         skip(self)
     )]
-    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, IngredientRepositoryError> {
+    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError> {
         let ingredient = sqlx::query_as!(
             IngredientModel,
             r#"
@@ -83,15 +86,15 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_one(&self.0)
         .await
         .map_err(|e| match e {
-            SQLXError::RowNotFound => IngredientRepositoryError::NotFound(id),
-            _ => IngredientRepositoryError::UnknownError(e.into()),
+            SQLXError::RowNotFound => GetIngredientByIdError::NotFound(id),
+            _ => GetIngredientByIdError::UnknownError(e.into()),
         })?;
 
         Ok(ingredient.try_into()?)
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Get all ingredients", skip(self))]
-    async fn get_all(&self) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
+    async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
         let ingredients = sqlx::query_as!(
             IngredientModel,
             r#"
@@ -101,7 +104,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         )
         .fetch_all(&self.0)
         .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
+        .map_err(|e| GetAllIngredientsError::UnknownError(e.into()))?
         .par_iter()
         .filter_map(|i| i.try_into().ok())
         .collect();
@@ -114,7 +117,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         &self,
         id: Uuid,
         changeset: IngredientChangeset,
-    ) -> Result<Ingredient, IngredientRepositoryError> {
+    ) -> Result<Ingredient, UpdateIngredientError> {
         let mut ingredient_to_update = sqlx::query_as!(
             IngredientModel,
             r#"
@@ -125,15 +128,15 @@ impl IngredientRepository for PostgresIngredientRepository {
         )
         .fetch_optional(&self.0)
         .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?
-        .ok_or_else(|| IngredientRepositoryError::NotFound(id))?;
+        .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?
+        .ok_or_else(|| UpdateIngredientError::NotFound(id))?;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
         let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
 
         if name.is_none() && description.is_none() && diet_friendly.is_none() {
-            return Err(IngredientRepositoryError::ValidationError(
+            return Err(UpdateIngredientError::ValidationError(
                 ValidationError::EmptyField(vec!["name", "description", "diet_friendly"]),
             ));
         };
@@ -142,7 +145,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             .0
             .begin()
             .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
 
         if let Some(name) = name {
             if name != ingredient_to_update.name {
@@ -160,7 +163,7 @@ impl IngredientRepository for PostgresIngredientRepository {
                 )
                 .fetch_one(&self.0)
                 .await
-                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
             };
         };
 
@@ -180,7 +183,7 @@ impl IngredientRepository for PostgresIngredientRepository {
                 )
                 .fetch_one(&self.0)
                 .await
-                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
             }
         };
 
@@ -200,19 +203,19 @@ impl IngredientRepository for PostgresIngredientRepository {
                 )
                 .fetch_one(&self.0)
                 .await
-                .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
             }
         };
 
         tx.commit()
             .await
-            .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
 
         Ok(ingredient_to_update.try_into()?)
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Delete an ingredient", skip(self))]
-    async fn delete(&self, id: Uuid) -> Result<(), IngredientRepositoryError> {
+    async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
         let ingredient_to_delete = self.get_by_id(id).await?;
 
         sqlx::query!(
@@ -221,16 +224,13 @@ impl IngredientRepository for PostgresIngredientRepository {
         )
         .execute(&self.0)
         .await
-        .map_err(|e| IngredientRepositoryError::UnknownError(e.into()))?;
+        .map_err(|e| DeleteIngredientError::UnknownError(e.into()))?;
 
         Ok(())
     }
 
-    async fn get_all_by_id(
-        &self,
-        ids: &[Uuid],
-    ) -> Result<Vec<Ingredient>, IngredientRepositoryError> {
-        let results: Result<Vec<Ingredient>, IngredientRepositoryError> = sqlx::query_as!(
+    async fn get_all_by_id(&self, ids: &[Uuid]) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
+        let results: Result<Vec<Ingredient>, GetAllIngredientsError> = sqlx::query_as!(
             IngredientModel,
             r#"
             SELECT id, name, description, diet_friendly
@@ -242,15 +242,13 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_all(&self.0)
         .await
         .map_err(|e| match e {
-            SQLXError::RowNotFound => IngredientRepositoryError::MultipleMissing(ids.to_vec()),
-            e => IngredientRepositoryError::UnknownError(e.into()),
+            SQLXError::RowNotFound => {
+                GetAllIngredientsError::MultipleIngredientsMissing(ids.to_vec())
+            }
+            e => GetAllIngredientsError::UnknownError(e.into()),
         })?
         .into_par_iter()
-        .map(|ingredient| {
-            ingredient
-                .try_into()
-                .map_err(IngredientRepositoryError::from)
-        })
+        .map(|ingredient| ingredient.try_into().map_err(GetAllIngredientsError::from))
         .collect();
 
         let results = results?;
@@ -267,7 +265,9 @@ impl IngredientRepository for PostgresIngredientRepository {
         if omitted_ids.is_empty() {
             Ok(results)
         } else {
-            Err(IngredientRepositoryError::MultipleMissing(omitted_ids))
+            Err(GetAllIngredientsError::MultipleIngredientsMissing(
+                omitted_ids,
+            ))
         }
     }
 }

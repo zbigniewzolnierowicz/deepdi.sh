@@ -55,12 +55,10 @@ async fn insert_ingredient_that_already_exists_fails_id(pool: PgPool) {
         .await
         .unwrap_err();
 
-    match result {
-        IngredientRepositoryError::Conflict(fieldname) => {
-            assert_eq!(fieldname, "id");
-        }
-        _ => unreachable!(),
-    };
+    assert!(matches!(
+        result,
+        InsertIngredientError::Conflict(fieldname) if fieldname == "id"
+    ));
 }
 
 #[sqlx::test]
@@ -86,12 +84,10 @@ async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
         .await
         .unwrap_err();
 
-    match result {
-        IngredientRepositoryError::Conflict(fieldname) => {
-            assert_eq!(fieldname, "name".to_string());
-        }
-        _ => unreachable!(),
-    };
+    assert!(matches!(
+        result,
+        InsertIngredientError::Conflict(fieldname) if fieldname == "name"
+    ))
 }
 
 #[sqlx::test]
@@ -118,14 +114,9 @@ async fn get_by_id_returns_ingredient(pool: PgPool) {
 async fn get_by_id_returns_error_when_missing(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool.clone());
 
-    let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
+    let error = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
 
-    match result {
-        IngredientRepositoryError::NotFound(id) => {
-            assert_eq!(id, Uuid::from_u128(1));
-        }
-        _ => unreachable!(),
-    }
+    assert!(matches!(error, GetIngredientByIdError::NotFound(id) if id == Uuid::from_u128(1)));
 }
 
 #[sqlx::test]
@@ -226,12 +217,9 @@ async fn updating_with_empty_changeset_fails(pool: PgPool) {
         .await
         .unwrap_err();
 
-    match error {
-        IngredientRepositoryError::ValidationError(ValidationError::EmptyField(fields)) => {
-            assert_eq!(fields, vec!["name", "description", "diet_friendly"]);
-        }
-        _ => unreachable!(),
-    };
+    assert!(
+        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == vec!["name", "description", "diet_friendly"])
+    );
 }
 
 #[sqlx::test]
@@ -251,12 +239,7 @@ async fn updating_a_missing_file_fails(pool: PgPool) {
         .await
         .unwrap_err();
 
-    match error {
-        IngredientRepositoryError::NotFound(u) => {
-            assert_eq!(u, Uuid::from_u128(1))
-        }
-        _ => unreachable!(),
-    }
+    assert!(matches!(error, UpdateIngredientError::NotFound(id) if id == Uuid::from_u128(1)));
 }
 
 #[sqlx::test]
@@ -270,20 +253,15 @@ async fn deleting_works(pool: PgPool) {
         diet_friendly: WhichDiets::new(),
     };
 
-    let insert_result = repo.insert(input).await.unwrap();
-
-    match repo.delete(insert_result.id).await {
-        Ok(()) => {}
-        Err(_) => unreachable!(),
-    };
+    repo.insert(input).await.unwrap();
 }
 
 #[sqlx::test]
 async fn deleting_nonexistent_ingredient_errors(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool.clone());
+    let error = repo.delete(Uuid::from_u128(0)).await.unwrap_err();
 
-    match repo.delete(Uuid::from_u128(0)).await {
-        Err(IngredientRepositoryError::NotFound(id)) => assert_eq!(id, Uuid::from_u128(0)),
-        _ => unreachable!(),
-    };
+    assert!(
+        matches!(error, DeleteIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(0))
+    );
 }

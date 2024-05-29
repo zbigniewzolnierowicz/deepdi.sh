@@ -2,7 +2,9 @@ use uuid::Uuid;
 
 use crate::domain::{
     entities::recipe::Recipe,
-    repositories::recipe::{errors::RecipeRepositoryError, RecipeRepositoryService},
+    repositories::recipe::{
+        errors::GetRecipeByIdError as GetRecipeByIdErrorInternal, RecipeRepositoryService,
+    },
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -14,10 +16,10 @@ pub enum GetRecipeError {
     Unknown(#[from] eyre::Error),
 }
 
-impl From<RecipeRepositoryError> for GetRecipeError {
-    fn from(value: RecipeRepositoryError) -> Self {
+impl From<GetRecipeByIdErrorInternal> for GetRecipeError {
+    fn from(value: GetRecipeByIdErrorInternal) -> Self {
         match value {
-            RecipeRepositoryError::NotFound(id) => GetRecipeError::NotFound(id),
+            GetRecipeByIdErrorInternal::NotFound(id) => GetRecipeError::NotFound(id),
             e => GetRecipeError::Unknown(e.into()),
         }
     }

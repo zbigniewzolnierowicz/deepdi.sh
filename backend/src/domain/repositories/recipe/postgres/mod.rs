@@ -1,48 +1,55 @@
 use async_trait::async_trait;
-use sqlx::{Error as SQLXError, PgPool};
-use std::{collections::HashMap, sync::OnceLock};
+use futures::future::join_all;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
 
-use super::{errors::RecipeRepositoryError, RecipeRepository};
+use super::{
+    errors::{GetRecipeByIdError, InsertRecipeError},
+    RecipeRepository,
+};
 
 pub struct PostgresRecipeRepository(pub PgPool);
 
-/// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
-/// This function maps constraints to fields
-fn constraint_to_field(field: &str) -> &str {
-    static HASHMAP: OnceLock<HashMap<&str, &str>> = OnceLock::new();
-    let m = HASHMAP.get_or_init(|| {
-        HashMap::from_iter([
-            ("ingredients_name_key", "ingredient name"),
-            ("ingredients_pkey", "ingredient id"),
-            ("recipes_pkey", "recipe id"),
-        ])
-    });
-    m.get(field).unwrap_or(&field)
-}
+async fn insert_ingredient(
+    pool: &PgPool,
+    id: Uuid,
+    ingredient: &IngredientWithAmount,
+) -> Result<(), InsertRecipeError> {
+    let amount = serde_json::to_value(ingredient.amount.clone())
+        .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
 
-fn map_error_to_internal(e: SQLXError) -> RecipeRepositoryError {
-    match e {
-        SQLXError::Database(dberror) => RecipeRepositoryError::Conflict(
-            constraint_to_field(dberror.constraint().unwrap_or_default()).to_string(),
-        ),
-        e => RecipeRepositoryError::UnknownError(e.into()),
-    }
+    sqlx::query!(
+        r#"
+                INSERT INTO ingredients_recipes
+                (recipe_id, ingredient_id, amount, notes, optional)
+                VALUES
+                ($1, $2, $3, $4, $5)
+                "#,
+        id,
+        ingredient.ingredient.id,
+        amount,
+        ingredient.notes,
+        ingredient.optional
+    )
+    .execute(pool)
+    .await
+    .map_err(InsertRecipeError::from)?;
+    Ok(())
 }
 
 #[async_trait]
 impl RecipeRepository for PostgresRecipeRepository {
-    async fn insert(&self, input: Recipe) -> Result<Recipe, RecipeRepositoryError> {
+    async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError> {
         let time = serde_json::to_value(&input.time)
-            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
 
         let servings = serde_json::to_value(&input.servings)
-            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
 
-        let tx = self.0.begin().await.map_err(map_error_to_internal)?;
+        let tx = self.0.begin().await.map_err(InsertRecipeError::from)?;
 
         let result = sqlx::query!(
             r#"INSERT INTO recipes
@@ -60,44 +67,30 @@ impl RecipeRepository for PostgresRecipeRepository {
         )
         .fetch_one(&self.0)
         .await
-        .map_err(map_error_to_internal)?;
+        .map_err(InsertRecipeError::from)?;
 
-        // TODO: Parallelize or turn into a single query somehow
-        for ingredient in input.ingredients {
-            let amount = serde_json::to_value(ingredient.amount)
-                .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+        join_all(
+            input
+                .ingredients
+                .iter()
+                .map(|i| insert_ingredient(&self.0, result.id, i)),
+        )
+        .await
+        .into_iter()
+        .collect::<Result<Vec<()>, InsertRecipeError>>()?;
 
-            sqlx::query!(
-                r#"
-                INSERT INTO ingredients_recipes
-                (recipe_id, ingredient_id, amount, notes, optional)
-                VALUES
-                ($1, $2, $3, $4, $5)
-                "#,
-                result.id,
-                ingredient.ingredient.id,
-                amount,
-                ingredient.notes,
-                ingredient.optional
-            )
-            .execute(&self.0)
+        tx.commit().await.map_err(InsertRecipeError::from)?;
+
+        self.get_by_id(&result.id)
             .await
-            .map_err(map_error_to_internal)?;
-        }
-
-        tx.commit().await.map_err(map_error_to_internal)?;
-
-        self.get_by_id(&result.id).await
+            .map_err(InsertRecipeError::Get)
     }
 
-    async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, RecipeRepositoryError> {
+    async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError> {
         let result = sqlx::query_file!("queries/get_recipe.sql", id)
             .fetch_one(&self.0)
             .await
-            .map_err(|e| match e {
-                SQLXError::RowNotFound => RecipeRepositoryError::NotFound(*id),
-                _ => RecipeRepositoryError::UnknownError(e.into()),
-            })?;
+            .map_err(|e| GetRecipeByIdError::with_id(id, e))?;
 
         let result_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
@@ -106,18 +99,19 @@ impl RecipeRepository for PostgresRecipeRepository {
         )
         .fetch_all(&self.0)
         .await
-        .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+        .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
 
         let ingredients = result_ingredients
             .iter()
             .map(IngredientWithAmount::try_from)
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(GetRecipeByIdError::from)?;
 
         let time = serde_json::from_value(result.time)
-            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
 
         let servings = serde_json::from_value(result.servings)
-            .map_err(|e| RecipeRepositoryError::UnknownError(e.into()))?;
+            .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
 
         let recipe = Recipe {
             id: result.id,

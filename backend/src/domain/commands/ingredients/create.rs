@@ -3,8 +3,9 @@ use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::*;
-use crate::domain::repositories::ingredients::errors::IngredientRepositoryError;
-use crate::domain::repositories::ingredients::IngredientRepositoryService;
+use crate::domain::repositories::ingredients::{
+    errors::InsertIngredientError, IngredientRepositoryService,
+};
 
 use self::errors::ValidationError;
 use self::types::DietFriendly;
@@ -35,12 +36,11 @@ impl IntoResponse for CreateIngredientError {
     }
 }
 
-impl From<IngredientRepositoryError> for CreateIngredientError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<InsertIngredientError> for CreateIngredientError {
+    fn from(value: InsertIngredientError) -> Self {
         match value {
-            IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
-            IngredientRepositoryError::Conflict(field) => Self::Conflict(field),
-            _ => unreachable!(),
+            InsertIngredientError::Conflict(field) => Self::Conflict(field),
+            e => Self::Internal(e.into()),
         }
     }
 }
