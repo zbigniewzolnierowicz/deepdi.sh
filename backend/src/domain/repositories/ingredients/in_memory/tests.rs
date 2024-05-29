@@ -14,7 +14,7 @@ async fn insert_ingredient_succeeds() {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
         description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -32,7 +32,7 @@ async fn insert_ingredient_that_already_exists_fails_id() {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
         description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -42,7 +42,7 @@ async fn insert_ingredient_that_already_exists_fails_id() {
             id: Uuid::from_u128(1),
             name: "Ingredient name 2".try_into().unwrap(),
             description: "Ingredient description 2".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
+            diet_friendly: WhichDiets::new(),
         })
         .await
         .unwrap_err();
@@ -63,7 +63,7 @@ async fn insert_ingredient_that_already_exists_fails_name() {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
         description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -73,7 +73,7 @@ async fn insert_ingredient_that_already_exists_fails_name() {
             id: Uuid::from_u128(2),
             name: "Ingredient name".try_into().unwrap(),
             description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets(vec![]),
+            diet_friendly: WhichDiets::new(),
         })
         .await
         .unwrap_err();
@@ -93,7 +93,7 @@ async fn get_by_id_returns_ingredient() {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
         description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -127,7 +127,7 @@ async fn get_all_returns_all_ingredients() {
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -136,7 +136,7 @@ async fn get_all_returns_all_ingredients() {
         id: Uuid::from_u128(2),
         name: "Ingredient name 2".try_into().unwrap(),
         description: "Ingredient description 2".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     })
     .await
     .unwrap();
@@ -178,7 +178,7 @@ async fn updating_an_ingredient_success() {
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     };
     repo.insert(input.clone()).await.unwrap();
 
@@ -210,7 +210,7 @@ async fn updating_with_empty_changeset_fails() {
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     };
     repo.insert(input.clone()).await.unwrap();
 
@@ -260,7 +260,7 @@ async fn deleting_works() {
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets(vec![]),
+        diet_friendly: WhichDiets::new(),
     };
 
     let insert_result = repo.insert(input).await.unwrap();
