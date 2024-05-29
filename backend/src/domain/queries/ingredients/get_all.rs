@@ -87,7 +87,7 @@ mod tests {
             description: IngredientDescription(
                 "Description of meat fries (whatever they are)".into(),
             ),
-            diet_friendly: WhichDiets(vec![]),
+            diet_friendly: WhichDiets::new(),
         };
 
         repo.insert(given_1.clone()).await.unwrap();

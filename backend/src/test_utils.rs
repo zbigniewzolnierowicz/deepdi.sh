@@ -26,7 +26,11 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::from_u128(0),
                     name: "Firm tofu".try_into().unwrap(),
                     description: "It's tofu".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
+                    diet_friendly: vec![
+                        DietFriendly::Vegan,
+                        DietFriendly::Vegetarian,
+                        DietFriendly::GlutenFree
+                    ].into(),
                 },
                 amount: IngredientUnit::Grams(400.0),
                 notes: None,
@@ -37,7 +41,11 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::from_u128(1),
                     name: "Broccoli".try_into().unwrap(),
                     description: "It's broccoli".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
+                    diet_friendly: vec![
+                        DietFriendly::Vegan,
+                        DietFriendly::Vegetarian,
+                        DietFriendly::GlutenFree
+                    ].into(),
                 },
                 amount: IngredientUnit::Other{unit: "head".to_string(), amount: 1.0},
                 notes: None,
@@ -48,7 +56,11 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::from_u128(2),
                     name: "Garlic".try_into().unwrap(),
                     description: "Garlic description".try_into().unwrap(),
-                    diet_friendly: WhichDiets(vec![DietFriendly::Vegan, DietFriendly::Vegetarian, DietFriendly::GlutenFree]),
+                    diet_friendly: vec![
+                        DietFriendly::Vegan,
+                        DietFriendly::Vegetarian,
+                        DietFriendly::GlutenFree
+                    ].into(),
                 },
                 amount: IngredientUnit::Other{ unit: "clove".to_string(), amount: 4.0 },
                 notes: None,

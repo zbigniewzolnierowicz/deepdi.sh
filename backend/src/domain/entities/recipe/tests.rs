@@ -31,7 +31,7 @@ fn converting_ingredient_with_amount_works() {
             id: Uuid::from_u128(0),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
-            diet_friendly: WhichDiets(vec![]),
+            diet_friendly: WhichDiets::new(),
         },
         amount: super::IngredientUnit::Grams(20.0),
         notes: None,
@@ -67,7 +67,7 @@ fn converting_ingredient_with_custom_amount_unit_works() {
             id: Uuid::from_u128(0),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
-            diet_friendly: WhichDiets(vec![]),
+            diet_friendly: WhichDiets::new(),
         },
         amount: super::IngredientUnit::Other {
             unit: "cloves".to_owned(),

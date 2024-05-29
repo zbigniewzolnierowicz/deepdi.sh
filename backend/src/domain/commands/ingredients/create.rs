@@ -7,7 +7,7 @@ use crate::domain::repositories::ingredients::errors::IngredientRepositoryError;
 use crate::domain::repositories::ingredients::IngredientRepositoryService;
 
 use self::errors::ValidationError;
-use self::types::{DietFriendly, WhichDiets};
+use self::types::DietFriendly;
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateIngredientError {
@@ -68,14 +68,13 @@ impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
             id: Uuid::now_v7(),
             name: value.name.try_into()?,
             description: value.description.try_into()?,
-            diet_friendly: WhichDiets(
-                value
-                    .diet_friendly
-                    .clone()
-                    .into_iter()
-                    .filter_map(|x| DietFriendly::try_from(x).ok())
-                    .collect(),
-            ),
+            diet_friendly: value
+                .diet_friendly
+                .clone()
+                .into_iter()
+                .filter_map(|x| DietFriendly::try_from(x).ok())
+                .collect::<Vec<_>>()
+                .into(),
         })
     }
 }
@@ -147,14 +146,11 @@ mod tests {
         let repo: IngredientRepositoryService =
             Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
-        let when = create_ingredient(repo.clone(), &given).await;
+        let when = create_ingredient(repo.clone(), &given).await.unwrap_err();
 
         // THEN
 
-        match when {
-            Err(CreateIngredientError::EmptyField("name")) => {}
-            _ => unreachable!(),
-        }
+        assert!(matches!(when, CreateIngredientError::EmptyField("name")));
     }
 
     #[tokio::test]
@@ -168,14 +164,14 @@ mod tests {
         let repo: IngredientRepositoryService =
             Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
-        let when = create_ingredient(repo.clone(), &given).await;
+        let when = create_ingredient(repo.clone(), &given).await.unwrap_err();
 
         // THEN
 
-        match when {
-            Err(CreateIngredientError::EmptyField("description")) => {}
-            _ => unreachable!(),
-        }
+        assert!(matches!(
+            when,
+            CreateIngredientError::EmptyField("description")
+        ));
     }
 
     #[tokio::test]
@@ -189,14 +185,11 @@ mod tests {
         let repo: IngredientRepositoryService =
             Arc::new(Box::new(InMemoryIngredientRepository::new()));
 
-        let when = create_ingredient(repo.clone(), &given).await;
+        let when = create_ingredient(repo.clone(), &given).await.unwrap_err();
 
         // THEN
 
-        match when {
-            Err(CreateIngredientError::EmptyField(_)) => {}
-            _ => unreachable!(),
-        };
+        assert!(matches!(when, CreateIngredientError::EmptyField(_)));
 
         assert!(!&repo
             .get_all()

@@ -102,6 +102,18 @@ impl TryFrom<String> for DietFriendly {
 )]
 pub struct WhichDiets(pub Vec<DietFriendly>);
 
+impl WhichDiets {
+    pub fn new() -> Self {
+        Self(vec![])
+    }
+}
+
+impl Default for WhichDiets {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // TODO: add doctest
 impl From<Vec<String>> for WhichDiets {
     fn from(value: Vec<String>) -> Self {
