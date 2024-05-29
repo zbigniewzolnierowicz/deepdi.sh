@@ -47,12 +47,10 @@ async fn insert_ingredient_that_already_exists_fails_id() {
         .await
         .unwrap_err();
 
-    match result {
-        IngredientRepositoryError::Conflict(fieldname) => {
-            assert_eq!(fieldname, "id");
-        }
-        _ => unreachable!(),
-    };
+    assert!(matches!(
+        result,
+        InsertIngredientError::Conflict(fieldname) if fieldname == "id"
+    ))
 }
 
 #[tokio::test]
@@ -78,12 +76,10 @@ async fn insert_ingredient_that_already_exists_fails_name() {
         .await
         .unwrap_err();
 
-    match result {
-        IngredientRepositoryError::Conflict(fieldname) => {
-            assert_eq!(fieldname, "name");
-        }
-        _ => unreachable!(),
-    };
+    assert!(matches!(
+        result,
+        InsertIngredientError::Conflict(fieldname) if fieldname == "name"
+    ))
 }
 
 #[tokio::test]
@@ -112,12 +108,7 @@ async fn get_by_id_returns_error_when_missing() {
 
     let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
 
-    match result {
-        IngredientRepositoryError::NotFound(id) => {
-            assert_eq!(id, Uuid::from_u128(1));
-        }
-        _ => unreachable!(),
-    }
+    assert!(matches!(result, GetIngredientByIdError::NotFound(id) if id == Uuid::from_u128(1)));
 }
 
 #[tokio::test]
@@ -219,12 +210,9 @@ async fn updating_with_empty_changeset_fails() {
         .await
         .unwrap_err();
 
-    match error {
-        IngredientRepositoryError::ValidationError(ValidationError::EmptyField(fields)) => {
-            assert_eq!(fields, vec!["name", "description", "diet_friendly"]);
-        }
-        _ => unreachable!(),
-    };
+    assert!(
+        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == vec!["name", "description", "diet_friendly"])
+    );
 }
 
 #[tokio::test]
@@ -244,12 +232,7 @@ async fn updating_a_missing_file_fails() {
         .await
         .unwrap_err();
 
-    match error {
-        IngredientRepositoryError::NotFound(u) => {
-            assert_eq!(u, Uuid::from_u128(1))
-        }
-        _ => unreachable!(),
-    }
+    assert!(matches!(error, UpdateIngredientError::NotFound(id) if id == Uuid::from_u128(1)));
 }
 
 #[tokio::test]
@@ -264,19 +247,16 @@ async fn deleting_works() {
     };
 
     let insert_result = repo.insert(input).await.unwrap();
-
-    match repo.delete(insert_result.id).await {
-        Ok(()) => {}
-        Err(_) => unreachable!(),
-    };
+    repo.delete(insert_result.id).await.unwrap();
 }
 
 #[tokio::test]
 async fn deleting_nonexistent_ingredient_errors() {
     let repo = InMemoryIngredientRepository::new();
+    let error = repo.delete(Uuid::from_u128(0)).await.unwrap_err();
 
-    match repo.delete(Uuid::from_u128(0)).await {
-        Err(IngredientRepositoryError::NotFound(id)) => assert_eq!(id, Uuid::from_u128(0)),
-        _ => unreachable!(),
-    };
+    assert!(matches!(
+        error,
+        DeleteIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(0)
+    ));
 }

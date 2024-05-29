@@ -11,7 +11,7 @@ use crate::domain::{
         errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
     },
     repositories::{
-        ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
+        ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
         recipe::{errors::InsertRecipeError, RecipeRepositoryService},
     },
 };
@@ -56,10 +56,10 @@ impl From<InsertRecipeError> for CreateRecipeError {
     }
 }
 
-impl From<IngredientRepositoryError> for CreateRecipeError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<GetAllIngredientsError> for CreateRecipeError {
+    fn from(value: GetAllIngredientsError) -> Self {
         match value {
-            IngredientRepositoryError::MultipleIngredientsMissing(ids) => {
+            GetAllIngredientsError::MultipleIngredientsMissing(ids) => {
                 Self::IngredientsNotFound(ids)
             }
             e => Self::Unknown(e.into()),

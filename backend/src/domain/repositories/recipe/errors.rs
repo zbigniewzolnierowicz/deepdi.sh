@@ -30,12 +30,6 @@ impl GetRecipeByIdError {
     }
 }
 
-impl From<GetRecipeByIdError> for RecipeRepositoryError {
-    fn from(value: GetRecipeByIdError) -> Self {
-        Self::Get(value)
-    }
-}
-
 #[derive(Error, Debug)]
 pub enum InsertRecipeError {
     #[error("The recipe with field {0} of the given value already exists")]
@@ -49,12 +43,6 @@ pub enum InsertRecipeError {
 
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
-}
-
-impl From<InsertRecipeError> for RecipeRepositoryError {
-    fn from(value: InsertRecipeError) -> Self {
-        Self::Insert(value)
-    }
 }
 
 /// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
@@ -80,13 +68,4 @@ impl From<SQLXError> for InsertRecipeError {
             e => Self::UnknownError(e.into()),
         }
     }
-}
-
-#[derive(Error, Debug)]
-pub enum RecipeRepositoryError {
-    #[error(transparent)]
-    Get(GetRecipeByIdError),
-
-    #[error(transparent)]
-    Insert(InsertRecipeError),
 }

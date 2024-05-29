@@ -5,7 +5,9 @@ use uuid::Uuid;
 
 use crate::domain::{
     entities::ingredient::{errors::ValidationError, Ingredient, IngredientChangeset},
-    repositories::ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
+    repositories::ingredients::{
+        errors::UpdateIngredientError as UpdateIngredientErrorInternal, IngredientRepositoryService,
+    },
 };
 
 #[derive(Debug)]
@@ -74,8 +76,8 @@ impl From<ValidationError> for UpdateIngredientError {
     }
 }
 
-impl From<IngredientRepositoryError> for UpdateIngredientError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<UpdateIngredientErrorInternal> for UpdateIngredientError {
+    fn from(value: UpdateIngredientErrorInternal) -> Self {
         Self::Internal(value.into())
     }
 }

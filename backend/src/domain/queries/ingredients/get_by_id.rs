@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
+    repositories::ingredients::{errors::GetIngredientByIdError, IngredientRepositoryService},
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -29,10 +29,10 @@ impl IntoResponse for GetIngredientError {
     }
 }
 
-impl From<IngredientRepositoryError> for GetIngredientError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<GetIngredientByIdError> for GetIngredientError {
+    fn from(value: GetIngredientByIdError) -> Self {
         match value {
-            IngredientRepositoryError::NotFound(id) => Self::NotFound(id),
+            GetIngredientByIdError::NotFound(id) => Self::NotFound(id),
             e => Self::Internal(e.into()),
         }
     }
@@ -86,9 +86,8 @@ mod tests {
         let id = Uuid::from_u128(0);
 
         // WHEN
-        match get_ingredient_by_id(repo, id).await {
-            Err(GetIngredientError::NotFound(missing_id)) => assert_eq!(missing_id, id),
-            _ => unreachable!(),
-        }
+        let error = get_ingredient_by_id(repo, id).await.unwrap_err();
+
+        assert!(matches!(error, GetIngredientError::NotFound(missing_id) if missing_id == id));
     }
 }

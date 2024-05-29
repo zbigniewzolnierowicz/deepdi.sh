@@ -3,7 +3,10 @@ use reqwest::StatusCode;
 
 use crate::domain::{
     entities::ingredient::Ingredient,
-    repositories::ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
+    repositories::ingredients::{
+        errors::GetAllIngredientsError as GetAllIngredientsErrorInternal,
+        IngredientRepositoryService,
+    },
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -26,8 +29,8 @@ impl IntoResponse for GetAllIngredientsError {
     }
 }
 
-impl From<IngredientRepositoryError> for GetAllIngredientsError {
-    fn from(value: IngredientRepositoryError) -> Self {
+impl From<GetAllIngredientsErrorInternal> for GetAllIngredientsError {
+    fn from(value: GetAllIngredientsErrorInternal) -> Self {
         Self::Internal(value.into())
     }
 }
@@ -36,7 +39,7 @@ impl From<IngredientRepositoryError> for GetAllIngredientsError {
 pub async fn get_all_ingredients(
     repo: IngredientRepositoryService,
 ) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
-    Ok(repo.get_all().await?)
+    repo.get_all().await.map_err(GetAllIngredientsError::from)
 }
 
 #[cfg(test)]
