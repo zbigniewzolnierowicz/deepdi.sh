@@ -2,10 +2,7 @@ use std::{collections::HashMap, time::Duration};
 
 use crate::domain::entities::recipe::{IngredientUnit, IngredientWithAmount, ServingsType};
 use crate::domain::entities::{
-    ingredient::{
-        types::{DietFriendly, WhichDiets},
-        Ingredient,
-    },
+    ingredient::{types::DietFriendly, Ingredient},
     recipe::Recipe,
 };
 

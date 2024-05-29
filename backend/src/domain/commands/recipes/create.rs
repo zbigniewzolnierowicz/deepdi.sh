@@ -12,7 +12,7 @@ use crate::domain::{
     },
     repositories::{
         ingredients::{errors::IngredientRepositoryError, IngredientRepositoryService},
-        recipe::{errors::RecipeRepositoryError, RecipeRepositoryService},
+        recipe::{errors::InsertRecipeError, RecipeRepositoryService},
     },
 };
 
@@ -47,12 +47,11 @@ impl IntoResponse for CreateRecipeError {
     }
 }
 
-impl From<RecipeRepositoryError> for CreateRecipeError {
-    fn from(value: RecipeRepositoryError) -> Self {
+impl From<InsertRecipeError> for CreateRecipeError {
+    fn from(value: InsertRecipeError) -> Self {
         match value {
-            RecipeRepositoryError::UnknownError(e) => Self::Unknown(e),
-            RecipeRepositoryError::ValidationError(e) => Self::Validation(e),
-            _ => unreachable!(),
+            InsertRecipeError::ValidationError(e) => Self::Validation(e),
+            e => Self::Unknown(e.into()),
         }
     }
 }
@@ -60,9 +59,10 @@ impl From<RecipeRepositoryError> for CreateRecipeError {
 impl From<IngredientRepositoryError> for CreateRecipeError {
     fn from(value: IngredientRepositoryError) -> Self {
         match value {
-            IngredientRepositoryError::UnknownError(e) => Self::Unknown(e),
-            IngredientRepositoryError::MultipleMissing(ids) => Self::IngredientsNotFound(ids),
-            _ => unreachable!(),
+            IngredientRepositoryError::MultipleIngredientsMissing(ids) => {
+                Self::IngredientsNotFound(ids)
+            }
+            e => Self::Unknown(e.into()),
         }
     }
 }

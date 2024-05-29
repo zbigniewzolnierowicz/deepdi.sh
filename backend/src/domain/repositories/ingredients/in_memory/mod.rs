@@ -147,7 +147,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
             .collect();
 
         if !missing_ids.is_empty() {
-            Err(IngredientRepositoryError::MultipleMissing(
+            Err(IngredientRepositoryError::MultipleIngredientsMissing(
                 missing_ids.iter().cloned().collect(),
             ))
         } else {

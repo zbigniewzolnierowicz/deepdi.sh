@@ -40,7 +40,9 @@ async fn inserting_recipe_with_same_id_fails(pool: PgPool) {
 
     let error = repo.insert(recipe.clone()).await.unwrap_err();
 
-    assert!(matches!(error, RecipeRepositoryError::Conflict(a) if a == "recipe id"));
+    assert!(
+        matches!(error, InsertRecipeError::Conflict(a) if a == "recipe id")
+    );
 }
 
 #[sqlx::test]
@@ -68,5 +70,7 @@ async fn getting_a_nonexistent_recipe_errors(pool: PgPool) {
     let repo = PostgresRecipeRepository::new(pool.clone());
     let error = repo.get_by_id(&Uuid::from_u128(0)).await.unwrap_err();
 
-    assert!(matches!(error, RecipeRepositoryError::NotFound(id) if id == Uuid::from_u128(0)));
+    assert!(
+        matches!(error, GetRecipeByIdError::NotFound(id) if id == Uuid::from_u128(0))
+    );
 }

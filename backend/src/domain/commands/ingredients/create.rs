@@ -38,9 +38,8 @@ impl IntoResponse for CreateIngredientError {
 impl From<IngredientRepositoryError> for CreateIngredientError {
     fn from(value: IngredientRepositoryError) -> Self {
         match value {
-            IngredientRepositoryError::UnknownError(e) => Self::Internal(e),
             IngredientRepositoryError::Conflict(field) => Self::Conflict(field),
-            _ => unreachable!(),
+            e => Self::Internal(e.into()),
         }
     }
 }

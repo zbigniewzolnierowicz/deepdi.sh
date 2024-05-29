@@ -28,7 +28,11 @@ async fn inserting_recipe_with_same_id_fails() {
 
     let error = repo.insert(recipe.clone()).await.unwrap_err();
 
-    assert!(matches!(error, RecipeRepositoryError::Conflict(a) if a == "id"));
+    dbg!(&error);
+
+    assert!(
+        matches!(error, InsertRecipeError::Conflict(a) if a == "recipe id")
+    );
 }
 
 #[tokio::test]
@@ -47,5 +51,7 @@ async fn getting_a_nonexistent_recipe_by_id_fails() {
     let recipe = recipe_fixture();
     let result = repo.get_by_id(&recipe.id).await.unwrap_err();
 
-    assert!(matches!(result, RecipeRepositoryError::NotFound(_)));
+    assert!(
+        matches!(result, GetRecipeByIdError::NotFound(id) if id == recipe.id)
+    );
 }

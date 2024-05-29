@@ -242,7 +242,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_all(&self.0)
         .await
         .map_err(|e| match e {
-            SQLXError::RowNotFound => IngredientRepositoryError::MultipleMissing(ids.to_vec()),
+            SQLXError::RowNotFound => IngredientRepositoryError::MultipleIngredientsMissing(ids.to_vec()),
             e => IngredientRepositoryError::UnknownError(e.into()),
         })?
         .into_par_iter()
@@ -267,7 +267,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         if omitted_ids.is_empty() {
             Ok(results)
         } else {
-            Err(IngredientRepositoryError::MultipleMissing(omitted_ids))
+            Err(IngredientRepositoryError::MultipleIngredientsMissing(omitted_ids))
         }
     }
 }
