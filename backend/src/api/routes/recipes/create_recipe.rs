@@ -1,12 +1,30 @@
-use axum::{extract::State, Json};
+use axum::{extract::State, response::IntoResponse, Json};
 use common::{CreateRecipeDTO, RecipeDTO};
+use reqwest::StatusCode;
 
-use crate::{
-    api::AppState,
-    domain::commands::recipes::create::{
-        create_recipe, CreateRecipe, CreateRecipeError, IngredientAmountData,
-    },
+use crate::api::errors::MakeError;
+use crate::api::AppState;
+use crate::domain::commands::recipes::create::{
+    create_recipe, CreateRecipe, CreateRecipeError, IngredientAmountData,
 };
+
+impl MakeError<String> for CreateRecipeError {
+    fn get_status_code(&self) -> StatusCode {
+        match self {
+            Self::IngredientsNotFound(_) => StatusCode::BAD_REQUEST,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+    fn get_message(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl IntoResponse for CreateRecipeError {
+    fn into_response(self) -> axum::response::Response {
+        (self.get_status_code(), self.get_json()).into_response()
+    }
+}
 
 #[tracing::instrument(
     "[ROUTE] Creating a new recipe",

@@ -7,27 +7,24 @@ use common::RecipeDTO;
 use reqwest::StatusCode;
 use uuid::Uuid;
 
-use crate::{
-    api::AppState,
-    domain::queries::recipes::get_by_id::{get_recipe_by_id, GetRecipeError},
-};
+use crate::api::{errors::MakeError, AppState};
+use crate::domain::queries::recipes::get_by_id::{get_recipe_by_id, GetRecipeError};
+
+impl MakeError<String> for GetRecipeError {
+    fn get_status_code(&self) -> StatusCode {
+        match self {
+            Self::NotFound(_) => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+    fn get_message(&self) -> String {
+        self.to_string()
+    }
+}
 
 impl IntoResponse for GetRecipeError {
     fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        let status = match self {
-            Self::NotFound(_) => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
-        };
-
-        (
-            status,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
+        (self.get_status_code(), self.get_json()).into_response()
     }
 }
 

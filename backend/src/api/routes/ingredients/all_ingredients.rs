@@ -1,10 +1,25 @@
-use axum::{extract::State, Json};
+use axum::{extract::State, response::IntoResponse, Json};
 use common::IngredientDTO;
 
 use crate::{
-    api::AppState,
+    api::{errors::MakeError, AppState},
     domain::queries::ingredients::get_all::{get_all_ingredients, GetAllIngredientsError},
 };
+
+impl MakeError<String> for GetAllIngredientsError {
+    fn get_message(&self) -> String {
+        self.to_string()
+    }
+    fn get_status_code(&self) -> reqwest::StatusCode {
+        reqwest::StatusCode::BAD_REQUEST
+    }
+}
+
+impl IntoResponse for GetAllIngredientsError {
+    fn into_response(self) -> axum::response::Response {
+        (self.get_status_code(), self.get_message()).into_response()
+    }
+}
 
 #[tracing::instrument(
     "[ROUTE] Getting all available ingredients",
