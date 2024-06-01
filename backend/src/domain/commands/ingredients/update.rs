@@ -1,6 +1,4 @@
-use axum::response::IntoResponse;
 use common::UpdateIngredientDTO;
-use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::domain::{
@@ -52,22 +50,11 @@ impl TryFrom<&UpdateIngredient> for IngredientChangeset {
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum UpdateIngredientError {
+    #[error("Could not find the ingredient with ID {0}")]
+    NotFound(Uuid),
+
     #[error(transparent)]
     Internal(#[from] eyre::Error),
-}
-
-impl IntoResponse for UpdateIngredientError {
-    fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        (
-            StatusCode::BAD_REQUEST,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
-    }
 }
 
 impl From<ValidationError> for UpdateIngredientError {
@@ -78,7 +65,10 @@ impl From<ValidationError> for UpdateIngredientError {
 
 impl From<UpdateIngredientErrorInternal> for UpdateIngredientError {
     fn from(value: UpdateIngredientErrorInternal) -> Self {
-        Self::Internal(value.into())
+        match value {
+            UpdateIngredientErrorInternal::NotFound(id) => Self::NotFound(id),
+            e => Self::Internal(e.into()),
+        }
     }
 }
 

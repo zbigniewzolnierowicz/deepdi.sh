@@ -1,19 +1,15 @@
 use std::collections::HashMap;
 
-use axum::response::IntoResponse;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::{
-    entities::recipe::{
-        errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
-    },
-    repositories::{
-        ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
-        recipe::{errors::InsertRecipeError, RecipeRepositoryService},
-    },
+use crate::domain::entities::recipe::{
+    errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
+};
+use crate::domain::repositories::{
+    ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
+    recipe::{errors::InsertRecipeError, RecipeRepositoryService},
 };
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -26,25 +22,6 @@ pub enum CreateRecipeError {
 
     #[error(transparent)]
     Unknown(#[from] eyre::Report),
-}
-
-impl IntoResponse for CreateRecipeError {
-    fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        let status = match self {
-            Self::IngredientsNotFound(_) => StatusCode::BAD_REQUEST,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
-        };
-
-        (
-            status,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
-    }
 }
 
 impl From<InsertRecipeError> for CreateRecipeError {

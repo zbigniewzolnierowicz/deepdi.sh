@@ -1,6 +1,3 @@
-use axum::response::IntoResponse;
-use reqwest::StatusCode;
-
 use crate::domain::{
     entities::ingredient::Ingredient,
     repositories::ingredients::{
@@ -13,20 +10,6 @@ use crate::domain::{
 pub enum GetAllIngredientsError {
     #[error(transparent)]
     Internal(#[from] eyre::Error),
-}
-
-impl IntoResponse for GetAllIngredientsError {
-    fn into_response(self) -> axum::response::Response {
-        let error_type: &str = self.as_ref();
-        (
-            StatusCode::BAD_REQUEST,
-            axum::Json(common::error::ErrorMessage::new(
-                error_type,
-                self.to_string(),
-            )),
-        )
-            .into_response()
-    }
 }
 
 impl From<GetAllIngredientsErrorInternal> for GetAllIngredientsError {

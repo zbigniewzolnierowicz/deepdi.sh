@@ -1,6 +1,6 @@
 use crate::domain::entities::ingredient::errors::ValidationError as IngredientValidationError;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum ValidationError {
     #[error("The fields {0:?} was empty")]
     EmptyField(Vec<&'static str>),
