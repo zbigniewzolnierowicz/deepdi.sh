@@ -1,9 +1,13 @@
 use assert_json_diff::assert_json_include;
 use common::{ingredients::IngredientDTO, RecipeDTO};
+use futures::future::join_all;
 use pretty_assertions::assert_eq;
 use reqwest::{Client, StatusCode};
 
-use crate::setup::TestApp;
+use crate::{
+    fixtures::{ingredient::ingredient_fixture, recipe::recipe_fixture},
+    setup::TestApp,
+};
 
 #[tokio::test]
 async fn inserts_recipe_correctly() {
@@ -12,55 +16,23 @@ async fn inserts_recipe_correctly() {
     let ingredient_create_path = app.get_base("ingredient/create");
     let recipe_create_path = app.get_base("recipe/create");
 
-    let ingredients_input = vec![serde_json::json!({
-        "name": "Cucumber",
-        "description": "A cucumber description.",
-        "diet_friendly": [
-            "vegan",
-            "vegetarian",
-            "gluten_free"
-        ]
-    })];
+    let ingredients_input = [ingredient_fixture()];
 
-    let mut ingredients: Vec<IngredientDTO> = vec![];
+    let ingredients: Vec<IngredientDTO> =
+        join_all(ingredients_input.iter().map(|ingredient| async {
+            client
+                .post(&ingredient_create_path)
+                .json(&ingredient.clone())
+                .send()
+                .await
+                .unwrap()
+                .json()
+                .await
+                .unwrap()
+        }))
+        .await;
 
-    for ingredient in ingredients_input {
-        let result: IngredientDTO = client
-            .post(&ingredient_create_path)
-            .json(&ingredient)
-            .send()
-            .await
-            .unwrap()
-            .json()
-            .await
-            .unwrap();
-
-        ingredients.push(result);
-    }
-
-    let data = serde_json::json!({
-        "name": "A diced cucumber",
-        "description": "Cucumber that's been diced",
-        "ingredients": ingredients
-            .iter()
-            .map(|ingredient| {
-                serde_json::json!({
-                    "ingredient_id": ingredient.id,
-                    "optional": false,
-                    "amount": {
-                        "grams": 100.0
-                    },
-                })
-            })
-            .collect::<Vec<_>>(),
-        "time": {
-            "Prep time": 6000
-        },
-        "steps": ["Get a cucumber", "Dice it"],
-        "servings": {
-            "exact": 1
-        },
-    });
+    let data = recipe_fixture(&ingredients);
 
     let result: RecipeDTO = client
         .post(&recipe_create_path)
@@ -146,25 +118,21 @@ async fn inserting_recipe_with_partially_incorrect_ingredients() {
     let recipe_create_path = app.get_base("recipe/create");
     let ingredient_create_path = app.get_base("ingredient/create");
 
-    let ingredient = serde_json::json!({
-        "name": "Cucumber",
-        "description": "A cucumber description.",
-        "diet_friendly": [
-            "vegan",
-            "vegetarian",
-            "gluten_free"
-        ]
-    });
+    let ingredients_input = [ingredient_fixture()];
 
-    let ingredient_result: IngredientDTO = client
-        .post(&ingredient_create_path)
-        .json(&ingredient)
-        .send()
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+    let ingredients: Vec<IngredientDTO> =
+        join_all(ingredients_input.iter().map(|ingredient| async {
+            client
+                .post(&ingredient_create_path)
+                .json(&ingredient.clone())
+                .send()
+                .await
+                .unwrap()
+                .json()
+                .await
+                .unwrap()
+        }))
+        .await;
 
     let data = serde_json::json!({
         "name": "A diced cucumber",
@@ -178,7 +146,7 @@ async fn inserting_recipe_with_partially_incorrect_ingredients() {
                 },
             },
             {
-                "ingredient_id": ingredient_result.id,
+                "ingredient_id": ingredients[0].id,
                 "optional": false,
                 "amount": {
                     "grams": 100.0

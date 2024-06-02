@@ -14,21 +14,14 @@ use crate::domain::repositories::{
     },
 };
 use axum::{
-    routing::{get, post, put},
+    routing::{delete, get, post, put},
     Router,
 };
 use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
 use color_eyre::Result;
 use sqlx::PgPool;
 
-use self::routes::{
-    ingredients::{
-        all_ingredients::get_all_ingredients_route, create_ingredient::create_ingredient_route,
-        get_ingredient_by_id::get_ingredient_by_id_route,
-        update_ingredient::update_ingredient_route,
-    },
-    recipes::{create_recipe::create_recipe_route, get_recipe_by_id::get_recipe_by_id_route},
-};
+use self::routes::{ingredients::*, recipes::*};
 
 pub struct App {
     router: Router,
@@ -49,6 +42,7 @@ impl App {
             .route("/ingredient", get(get_all_ingredients_route))
             .route("/recipe/create", post(create_recipe_route))
             .route("/recipe/:id", get(get_recipe_by_id_route))
+            .route("/recipe/:id", delete(delete_recipe_route))
             .layer(OtelInResponseLayer)
             .layer(OtelAxumLayer::default())
     }

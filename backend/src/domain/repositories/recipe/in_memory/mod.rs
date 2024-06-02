@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::domain::{entities::recipe::Recipe, repositories::recipe::errors::InsertRecipeError};
 
-use super::{errors::GetRecipeByIdError, RecipeRepository};
+use super::{errors::{DeleteRecipeError, GetRecipeByIdError}, RecipeRepository};
 
 pub struct InMemoryRecipeRepository(pub Mutex<HashMap<uuid::Uuid, Recipe>>);
 
@@ -37,6 +37,10 @@ impl RecipeRepository for InMemoryRecipeRepository {
             .ok_or_else(|| GetRecipeByIdError::NotFound(*id))?;
 
         Ok(result)
+    }
+
+    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
+        todo!()
     }
 }
 

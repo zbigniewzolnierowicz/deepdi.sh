@@ -70,3 +70,20 @@ async fn getting_a_nonexistent_recipe_errors(pool: PgPool) {
 
     assert!(matches!(error, GetRecipeByIdError::NotFound(id) if id == Uuid::from_u128(0)));
 }
+
+#[sqlx::test]
+async fn deleting_a_recipe_succeeds(pool: PgPool) {
+    let repo = PostgresRecipeRepository::new(pool.clone());
+    let recipe = recipe_fixture();
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    repo.delete(&result.id).await.unwrap();
+}
+
+#[sqlx::test]
+async fn deleting_a_nonexistent_recipe_fails(pool: PgPool) {
+    let repo = PostgresRecipeRepository::new(pool.clone());
+    let recipe = recipe_fixture();
+    let result = repo.delete(&recipe.id).await.unwrap_err();
+
+    assert!(matches!(result, DeleteRecipeError::NotFound(id) if id == recipe.id))
+}

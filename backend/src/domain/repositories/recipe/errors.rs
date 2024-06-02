@@ -69,3 +69,12 @@ impl From<SQLXError> for InsertRecipeError {
         }
     }
 }
+
+#[derive(Error, Debug)]
+pub enum DeleteRecipeError {
+    #[error("The recipe with ID of {0} was not found")]
+    NotFound(Uuid),
+
+    #[error(transparent)]
+    UnknownError(#[from] eyre::Error),
+}

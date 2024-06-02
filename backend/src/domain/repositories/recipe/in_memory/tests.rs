@@ -51,3 +51,20 @@ async fn getting_a_nonexistent_recipe_by_id_fails() {
 
     assert!(matches!(result, GetRecipeByIdError::NotFound(id) if id == recipe.id));
 }
+
+#[tokio::test]
+async fn deleting_a_recipe_succeeds() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    repo.delete(&result.id).await.unwrap();
+}
+
+#[tokio::test]
+async fn deleting_a_nonexistent_recipe_fails() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.delete(&recipe.id).await.unwrap_err();
+
+    assert!(matches!(result, DeleteRecipeError::NotFound(id) if id == recipe.id))
+}

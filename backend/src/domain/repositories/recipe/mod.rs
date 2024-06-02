@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use self::errors::{GetRecipeByIdError, InsertRecipeError};
+use self::errors::{DeleteRecipeError, GetRecipeByIdError, InsertRecipeError};
 
 #[async_trait]
 pub trait RecipeRepository: Send + Sync + 'static {
@@ -15,6 +15,8 @@ pub trait RecipeRepository: Send + Sync + 'static {
     async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError>;
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError>;
+
+    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError>;
 }
 
 pub type RecipeRepositoryService = Arc<Box<dyn RecipeRepository>>;

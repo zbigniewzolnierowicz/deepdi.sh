@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
 
+use super::errors::DeleteRecipeError;
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -124,6 +125,10 @@ impl RecipeRepository for PostgresRecipeRepository {
         };
 
         Ok(recipe)
+    }
+
+    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
+        todo!()
     }
 }
 
