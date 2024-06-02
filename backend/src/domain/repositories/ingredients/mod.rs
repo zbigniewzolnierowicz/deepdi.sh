@@ -14,8 +14,8 @@ use uuid::Uuid;
 use crate::domain::entities::ingredient::{Ingredient, IngredientChangeset};
 
 use self::errors::{
-    DeleteIngredientError, GetAllIngredientsError, GetIngredientByIdError,
-    InsertIngredientError, UpdateIngredientError,
+    DeleteIngredientError, GetAllIngredientsError, GetIngredientByIdError, InsertIngredientError,
+    UpdateIngredientError,
 };
 
 #[async_trait]

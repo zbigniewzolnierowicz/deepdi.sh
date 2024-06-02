@@ -1,5 +1,5 @@
-mod routes;
 mod errors;
+mod routes;
 
 use std::sync::Arc;
 
