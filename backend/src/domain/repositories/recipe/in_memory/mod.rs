@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use eyre::eyre;
 use std::{collections::HashMap, sync::Mutex};
 use uuid::Uuid;
 
@@ -15,9 +14,7 @@ pub struct InMemoryRecipeRepository(pub Mutex<HashMap<uuid::Uuid, Recipe>>);
 #[async_trait]
 impl RecipeRepository for InMemoryRecipeRepository {
     async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError> {
-        let mut lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        }).map_err(InsertRecipeError::UnknownError)?;
+        let mut lock = self.0.lock()?;
 
         if lock.iter().any(|(id, _)| id == &input.id) {
             tracing::error!("The recipe with ID {} already exists.", input.id);
@@ -30,9 +27,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
     }
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError> {
-        let lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        }).map_err(GetRecipeByIdError::UnknownError)?;
+        let lock = self.0.lock()?;
 
         let result = lock
             .get(id)
@@ -43,9 +38,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
     }
 
     async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
-        let mut lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        }).map_err(GetRecipeByIdError::UnknownError)?;
+        let mut lock = self.0.lock()?;
 
         lock.remove(id).ok_or(DeleteRecipeError::NotFound(*id))?;
 

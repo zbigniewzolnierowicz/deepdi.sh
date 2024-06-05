@@ -1,3 +1,6 @@
+use eyre::eyre;
+use std::sync::PoisonError;
+
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -15,6 +18,12 @@ pub enum GetIngredientByIdError {
     UnknownError(#[from] eyre::Error),
 }
 
+impl<T> From<PoisonError<T>> for GetIngredientByIdError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum GetAllIngredientsError {
     #[error("The ingredients with IDs of {0:?} were not found")]
@@ -27,6 +36,12 @@ pub enum GetAllIngredientsError {
     UnknownError(#[from] eyre::Error),
 }
 
+impl<T> From<PoisonError<T>> for GetAllIngredientsError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum DeleteIngredientError {
     #[error(transparent)]
@@ -34,6 +49,12 @@ pub enum DeleteIngredientError {
 
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for DeleteIngredientError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
 }
 
 #[derive(Error, Debug)]
@@ -46,6 +67,12 @@ pub enum InsertIngredientError {
 
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for InsertIngredientError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
 }
 
 #[derive(Error, Debug)]
@@ -61,4 +88,10 @@ pub enum UpdateIngredientError {
 
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for UpdateIngredientError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
 }
