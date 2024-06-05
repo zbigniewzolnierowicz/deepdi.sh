@@ -78,7 +78,7 @@ async fn inserting_recipe_with_incorrect_ingredients_fails() {
         "description": "Cucumber that's been diced",
         "ingredients": [
             {
-                "ingredient_id": uuid::Uuid::from_u128(0),
+                "ingredient_id": uuid::Uuid::nil(),
                 "optional": false,
                 "amount": {
                     "grams": 100.0
@@ -139,7 +139,7 @@ async fn inserting_recipe_with_partially_incorrect_ingredients() {
         "description": "Cucumber that's been diced",
         "ingredients": [
             {
-                "ingredient_id": uuid::Uuid::from_u128(0),
+                "ingredient_id": uuid::Uuid::nil(),
                 "optional": false,
                 "amount": {
                     "grams": 100.0

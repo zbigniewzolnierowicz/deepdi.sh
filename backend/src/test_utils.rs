@@ -9,7 +9,7 @@ use crate::domain::entities::{
 pub fn recipe_fixture() -> Recipe {
     // Recipe from https://publicdomainrecipes.com/hoisin_tofu_and_broccoli/
     Recipe {
-        id: uuid::Uuid::from_u128(0),
+        id: uuid::Uuid::nil(),
         name: "Hoisin Tofu and Broccoli".to_string(),
         description: "If necessary, provide a very brief description of the dish in one or two sentences. For most dishes, this will be unnecessary. If there is a title image of this dish, it should be above this paragraph. You may also include prep/cook time and the number of servings as below:".to_string(),
         time: HashMap::from([
@@ -20,7 +20,7 @@ pub fn recipe_fixture() -> Recipe {
         ingredients: vec![
             IngredientWithAmount {
                 ingredient: Ingredient {
-                    id: uuid::Uuid::from_u128(0),
+                    id: uuid::Uuid::nil(),
                     name: "Firm tofu".try_into().unwrap(),
                     description: "It's tofu".try_into().unwrap(),
                     diet_friendly: vec![

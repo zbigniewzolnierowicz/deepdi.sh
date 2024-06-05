@@ -80,7 +80,7 @@ async fn getting_nonexistent_recipe_fails() {
     let app = TestApp::new().await;
     let client = Client::new();
 
-    let get_recipe_by_id_route = app.get_base(&format!("recipe/{}", Uuid::from_u128(0)));
+    let get_recipe_by_id_route = app.get_base(&format!("recipe/{}", Uuid::nil()));
 
     let result = client.get(get_recipe_by_id_route).send().await.unwrap();
 

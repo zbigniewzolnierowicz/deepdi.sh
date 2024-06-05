@@ -259,9 +259,9 @@ async fn deleting_works(pool: PgPool) {
 #[sqlx::test]
 async fn deleting_nonexistent_ingredient_errors(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool.clone());
-    let error = repo.delete(Uuid::from_u128(0)).await.unwrap_err();
+    let error = repo.delete(Uuid::nil()).await.unwrap_err();
 
     assert!(
-        matches!(error, DeleteIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(0))
+        matches!(error, DeleteIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::nil())
     );
 }

@@ -67,7 +67,7 @@ mod tests {
         // GIVEN
         let repo: IngredientRepositoryService =
             Arc::new(Box::new(InMemoryIngredientRepository::new()));
-        let id = Uuid::from_u128(0);
+        let id = Uuid::nil();
 
         // WHEN
         let error = get_ingredient_by_id(repo, id).await.unwrap_err();

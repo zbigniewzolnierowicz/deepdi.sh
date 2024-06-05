@@ -66,9 +66,9 @@ async fn getting_recipe_by_id_works(pool: PgPool) {
 #[sqlx::test]
 async fn getting_a_nonexistent_recipe_errors(pool: PgPool) {
     let repo = PostgresRecipeRepository::new(pool.clone());
-    let error = repo.get_by_id(&Uuid::from_u128(0)).await.unwrap_err();
+    let error = repo.get_by_id(&Uuid::nil()).await.unwrap_err();
 
-    assert!(matches!(error, GetRecipeByIdError::NotFound(id) if id == Uuid::from_u128(0)));
+    assert!(matches!(error, GetRecipeByIdError::NotFound(id) if id == Uuid::nil()));
 }
 
 #[sqlx::test]

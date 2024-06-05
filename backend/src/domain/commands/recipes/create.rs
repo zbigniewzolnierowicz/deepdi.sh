@@ -145,7 +145,7 @@ mod tests {
                 )]),
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
-                    ingredient_id: Uuid::from_u128(0),
+                    ingredient_id: Uuid::nil(),
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
@@ -161,9 +161,9 @@ mod tests {
     #[tokio::test]
     async fn create_recipe_with_proper_ingredients() {
         let ingredients: HashMap<Uuid, Ingredient> = HashMap::from([(
-            Uuid::from_u128(0),
+            Uuid::nil(),
             IngredientModel {
-                id: Uuid::from_u128(0),
+                id: Uuid::nil(),
                 name: "Ingredient Zero".to_string(),
                 description: "Description of ingredient zero".to_string(),
                 diet_friendly: vec![
@@ -195,7 +195,7 @@ mod tests {
                 )]),
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
-                    ingredient_id: Uuid::from_u128(0),
+                    ingredient_id: Uuid::nil(),
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
@@ -211,7 +211,7 @@ mod tests {
             result.ingredients,
             vec![IngredientWithAmount {
                 ingredient: IngredientModel {
-                    id: Uuid::from_u128(0),
+                    id: Uuid::nil(),
                     name: "Ingredient Zero".to_string(),
                     description: "Description of ingredient zero".to_string(),
                     diet_friendly: vec![
@@ -248,7 +248,7 @@ mod tests {
                 )]),
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
-                    ingredient_id: Uuid::from_u128(0),
+                    ingredient_id: Uuid::nil(),
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],
@@ -269,7 +269,7 @@ mod tests {
         ingredient_repo
             .insert(
                 IngredientModel {
-                    id: Uuid::from_u128(0),
+                    id: Uuid::nil(),
                     name: "Ingredient Zero".to_string(),
                     description: "Description of ingredient zero".to_string(),
                     diet_friendly: vec![
@@ -299,7 +299,7 @@ mod tests {
                 )]),
                 steps: vec!["Try screaming at the food".to_string()],
                 ingredients: vec![IngredientAmountData {
-                    ingredient_id: Uuid::from_u128(0),
+                    ingredient_id: Uuid::nil(),
                     amount: IngredientUnit::Grams(1.0),
                     ..Default::default()
                 }],

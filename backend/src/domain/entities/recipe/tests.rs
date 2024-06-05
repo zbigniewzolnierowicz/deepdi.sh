@@ -14,7 +14,7 @@ use super::{IngredientWithAmount, IngredientWithAmountModel};
 fn converting_ingredient_with_amount_works() {
     let input = IngredientWithAmountModel {
         ingredient: IngredientModel {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
             diet_friendly: vec![],
@@ -28,7 +28,7 @@ fn converting_ingredient_with_amount_works() {
 
     let expected = IngredientWithAmount {
         ingredient: Ingredient {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
             diet_friendly: WhichDiets::new(),
@@ -47,7 +47,7 @@ fn converting_ingredient_with_amount_works() {
 fn converting_ingredient_with_custom_amount_unit_works() {
     let input = IngredientWithAmountModel {
         ingredient: IngredientModel {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
             diet_friendly: vec![],
@@ -64,7 +64,7 @@ fn converting_ingredient_with_custom_amount_unit_works() {
 
     let expected = IngredientWithAmount {
         ingredient: Ingredient {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
             diet_friendly: WhichDiets::new(),
@@ -86,7 +86,7 @@ fn converting_ingredient_with_custom_amount_unit_works() {
 fn converting_ingredient_with_custom_amount_unit_but_without_unit_descriptor_fails() {
     let input = IngredientWithAmountModel {
         ingredient: IngredientModel {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
             diet_friendly: vec![],
@@ -113,7 +113,7 @@ fn converting_ingredient_with_custom_amount_unit_but_without_unit_descriptor_fai
 fn malformed_ingredient_amount_fails() {
     let input = IngredientWithAmountModel {
         ingredient: IngredientModel {
-            id: Uuid::from_u128(0),
+            id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
             diet_friendly: vec![],
