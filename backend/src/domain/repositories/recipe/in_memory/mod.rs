@@ -5,7 +5,10 @@ use uuid::Uuid;
 
 use crate::domain::{entities::recipe::Recipe, repositories::recipe::errors::InsertRecipeError};
 
-use super::{errors::{DeleteRecipeError, GetRecipeByIdError}, RecipeRepository};
+use super::{
+    errors::{DeleteRecipeError, GetRecipeByIdError},
+    RecipeRepository,
+};
 
 pub struct InMemoryRecipeRepository(pub Mutex<HashMap<uuid::Uuid, Recipe>>);
 
@@ -40,7 +43,13 @@ impl RecipeRepository for InMemoryRecipeRepository {
     }
 
     async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
-        todo!()
+        let mut lock = self.0.lock().map_err(|_| {
+            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
+        }).map_err(GetRecipeByIdError::UnknownError)?;
+
+        lock.remove(id).ok_or(DeleteRecipeError::NotFound(*id))?;
+
+        Ok(())
     }
 }
 
