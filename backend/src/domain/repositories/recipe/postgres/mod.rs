@@ -128,7 +128,29 @@ impl RecipeRepository for PostgresRecipeRepository {
     }
 
     async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
-        todo!()
+        let recipe = self.get_by_id(id).await?;
+
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        sqlx::query_file!("queries/delete_ingredients_for_recipe.sql", recipe.id)
+            .execute(&self.0)
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        sqlx::query_file!("queries/delete_recipe.sql", recipe.id)
+            .execute(&self.0)
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        tx.commit()
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        Ok(())
     }
 }
 

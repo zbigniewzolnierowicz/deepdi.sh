@@ -78,3 +78,12 @@ pub enum DeleteRecipeError {
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
 }
+
+impl From<GetRecipeByIdError> for DeleteRecipeError {
+    fn from(value: GetRecipeByIdError) -> Self {
+        match value {
+            GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
+            e => Self::UnknownError(e.into()),
+        }
+    }
+}
