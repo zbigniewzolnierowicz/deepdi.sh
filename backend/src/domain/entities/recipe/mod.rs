@@ -17,7 +17,6 @@ pub struct Recipe {
     pub name: String,
     pub description: String,
     pub steps: RecipeSteps,
-    // TODO: add newtype for checking if the ingredients list is not empty
     pub ingredients: Vec<IngredientWithAmount>,
     pub time: HashMap<String, std::time::Duration>,
     pub servings: ServingsType,
@@ -28,6 +27,15 @@ pub struct RecipeSteps(Vec<String>);
 
 impl AsRef<[String]> for RecipeSteps {
     fn as_ref(&self) -> &[String] {
+        &self.0
+    }
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct RecipeIngredients(Vec<IngredientWithAmount>);
+
+impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
+    fn as_ref(&self) -> &[IngredientWithAmount] {
         &self.0
     }
 }
@@ -47,6 +55,17 @@ impl TryFrom<Vec<String>> for RecipeSteps {
             Err(ValidationError::EmptyField(vec!["steps"]))
         } else {
             Ok(Self(data.to_owned()))
+        }
+    }
+}
+
+impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
+    type Error = ValidationError;
+    fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            Err(ValidationError::EmptyField(vec!["steps"]))
+        } else {
+            Ok(Self(value.to_owned()))
         }
     }
 }
