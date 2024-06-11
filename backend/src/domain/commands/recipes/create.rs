@@ -69,7 +69,6 @@ pub async fn create_recipe(
 ) -> Result<Recipe, CreateRecipeError> {
     let ingredient_ids: Vec<Uuid> = input.ingredients.iter().map(|i| i.ingredient_id).collect();
 
-    // FIXME: There's probably a better way to do this
     let ingredients_in_recipe: Vec<_> = ingredient_repo
         .get_all_by_id(&ingredient_ids)
         .await
@@ -101,7 +100,7 @@ pub async fn create_recipe(
             id: Uuid::now_v7(),
             name: input.name.to_string(),
             description: input.description.to_string(),
-            steps: input.steps.clone(),
+            steps: input.steps.clone().try_into()?,
             ingredients: ingredients_in_recipe,
             time: input.time.clone(),
             servings: input.servings.clone(),

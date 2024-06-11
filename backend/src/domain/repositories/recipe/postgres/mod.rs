@@ -61,7 +61,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             input.id,
             input.name,
             input.description,
-            &input.steps,
+            &input.steps.as_ref(),
             time,
             servings,
             serde_json::json!({})
@@ -118,7 +118,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             id: result.id,
             name: result.name,
             description: result.description,
-            steps: result.steps,
+            steps: result.steps.try_into()?,
             time,
             servings,
             ingredients,

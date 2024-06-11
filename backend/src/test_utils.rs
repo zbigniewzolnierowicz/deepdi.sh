@@ -75,6 +75,6 @@ pub fn recipe_fixture() -> Recipe {
             "Add 2 tbsp of oil on the same pan. Cook tofu until the bottom is golden brown, flip and repeat. Stir a few times, then move to the side of the pan.".to_string(),
             "Add more oil, garlic, ginger. Stir until it releases fragrance - generally less than a minute, then stir to combine the two.".to_string(),
             "Cook together until sause thickens, then add broccoli and stir to combine.".to_string(),
-        ]
+        ].try_into().unwrap()
     }
 }

@@ -63,5 +63,5 @@ pub async fn create_recipe_route(
     };
     let result = create_recipe(recipe_repository, ingredient_repository, &input).await?;
 
-    Ok(Json(result.into()))
+    Ok(Json(result.try_into()?))
 }

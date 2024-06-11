@@ -37,5 +37,5 @@ pub async fn get_recipe_by_id_route(
 ) -> Result<Json<RecipeDTO>, GetRecipeError> {
     let result = get_recipe_by_id(recipe_repository, &recipe_id).await?;
 
-    Ok(axum::Json(result.into()))
+    Ok(axum::Json(result.try_into()?))
 }

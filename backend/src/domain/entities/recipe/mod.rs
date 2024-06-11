@@ -2,6 +2,7 @@ pub mod errors;
 use std::collections::HashMap;
 
 use common::{IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -15,29 +16,57 @@ pub struct Recipe {
     pub id: Uuid,
     pub name: String,
     pub description: String,
-    // TODO: add newtype for checking if the steps list is not empty
-    pub steps: Vec<String>,
+    pub steps: RecipeSteps,
     // TODO: add newtype for checking if the ingredients list is not empty
     pub ingredients: Vec<IngredientWithAmount>,
     pub time: HashMap<String, std::time::Duration>,
     pub servings: ServingsType,
 }
 
-impl From<Recipe> for RecipeDTO {
-    fn from(value: Recipe) -> Self {
-        Self {
+#[derive(PartialEq, Debug, Clone)]
+pub struct RecipeSteps(Vec<String>);
+
+impl AsRef<[String]> for RecipeSteps {
+    fn as_ref(&self) -> &[String] {
+        &self.0
+    }
+}
+
+impl TryFrom<Vec<String>> for RecipeSteps {
+    type Error = ValidationError;
+    fn try_from(value: Vec<String>) -> Result<Self, Self::Error> {
+        // Filter out empty steps
+        let data: Vec<String> = value
+            .to_owned()
+            .par_iter()
+            .filter(|step| !step.trim().is_empty())
+            .cloned()
+            .collect();
+
+        if data.is_empty() {
+            Err(ValidationError::EmptyField(vec!["steps"]))
+        } else {
+            Ok(Self(data.to_owned()))
+        }
+    }
+}
+
+impl TryFrom<Recipe> for RecipeDTO {
+    type Error = ValidationError;
+    fn try_from(value: Recipe) -> Result<Self, Self::Error> {
+        Ok(Self {
             id: value.id.to_string(),
             ingredients: value.ingredients.into_iter().map(|i| i.into()).collect(),
             name: value.name,
             description: value.description,
-            steps: value.steps,
+            steps: value.steps.0,
             time: value
                 .time
                 .into_iter()
                 .map(|(k, v)| (k, v.as_secs()))
                 .collect(),
             servings: value.servings.into(),
-        }
+        })
     }
 }
 
