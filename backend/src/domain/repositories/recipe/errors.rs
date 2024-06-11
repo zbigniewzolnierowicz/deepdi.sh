@@ -1,13 +1,14 @@
-use std::{collections::HashMap, sync::OnceLock};
+use eyre::eyre;
+use std::{
+    collections::HashMap,
+    sync::{OnceLock, PoisonError},
+};
 
 use sqlx::Error as SQLXError;
 use thiserror::Error;
 use uuid::Uuid;
 
 use crate::domain::entities::recipe::errors::ValidationError;
-
-// TODO: split into separate get, update, insert and delete errors that get combined in
-// RecipeRepositoryError
 
 #[derive(Error, Debug)]
 pub enum GetRecipeByIdError {
@@ -27,6 +28,12 @@ impl GetRecipeByIdError {
             SQLXError::RowNotFound => Self::NotFound(*id),
             _ => Self::UnknownError(e.into()),
         }
+    }
+}
+
+impl<T> From<PoisonError<T>> for GetRecipeByIdError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }
 
@@ -67,5 +74,35 @@ impl From<SQLXError> for InsertRecipeError {
             ),
             e => Self::UnknownError(e.into()),
         }
+    }
+}
+
+impl<T> From<PoisonError<T>> for InsertRecipeError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum DeleteRecipeError {
+    #[error("The recipe with ID of {0} was not found")]
+    NotFound(Uuid),
+
+    #[error(transparent)]
+    UnknownError(#[from] eyre::Error),
+}
+
+impl From<GetRecipeByIdError> for DeleteRecipeError {
+    fn from(value: GetRecipeByIdError) -> Self {
+        match value {
+            GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
+            e => Self::UnknownError(e.into()),
+        }
+    }
+}
+
+impl<T> From<PoisonError<T>> for DeleteRecipeError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }

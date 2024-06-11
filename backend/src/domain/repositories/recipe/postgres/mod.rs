@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
 
+use super::errors::DeleteRecipeError;
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -60,7 +61,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             input.id,
             input.name,
             input.description,
-            &input.steps,
+            &input.steps.as_ref(),
             time,
             servings,
             serde_json::json!({})
@@ -117,13 +118,39 @@ impl RecipeRepository for PostgresRecipeRepository {
             id: result.id,
             name: result.name,
             description: result.description,
-            steps: result.steps,
+            steps: result.steps.try_into()?,
             time,
             servings,
             ingredients,
         };
 
         Ok(recipe)
+    }
+
+    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
+        let recipe = self.get_by_id(id).await?;
+
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        sqlx::query_file!("queries/delete_ingredients_for_recipe.sql", recipe.id)
+            .execute(&self.0)
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        sqlx::query_file!("queries/delete_recipe.sql", recipe.id)
+            .execute(&self.0)
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        tx.commit()
+            .await
+            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+
+        Ok(())
     }
 }
 

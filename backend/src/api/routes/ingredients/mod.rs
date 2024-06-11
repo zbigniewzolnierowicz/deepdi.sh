@@ -1,4 +1,9 @@
-pub mod all_ingredients;
-pub mod create_ingredient;
-pub mod get_ingredient_by_id;
-pub mod update_ingredient;
+mod all_ingredients;
+mod create_ingredient;
+mod get_ingredient_by_id;
+mod update_ingredient;
+
+pub use all_ingredients::*;
+pub use create_ingredient::*;
+pub use get_ingredient_by_id::*;
+pub use update_ingredient::*;

@@ -18,7 +18,7 @@ impl MakeError<String> for UpdateIngredientError {
     fn get_status_code(&self) -> reqwest::StatusCode {
         match self {
             Self::NotFound(_) => reqwest::StatusCode::NOT_FOUND,
-            _ => reqwest::StatusCode::INTERNAL_SERVER_ERROR
+            _ => reqwest::StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

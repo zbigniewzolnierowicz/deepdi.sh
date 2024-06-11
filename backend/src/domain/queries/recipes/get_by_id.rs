@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::Recipe,
+    entities::recipe::{errors::ValidationError, Recipe},
     repositories::recipe::{
         errors::GetRecipeByIdError as GetRecipeByIdErrorInternal, RecipeRepositoryService,
     },
@@ -13,6 +13,9 @@ pub enum GetRecipeError {
     NotFound(Uuid),
 
     #[error(transparent)]
+    ValidationError(#[from] ValidationError),
+
+    #[error(transparent)]
     Unknown(#[from] eyre::Error),
 }
 
@@ -20,7 +23,7 @@ impl From<GetRecipeByIdErrorInternal> for GetRecipeError {
     fn from(value: GetRecipeByIdErrorInternal) -> Self {
         match value {
             GetRecipeByIdErrorInternal::NotFound(id) => GetRecipeError::NotFound(id),
-            e => GetRecipeError::Unknown(e.into()),
+            e => e.into(),
         }
     }
 }

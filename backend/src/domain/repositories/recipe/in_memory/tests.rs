@@ -30,9 +30,7 @@ async fn inserting_recipe_with_same_id_fails() {
 
     dbg!(&error);
 
-    assert!(
-        matches!(error, InsertRecipeError::Conflict(a) if a == "recipe id")
-    );
+    assert!(matches!(error, InsertRecipeError::Conflict(a) if a == "recipe id"));
 }
 
 #[tokio::test]
@@ -51,7 +49,22 @@ async fn getting_a_nonexistent_recipe_by_id_fails() {
     let recipe = recipe_fixture();
     let result = repo.get_by_id(&recipe.id).await.unwrap_err();
 
-    assert!(
-        matches!(result, GetRecipeByIdError::NotFound(id) if id == recipe.id)
-    );
+    assert!(matches!(result, GetRecipeByIdError::NotFound(id) if id == recipe.id));
+}
+
+#[tokio::test]
+async fn deleting_a_recipe_succeeds() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    repo.delete(&result.id).await.unwrap();
+}
+
+#[tokio::test]
+async fn deleting_a_nonexistent_recipe_fails() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let result = repo.delete(&recipe.id).await.unwrap_err();
+
+    assert!(matches!(result, DeleteRecipeError::NotFound(id) if id == recipe.id))
 }

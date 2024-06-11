@@ -26,7 +26,7 @@ async fn inserting_ingredient_succeeds() {
     let body = request.json::<IngredientDTO>().await.unwrap();
 
     let expected_body = IngredientDTO {
-        id: uuid::Uuid::from_u128(0),
+        id: uuid::Uuid::nil(),
         name: "Tomato".to_string(),
         description: "Tomatoes are very squishy".to_string(),
         diet_friendly: vec![

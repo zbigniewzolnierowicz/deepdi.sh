@@ -4,7 +4,6 @@ use std::{
 };
 
 use async_trait::async_trait;
-use eyre::eyre;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::{
@@ -28,9 +27,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
         skip(self)
     )]
     async fn insert(&self, ingredient: Ingredient) -> Result<Ingredient, InsertIngredientError> {
-        let mut lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let mut lock = self.0.lock()?;
 
         if lock.iter().any(|(id, _)| id == &ingredient.id) {
             tracing::error!("The ingredient with ID {} already exists.", ingredient.id);
@@ -55,9 +52,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
         skip(self)
     )]
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError> {
-        let lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let lock = self.0.lock()?;
 
         let ingredient = lock
             .values()
@@ -69,9 +64,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Get all ingredients", skip(self))]
     async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
-        let lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let lock = self.0.lock()?;
 
         Ok(lock.values().cloned().collect())
     }
@@ -82,9 +75,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, UpdateIngredientError> {
-        let mut lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let mut lock = self.0.lock()?;
 
         let ingredient = lock
             .get_mut(&id)
@@ -118,18 +109,14 @@ impl IngredientRepository for InMemoryIngredientRepository {
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Delete an ingredient", skip(self))]
     async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
         let ingredient = self.get_by_id(id).await?;
-        let mut lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let mut lock = self.0.lock()?;
         lock.remove(&ingredient.id);
 
         Ok(())
     }
 
     async fn get_all_by_id(&self, ids: &[Uuid]) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
-        let lock = self.0.lock().map_err(|_| {
-            eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked")
-        })?;
+        let lock = self.0.lock()?;
 
         let mut missing_ids: HashSet<Uuid> = HashSet::from_iter(ids.iter().cloned());
 
