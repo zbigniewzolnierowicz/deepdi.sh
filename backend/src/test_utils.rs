@@ -64,7 +64,7 @@ pub fn recipe_fixture() -> Recipe {
                 optional: false
 
             },
-        ],
+        ].try_into().unwrap(),
         steps: vec![
             "Cut the tofu into 3/4” (2 cm) cubes and place it in a sealable ziplock bag.".to_string(),
             "Combine 1/4 cup soy sauce, 1/2 teaspoon dark soy sauce, sugar and rice vinegar ingredients in a bowl and stir to mix.".to_string(),

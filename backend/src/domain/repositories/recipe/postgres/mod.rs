@@ -73,6 +73,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         join_all(
             input
                 .ingredients
+                .as_ref()
                 .iter()
                 .map(|i| insert_ingredient(&self.0, result.id, i)),
         )
@@ -121,7 +122,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             steps: result.steps.try_into()?,
             time,
             servings,
-            ingredients,
+            ingredients: ingredients.try_into()?,
         };
 
         Ok(recipe)
