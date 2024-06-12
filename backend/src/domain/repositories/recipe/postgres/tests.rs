@@ -4,6 +4,7 @@ use crate::{
     },
     test_utils::recipe_fixture,
 };
+use pretty_assertions::assert_eq;
 
 use super::*;
 
@@ -17,7 +18,7 @@ async fn creating_recipe_works(pool: PgPool) {
     join_all(
         recipe
             .ingredients
-            .clone()
+            .as_ref()
             .iter()
             .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
     )
@@ -36,7 +37,7 @@ async fn inserting_recipe_with_same_id_fails(pool: PgPool) {
     join_all(
         recipe
             .ingredients
-            .clone()
+            .as_ref()
             .iter()
             .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
     )
@@ -59,7 +60,7 @@ async fn getting_recipe_by_id_works(pool: PgPool) {
     join_all(
         recipe
             .ingredients
-            .clone()
+            .as_ref()
             .iter()
             .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
     )
@@ -89,7 +90,7 @@ async fn deleting_a_recipe_succeeds(pool: PgPool) {
     join_all(
         recipe
             .ingredients
-            .clone()
+            .as_ref()
             .iter()
             .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
     )
