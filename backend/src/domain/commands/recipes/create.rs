@@ -101,7 +101,7 @@ pub async fn create_recipe(
             name: input.name.to_string(),
             description: input.description.to_string(),
             steps: input.steps.clone().try_into()?,
-            ingredients: ingredients_in_recipe,
+            ingredients: ingredients_in_recipe.try_into()?,
             time: input.time.clone(),
             servings: input.servings.clone(),
         })
@@ -207,7 +207,7 @@ mod tests {
         assert_eq!(Uuid::get_version(&result.id), Some(uuid::Version::SortRand));
         assert_eq!(&result.name, "Recipe test");
         assert_eq!(
-            result.ingredients,
+            result.ingredients.as_ref(),
             vec![IngredientWithAmount {
                 ingredient: IngredientModel {
                     id: Uuid::nil(),

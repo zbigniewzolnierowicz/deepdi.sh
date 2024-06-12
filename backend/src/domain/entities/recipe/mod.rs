@@ -17,7 +17,7 @@ pub struct Recipe {
     pub name: String,
     pub description: String,
     pub steps: RecipeSteps,
-    pub ingredients: Vec<IngredientWithAmount>,
+    pub ingredients: RecipeIngredients,
     pub time: HashMap<String, std::time::Duration>,
     pub servings: ServingsType,
 }
@@ -75,7 +75,12 @@ impl TryFrom<Recipe> for RecipeDTO {
     fn try_from(value: Recipe) -> Result<Self, Self::Error> {
         Ok(Self {
             id: value.id.to_string(),
-            ingredients: value.ingredients.into_iter().map(|i| i.into()).collect(),
+            ingredients: value
+                .ingredients
+                .as_ref()
+                .iter()
+                .map(|i| i.clone().into())
+                .collect(),
             name: value.name,
             description: value.description,
             steps: value.steps.0,

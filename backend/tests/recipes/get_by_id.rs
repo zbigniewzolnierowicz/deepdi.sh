@@ -5,7 +5,10 @@ use pretty_assertions::assert_eq;
 use reqwest::{Client, StatusCode};
 use uuid::Uuid;
 
-use crate::{fixtures::{ingredient::ingredient_fixture, recipe::recipe_fixture}, setup::TestApp};
+use crate::{
+    fixtures::{ingredient::ingredient_fixture, recipe::recipe_fixture},
+    setup::TestApp,
+};
 
 #[tokio::test]
 async fn getting_recipe_by_id_works_correctly() {
