@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT id, name, description, diet_friendly\n                FROM ingredients\n                WHERE id = $1\n            ",
+  "query": "SELECT id, name, description, diet_friendly\nFROM ingredients;\n",
   "describe": {
     "columns": [
       {
@@ -25,9 +25,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid"
-      ]
+      "Left": []
     },
     "nullable": [
       false,
@@ -36,5 +34,5 @@
       false
     ]
   },
-  "hash": "d0751bb6143bbb80fdc54d7bafffd9cad3e9b9f8965f66148871a69a400ac48b"
+  "hash": "dddbf6d71e2c6fb6498d48352783c5c3086410dac597b9b2c53c662696faa8ab"
 }

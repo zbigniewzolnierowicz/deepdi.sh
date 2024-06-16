@@ -18,7 +18,11 @@ pub trait RecipeRepository: Send + Sync + 'static {
 
     async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError>;
 
-    async fn update(&self, input: &Uuid, changeset: RecipeChangeset) -> Result<Recipe, UpdateRecipeError>;
+    async fn update(
+        &self,
+        id: &Uuid,
+        changeset: RecipeChangeset,
+    ) -> Result<Recipe, UpdateRecipeError>;
 }
 
 pub type RecipeRepositoryService = Arc<Box<dyn RecipeRepository>>;

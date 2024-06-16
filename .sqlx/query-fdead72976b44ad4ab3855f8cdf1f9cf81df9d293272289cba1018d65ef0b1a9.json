@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO ingredients_recipes\n(recipe_id, ingredient_id, amount, notes, optional)\nVALUES\n($1, $2, $3, $4, $5);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Json",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fdead72976b44ad4ab3855f8cdf1f9cf81df9d293272289cba1018d65ef0b1a9"
+}

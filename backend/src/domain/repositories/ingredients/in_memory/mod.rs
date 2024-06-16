@@ -79,7 +79,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
         let ingredient = lock
             .get_mut(&id)
-            .ok_or(UpdateIngredientError::NotFound(id))?;
+            .ok_or(GetIngredientByIdError::NotFound(id))?;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());

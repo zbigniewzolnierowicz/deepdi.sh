@@ -101,9 +101,10 @@ async fn updating_a_recipe_succeeds(pool: PgPool) {
     let recipe = recipe_fixture();
     let changeset = RecipeChangeset {
         name: Some("WE UPDATED THIS THING".to_string()),
+        // TODO: add all of the changeable fields
         ..Default::default()
     };
-    
+
     insert_all_ingredients(ingredient_repo, &recipe).await;
 
     let result = repo.insert(recipe.clone()).await.unwrap();

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "DELETE FROM ingredients WHERE id = $1",
+  "query": "DELETE FROM ingredients WHERE id = $1;\n",
   "describe": {
     "columns": [],
     "parameters": {
@@ -10,5 +10,5 @@
     },
     "nullable": []
   },
-  "hash": "c8eee2c979cb86fe8ad0db15cddd1084969d18ce372789315bb094de4fe94034"
+  "hash": "d8a65039e47764da6cc4088c6dab5dd273e3ab701086b0968b6c3bf1dba7a042"
 }

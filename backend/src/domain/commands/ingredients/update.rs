@@ -4,7 +4,8 @@ use uuid::Uuid;
 use crate::domain::{
     entities::ingredient::{errors::ValidationError, Ingredient, IngredientChangeset},
     repositories::ingredients::{
-        errors::UpdateIngredientError as UpdateIngredientErrorInternal, IngredientRepositoryService,
+        errors::{GetIngredientByIdError, UpdateIngredientError as UpdateIngredientErrorInternal},
+        IngredientRepositoryService,
     },
 };
 
@@ -66,7 +67,9 @@ impl From<ValidationError> for UpdateIngredientError {
 impl From<UpdateIngredientErrorInternal> for UpdateIngredientError {
     fn from(value: UpdateIngredientErrorInternal) -> Self {
         match value {
-            UpdateIngredientErrorInternal::NotFound(id) => Self::NotFound(id),
+            UpdateIngredientErrorInternal::Get(GetIngredientByIdError::NotFound(id)) => {
+                Self::NotFound(id)
+            }
             e => Self::Internal(e.into()),
         }
     }

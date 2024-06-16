@@ -50,13 +50,13 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
     async fn update(
         &self,
-        input: &Uuid,
+        id: &Uuid,
         changeset: RecipeChangeset,
     ) -> Result<Recipe, UpdateRecipeError> {
         let mut lock = self.0.lock()?;
         let recipe = lock
-            .get_mut(input)
-            .ok_or(UpdateRecipeError::Get(GetRecipeByIdError::NotFound(*input)))?;
+            .get_mut(id)
+            .ok_or(UpdateRecipeError::Get(GetRecipeByIdError::NotFound(*id)))?;
 
         if let Some(v) = changeset.name {
             recipe.name = v;
@@ -76,10 +76,6 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
         if let Some(v) = changeset.description {
             recipe.description = v;
-        };
-
-        if let Some(v) = changeset.ingredients {
-            recipe.ingredients = v;
         };
 
         Ok(recipe.clone())

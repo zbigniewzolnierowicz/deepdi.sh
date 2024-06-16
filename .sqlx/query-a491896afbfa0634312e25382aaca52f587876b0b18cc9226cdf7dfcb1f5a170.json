@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO ingredients (id, name, description, diet_friendly)\n                VALUES ($1, $2, $3, $4)\n                RETURNING id, name, description, diet_friendly\n            ",
+  "query": "SELECT id, name, description, diet_friendly\nFROM ingredients\nWHERE id = $1;\n",
   "describe": {
     "columns": [
       {
@@ -26,10 +26,7 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Varchar",
-        "Text",
-        "VarcharArray"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -39,5 +36,5 @@
       false
     ]
   },
-  "hash": "d5411feb1db2af6d8a9bf7824bf02c5da0535d9e36f93b1205ead5f6e7c6e656"
+  "hash": "a491896afbfa0634312e25382aaca52f587876b0b18cc9226cdf7dfcb1f5a170"
 }
