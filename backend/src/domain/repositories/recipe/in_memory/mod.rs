@@ -2,10 +2,13 @@ use async_trait::async_trait;
 use std::{collections::HashMap, sync::Mutex};
 use uuid::Uuid;
 
-use crate::domain::{entities::recipe::Recipe, repositories::recipe::errors::InsertRecipeError};
+use crate::domain::{
+    entities::recipe::{Recipe, RecipeChangeset},
+    repositories::recipe::errors::InsertRecipeError,
+};
 
 use super::{
-    errors::{DeleteRecipeError, GetRecipeByIdError},
+    errors::{DeleteRecipeError, GetRecipeByIdError, UpdateRecipeError},
     RecipeRepository,
 };
 
@@ -43,6 +46,43 @@ impl RecipeRepository for InMemoryRecipeRepository {
         lock.remove(id).ok_or(DeleteRecipeError::NotFound(*id))?;
 
         Ok(())
+    }
+
+    async fn update(
+        &self,
+        input: &Uuid,
+        changeset: RecipeChangeset,
+    ) -> Result<Recipe, UpdateRecipeError> {
+        let mut lock = self.0.lock()?;
+        let recipe = lock
+            .get_mut(input)
+            .ok_or(UpdateRecipeError::Get(GetRecipeByIdError::NotFound(*input)))?;
+
+        if let Some(v) = changeset.name {
+            recipe.name = v;
+        };
+
+        if let Some(v) = changeset.time {
+            recipe.time = v;
+        };
+
+        if let Some(v) = changeset.steps {
+            recipe.steps = v;
+        };
+
+        if let Some(v) = changeset.servings {
+            recipe.servings = v;
+        };
+
+        if let Some(v) = changeset.description {
+            recipe.description = v;
+        };
+
+        if let Some(v) = changeset.ingredients {
+            recipe.ingredients = v;
+        };
+
+        Ok(recipe.clone())
     }
 }
 

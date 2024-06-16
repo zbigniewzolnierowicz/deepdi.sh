@@ -4,9 +4,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
-use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
+use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset};
 
-use super::errors::DeleteRecipeError;
+use super::errors::{DeleteRecipeError, UpdateRecipeError};
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -152,6 +152,10 @@ impl RecipeRepository for PostgresRecipeRepository {
             .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
 
         Ok(())
+    }
+
+    async fn update(&self, input: &Uuid, changeset: RecipeChangeset) -> Result<Recipe, UpdateRecipeError> {
+        todo!()
     }
 }
 

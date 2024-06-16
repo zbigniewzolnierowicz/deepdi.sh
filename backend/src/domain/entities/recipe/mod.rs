@@ -220,5 +220,15 @@ impl IngredientUnit {
     }
 }
 
+#[derive(Default)]
+pub struct RecipeChangeset {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub steps: Option<RecipeSteps>,
+    pub ingredients: Option<RecipeIngredients>,
+    pub time: Option<HashMap<String, std::time::Duration>>,
+    pub servings: Option<ServingsType>,
+}
+
 #[cfg(test)]
 mod tests;

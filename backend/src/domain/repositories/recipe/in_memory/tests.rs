@@ -68,3 +68,49 @@ async fn deleting_a_nonexistent_recipe_fails() {
 
     assert!(matches!(result, DeleteRecipeError::NotFound(id) if id == recipe.id))
 }
+
+#[tokio::test]
+async fn updating_a_recipe_succeeds() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let changeset = RecipeChangeset {
+        name: Some("WE UPDATED THIS THING".to_string()),
+        ..Default::default()
+    };
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    let result = repo.update(&result.id, changeset).await.unwrap();
+
+    assert_eq!(&result.name, "WE UPDATED THIS THING");
+
+    let result = repo.get_by_id(&result.id).await.unwrap();
+
+    assert_eq!(&result.name, "WE UPDATED THIS THING");
+}
+
+#[tokio::test]
+async fn updating_a_nonexistent_recipe_fails() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let changeset = RecipeChangeset {
+        name: Some("WE UPDATED THIS THING".to_string()),
+        ..Default::default()
+    };
+    let result = repo.update(&recipe.id, changeset).await.unwrap_err();
+
+    assert!(
+        matches!(result, UpdateRecipeError::Get(GetRecipeByIdError::NotFound(id)) if id == recipe.id)
+    )
+}
+
+#[tokio::test]
+async fn updating_a_recipe_with_empty_changeset_does_nothing() {
+    let repo = InMemoryRecipeRepository::new();
+    let recipe = recipe_fixture();
+    let changeset = RecipeChangeset {
+        ..Default::default()
+    };
+    let result = repo.insert(recipe.clone()).await.unwrap();
+    let result = repo.update(&result.id, changeset).await.unwrap();
+
+    assert_eq!(recipe, result);
+}
