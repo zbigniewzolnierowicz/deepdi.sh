@@ -1,8 +1,11 @@
+use std::{collections::HashMap, time::Duration};
+
 use crate::{
-    domain::repositories::ingredients::{
-        postgres::PostgresIngredientRepository, IngredientRepository,
+    domain::{
+        entities::recipe::ServingsType,
+        repositories::ingredients::{postgres::PostgresIngredientRepository, IngredientRepository},
     },
-    test_utils::recipe_fixture,
+    test_utils::{recipe_changeset, recipe_fixture},
 };
 
 use super::*;
@@ -99,22 +102,26 @@ async fn updating_a_recipe_succeeds(pool: PgPool) {
     let repo = PostgresRecipeRepository::new(pool);
 
     let recipe = recipe_fixture();
-    let changeset = RecipeChangeset {
-        name: Some("WE UPDATED THIS THING".to_string()),
-        // TODO: add all of the changeable fields
-        ..Default::default()
-    };
-
+    let changeset = recipe_changeset();
     insert_all_ingredients(ingredient_repo, &recipe).await;
 
     let result = repo.insert(recipe.clone()).await.unwrap();
-    let result = repo.update(&result.id, changeset).await.unwrap();
-
-    assert_eq!(&result.name, "WE UPDATED THIS THING");
-
+    repo.update(&result.id, changeset).await.unwrap();
     let result = repo.get_by_id(&result.id).await.unwrap();
 
-    assert_eq!(&result.name, "WE UPDATED THIS THING");
+    assert_eq!(
+        result,
+        Recipe {
+            name: "WE UPDATED THIS THING".to_string(),
+            description: "WE UPDATED THAT THING".to_string(),
+            steps: vec!["WE UPDATED ANOTHER THING".to_string()]
+                .try_into()
+                .unwrap(),
+            time: HashMap::from([("Prep time".to_string(), Duration::from_secs(60))]),
+            servings: ServingsType::Exact(4),
+            ..recipe
+        }
+    );
 }
 
 #[sqlx::test]
