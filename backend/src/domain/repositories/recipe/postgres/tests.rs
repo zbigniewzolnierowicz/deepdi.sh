@@ -7,6 +7,7 @@ use crate::{
     },
     test_utils::{recipe_changeset, recipe_fixture},
 };
+use pretty_assertions::assert_eq;
 
 use super::*;
 
