@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    UPDATE recipes\n                    SET steps = $2\n                    WHERE id = $1\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "VarcharArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c0dc752fb30ce2930118b99b9fef6e9145e82467cbd1288554b05a3b4b59c9b1"
+}

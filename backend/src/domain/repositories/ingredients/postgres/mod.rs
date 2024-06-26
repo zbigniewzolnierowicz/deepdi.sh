@@ -43,13 +43,9 @@ impl IngredientRepository for PostgresIngredientRepository {
             .map(|d| d.to_string())
             .collect();
 
-        let ingredient = sqlx::query_as!(
+        let ingredient = sqlx::query_file_as!(
             IngredientModel,
-            r#"
-                INSERT INTO ingredients (id, name, description, diet_friendly)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id, name, description, diet_friendly
-            "#,
+            "queries/ingredients/insert_ingredient.sql",
             ingredient.id,
             &ingredient.name,
             &ingredient.description,
@@ -74,13 +70,9 @@ impl IngredientRepository for PostgresIngredientRepository {
         skip(self)
     )]
     async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError> {
-        let ingredient = sqlx::query_as!(
+        let ingredient = sqlx::query_file_as!(
             IngredientModel,
-            r#"
-                SELECT id, name, description, diet_friendly
-                FROM ingredients
-                WHERE id = $1
-            "#,
+            "queries/ingredients/get_ingredient_by_id.sql",
             id
         )
         .fetch_one(&self.0)
@@ -95,12 +87,9 @@ impl IngredientRepository for PostgresIngredientRepository {
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Get all ingredients", skip(self))]
     async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
-        let ingredients = sqlx::query_as!(
+        let ingredients = sqlx::query_file_as!(
             IngredientModel,
-            r#"
-            SELECT id, name, description, diet_friendly
-            FROM ingredients;
-            "#
+            "queries/ingredients/get_all_ingredients.sql",
         )
         .fetch_all(&self.0)
         .await
@@ -118,18 +107,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, UpdateIngredientError> {
-        let mut ingredient_to_update = sqlx::query_as!(
-            IngredientModel,
-            r#"
-            SELECT id, name, description, diet_friendly
-            FROM ingredients
-            WHERE id = $1"#,
-            id
-        )
-        .fetch_optional(&self.0)
-        .await
-        .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?
-        .ok_or_else(|| UpdateIngredientError::NotFound(id))?;
+        let mut ingredient_to_update: IngredientModel = self.get_by_id(id).await?.into();
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -148,7 +126,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
 
         if let Some(name) = name {
-            if name != ingredient_to_update.name {
+            if name != *ingredient_to_update.name {
                 ingredient_to_update = sqlx::query_as!(
                     IngredientModel,
                     r#"
@@ -218,8 +196,8 @@ impl IngredientRepository for PostgresIngredientRepository {
     async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
         let ingredient_to_delete = self.get_by_id(id).await?;
 
-        sqlx::query!(
-            "DELETE FROM ingredients WHERE id = $1",
+        sqlx::query_file!(
+            "queries/ingredients/delete_ingredient.sql",
             ingredient_to_delete.id
         )
         .execute(&self.0)
@@ -230,13 +208,9 @@ impl IngredientRepository for PostgresIngredientRepository {
     }
 
     async fn get_all_by_id(&self, ids: &[Uuid]) -> Result<Vec<Ingredient>, GetAllIngredientsError> {
-        let results: Result<Vec<Ingredient>, GetAllIngredientsError> = sqlx::query_as!(
+        let results: Result<Vec<Ingredient>, GetAllIngredientsError> = sqlx::query_file_as!(
             IngredientModel,
-            r#"
-            SELECT id, name, description, diet_friendly
-            FROM ingredients
-            WHERE id = ANY($1)
-            "#,
+            "queries/ingredients/get_all_ingredients_by_id.sql",
             ids
         )
         .fetch_all(&self.0)

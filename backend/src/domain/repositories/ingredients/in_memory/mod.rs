@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, HashSet},
     sync::Mutex,
 };
 
@@ -18,7 +18,7 @@ use super::{
     IngredientRepository,
 };
 
-pub struct InMemoryIngredientRepository(pub Mutex<HashMap<Uuid, Ingredient>>);
+pub struct InMemoryIngredientRepository(pub Mutex<BTreeMap<Uuid, Ingredient>>);
 
 #[async_trait]
 impl IngredientRepository for InMemoryIngredientRepository {
@@ -79,7 +79,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
         let ingredient = lock
             .get_mut(&id)
-            .ok_or(UpdateIngredientError::NotFound(id))?;
+            .ok_or(GetIngredientByIdError::NotFound(id))?;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -145,7 +145,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
 impl InMemoryIngredientRepository {
     pub fn new() -> Self {
-        HashMap::new().into()
+        BTreeMap::new().into()
     }
 }
 
@@ -155,8 +155,8 @@ impl Default for InMemoryIngredientRepository {
     }
 }
 
-impl From<HashMap<Uuid, Ingredient>> for InMemoryIngredientRepository {
-    fn from(value: HashMap<Uuid, Ingredient>) -> Self {
+impl From<BTreeMap<Uuid, Ingredient>> for InMemoryIngredientRepository {
+    fn from(value: BTreeMap<Uuid, Ingredient>) -> Self {
         Self(value.into())
     }
 }

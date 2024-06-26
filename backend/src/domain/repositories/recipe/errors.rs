@@ -106,3 +106,18 @@ impl<T> From<PoisonError<T>> for DeleteRecipeError {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }
+
+#[derive(Error, Debug)]
+pub enum UpdateRecipeError {
+    #[error(transparent)]
+    Get(#[from] GetRecipeByIdError),
+
+    #[error(transparent)]
+    UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for UpdateRecipeError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}

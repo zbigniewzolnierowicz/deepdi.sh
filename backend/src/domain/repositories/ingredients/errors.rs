@@ -77,8 +77,8 @@ impl<T> From<PoisonError<T>> for InsertIngredientError {
 
 #[derive(Error, Debug)]
 pub enum UpdateIngredientError {
-    #[error("The ingredient with ID of {0} was not found")]
-    NotFound(Uuid),
+    #[error(transparent)]
+    Get(#[from] GetIngredientByIdError),
 
     #[error("The ingredient with field {0} of the given value already exists")]
     Conflict(String),

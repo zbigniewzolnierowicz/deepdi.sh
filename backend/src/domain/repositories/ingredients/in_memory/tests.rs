@@ -232,7 +232,9 @@ async fn updating_a_missing_file_fails() {
         .await
         .unwrap_err();
 
-    assert!(matches!(error, UpdateIngredientError::NotFound(id) if id == Uuid::from_u128(1)));
+    assert!(
+        matches!(error, UpdateIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(1))
+    );
 }
 
 #[tokio::test]

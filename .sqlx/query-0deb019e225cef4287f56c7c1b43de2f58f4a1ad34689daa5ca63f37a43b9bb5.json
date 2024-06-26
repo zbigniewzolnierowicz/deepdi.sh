@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO recipes\n            (id, name, description, steps, time, servings, metadata)\n            VALUES\n            ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING id",
+  "query": "INSERT INTO recipes\n(id, name, description, steps, time, servings, metadata)\nVALUES\n($1, $2, $3, $4, $5, $6, $7)\nRETURNING id;\n",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "a4cb88601ffed19c2b769043ac6a3f39c3a29c565151df3a485275abe3de8743"
+  "hash": "0deb019e225cef4287f56c7c1b43de2f58f4a1ad34689daa5ca63f37a43b9bb5"
 }

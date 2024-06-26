@@ -1,5 +1,5 @@
 pub mod errors;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use common::{IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -18,24 +18,35 @@ pub struct Recipe {
     pub description: String,
     pub steps: RecipeSteps,
     pub ingredients: RecipeIngredients,
-    pub time: HashMap<String, std::time::Duration>,
+    pub time: BTreeMap<String, std::time::Duration>,
     pub servings: ServingsType,
 }
+#[derive(Debug, Clone)]
+pub struct RecipeIngredients(Vec<IngredientWithAmount>);
+
+impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
+    fn as_ref(&self) -> &[IngredientWithAmount] {
+        &self.0
+    }
+}
+
+impl PartialEq for RecipeIngredients {
+    fn eq(&self, other: &Self) -> bool {
+        let mut a = self.0.clone();
+        let mut b = other.0.clone();
+        a.sort_by_key(|f| f.ingredient.id);
+        b.sort_by_key(|f| f.ingredient.id);
+
+        a.eq(&b)
+    }
+}
+
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct RecipeSteps(Vec<String>);
 
 impl AsRef<[String]> for RecipeSteps {
     fn as_ref(&self) -> &[String] {
-        &self.0
-    }
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub struct RecipeIngredients(Vec<IngredientWithAmount>);
-
-impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
-    fn as_ref(&self) -> &[IngredientWithAmount] {
         &self.0
     }
 }
@@ -218,6 +229,15 @@ impl IngredientUnit {
     pub fn from_tablespoons(tablespoons: f64) -> Self {
         Self::Teaspoons(tablespoons * 3.0)
     }
+}
+
+#[derive(Default)]
+pub struct RecipeChangeset {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub steps: Option<RecipeSteps>,
+    pub time: Option<BTreeMap<String, std::time::Duration>>,
+    pub servings: Option<ServingsType>,
 }
 
 #[cfg(test)]

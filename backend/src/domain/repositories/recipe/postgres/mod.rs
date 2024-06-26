@@ -4,9 +4,11 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
-use crate::domain::entities::recipe::{IngredientWithAmount, IngredientWithAmountModel, Recipe};
+use crate::domain::entities::recipe::{
+    IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
+};
 
-use super::errors::DeleteRecipeError;
+use super::errors::{DeleteRecipeError, UpdateRecipeError};
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -22,13 +24,8 @@ async fn insert_ingredient(
     let amount = serde_json::to_value(ingredient.amount.clone())
         .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
 
-    sqlx::query!(
-        r#"
-                INSERT INTO ingredients_recipes
-                (recipe_id, ingredient_id, amount, notes, optional)
-                VALUES
-                ($1, $2, $3, $4, $5)
-                "#,
+    sqlx::query_file!(
+        "queries/recipes/insert_ingredient.sql",
         id,
         ingredient.ingredient.id,
         amount,
@@ -38,6 +35,7 @@ async fn insert_ingredient(
     .execute(pool)
     .await
     .map_err(InsertRecipeError::from)?;
+
     Ok(())
 }
 
@@ -52,12 +50,8 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         let tx = self.0.begin().await.map_err(InsertRecipeError::from)?;
 
-        let result = sqlx::query!(
-            r#"INSERT INTO recipes
-            (id, name, description, steps, time, servings, metadata)
-            VALUES
-            ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING id"#,
+        let result = sqlx::query_file!(
+            "queries/recipes/insert_recipe.sql",
             input.id,
             input.name,
             input.description,
@@ -89,14 +83,14 @@ impl RecipeRepository for PostgresRecipeRepository {
     }
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError> {
-        let result = sqlx::query_file!("queries/get_recipe.sql", id)
+        let result = sqlx::query_file!("queries/recipes/get_recipe.sql", id)
             .fetch_one(&self.0)
             .await
             .map_err(|e| GetRecipeByIdError::with_id(id, e))?;
 
         let result_ingredients = sqlx::query_file_as!(
             IngredientWithAmountModel,
-            "queries/get_ingredients_for_recipe.sql",
+            "queries/recipes/get_ingredients_for_recipe.sql",
             id
         )
         .fetch_all(&self.0)
@@ -137,12 +131,15 @@ impl RecipeRepository for PostgresRecipeRepository {
             .await
             .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
 
-        sqlx::query_file!("queries/delete_ingredients_for_recipe.sql", recipe.id)
-            .execute(&self.0)
-            .await
-            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+        sqlx::query_file!(
+            "queries/recipes/delete_ingredients_for_recipe.sql",
+            recipe.id
+        )
+        .execute(&self.0)
+        .await
+        .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
 
-        sqlx::query_file!("queries/delete_recipe.sql", recipe.id)
+        sqlx::query_file!("queries/recipes/delete_recipe.sql", recipe.id)
             .execute(&self.0)
             .await
             .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
@@ -152,6 +149,121 @@ impl RecipeRepository for PostgresRecipeRepository {
             .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
 
         Ok(())
+    }
+
+    async fn update(
+        &self,
+        id: &Uuid,
+        changeset: RecipeChangeset,
+    ) -> Result<Recipe, UpdateRecipeError> {
+        let recipe = self.get_by_id(id).await?;
+
+        let tx = self
+            .0
+            .begin()
+            .await
+            .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+
+        if let Some(value) = changeset.name {
+            if value != recipe.name {
+                sqlx::query!(
+                    r#"
+                    UPDATE recipes
+                    SET name = $2
+                    WHERE id = $1
+                    "#,
+                    id,
+                    value
+                )
+                .execute(&self.0)
+                .await
+                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+            }
+        };
+
+        if let Some(value) = changeset.description {
+            if value != recipe.description {
+                sqlx::query!(
+                    r#"
+                    UPDATE recipes
+                    SET description = $2
+                    WHERE id = $1
+                    "#,
+                    id,
+                    value
+                )
+                .execute(&self.0)
+                .await
+                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+            }
+        };
+
+        if let Some(value) = changeset.servings {
+            if value != recipe.servings {
+                let value = serde_json::to_value(value)
+                    .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+
+                sqlx::query!(
+                    r#"
+                    UPDATE recipes
+                    SET servings = $2
+                    WHERE id = $1
+                    "#,
+                    id,
+                    value
+                )
+                .execute(&self.0)
+                .await
+                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+            }
+        }
+
+        if let Some(value) = changeset.time {
+            if value != recipe.time {
+                let value = serde_json::to_value(value)
+                    .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+
+                sqlx::query!(
+                    r#"
+                    UPDATE recipes
+                    SET time = $2
+                    WHERE id = $1
+                    "#,
+                    id,
+                    value
+                )
+                .execute(&self.0)
+                .await
+                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+            }
+        }
+
+        if let Some(value) = changeset.steps {
+            if value != recipe.steps {
+                let value = value.as_ref();
+
+                sqlx::query!(
+                    r#"
+                    UPDATE recipes
+                    SET steps = $2
+                    WHERE id = $1
+                    "#,
+                    id,
+                    value
+                )
+                .execute(&self.0)
+                .await
+                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+            }
+        }
+
+        tx.commit()
+            .await
+            .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+
+        let recipe = self.get_by_id(id).await?;
+
+        Ok(recipe)
     }
 }
 
