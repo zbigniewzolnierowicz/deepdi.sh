@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::BTreeMap, time::Duration};
 
 use crate::domain::entities::recipe::{
     IngredientUnit, IngredientWithAmount, RecipeChangeset, ServingsType,
@@ -14,7 +14,7 @@ pub fn recipe_fixture() -> Recipe {
         id: uuid::Uuid::nil(),
         name: "Hoisin Tofu and Broccoli".to_string(),
         description: "If necessary, provide a very brief description of the dish in one or two sentences. For most dishes, this will be unnecessary. If there is a title image of this dish, it should be above this paragraph. You may also include prep/cook time and the number of servings as below:".to_string(),
-        time: HashMap::from([
+        time: BTreeMap::from([
             ("Prep time".to_string(), Duration::from_secs(15 * 60)),
             ("Cook time".to_string(), Duration::from_secs(10 * 60))
         ]),
@@ -85,7 +85,7 @@ pub fn recipe_changeset() -> RecipeChangeset {
     RecipeChangeset {
         name: Some("WE UPDATED THIS THING".to_string()),
         description: Some("WE UPDATED THAT THING".to_string()),
-        time: Some(HashMap::from([(
+        time: Some(BTreeMap::from([(
             "Prep time".to_string(),
             Duration::from_secs(60),
         )])),

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::BTreeMap, time::Duration};
 
 use crate::{
     domain::{
@@ -117,7 +117,7 @@ async fn updating_a_recipe_succeeds(pool: PgPool) {
             steps: vec!["WE UPDATED ANOTHER THING".to_string()]
                 .try_into()
                 .unwrap(),
-            time: HashMap::from([("Prep time".to_string(), Duration::from_secs(60))]),
+            time: BTreeMap::from([("Prep time".to_string(), Duration::from_secs(60))]),
             servings: ServingsType::Exact(4),
             ..recipe
         }

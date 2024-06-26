@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
@@ -49,7 +49,7 @@ pub struct CreateRecipe<'a> {
     pub name: &'a str,
     pub description: &'a str,
     pub steps: Vec<String>,
-    pub time: HashMap<String, std::time::Duration>,
+    pub time: BTreeMap<String, std::time::Duration>,
     pub ingredients: Vec<IngredientAmountData>,
     pub servings: ServingsType,
 }
@@ -138,7 +138,7 @@ mod tests {
             &CreateRecipe {
                 name: "Recipe test",
                 description: "This is a test for the recipe",
-                time: HashMap::from([(
+                time: BTreeMap::from([(
                     "Prep time".to_string(),
                     std::time::Duration::from_secs(60),
                 )]),
@@ -159,7 +159,7 @@ mod tests {
 
     #[tokio::test]
     async fn create_recipe_with_proper_ingredients() {
-        let ingredients: HashMap<Uuid, Ingredient> = HashMap::from([(
+        let ingredients: BTreeMap<Uuid, Ingredient> = BTreeMap::from([(
             Uuid::nil(),
             IngredientModel {
                 id: Uuid::nil(),
@@ -188,7 +188,7 @@ mod tests {
             &CreateRecipe {
                 name: "Recipe test",
                 description: "This is a test for the recipe",
-                time: HashMap::from([(
+                time: BTreeMap::from([(
                     "Prep time".to_string(),
                     std::time::Duration::from_secs(60),
                 )]),
@@ -241,7 +241,7 @@ mod tests {
             &CreateRecipe {
                 name: "Recipe test",
                 description: "This is a test for the recipe",
-                time: HashMap::from([(
+                time: BTreeMap::from([(
                     "Prep time".to_string(),
                     std::time::Duration::from_secs(60),
                 )]),
@@ -292,7 +292,7 @@ mod tests {
             &CreateRecipe {
                 name: "Recipe test",
                 description: "This is a test for the recipe",
-                time: HashMap::from([(
+                time: BTreeMap::from([(
                     "Prep time".to_string(),
                     std::time::Duration::from_secs(60),
                 )]),
