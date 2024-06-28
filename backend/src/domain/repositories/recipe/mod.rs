@@ -2,6 +2,9 @@ pub mod errors;
 pub mod in_memory;
 pub mod postgres;
 
+#[cfg(test)]
+pub mod __test__;
+
 use crate::domain::entities::recipe::{Recipe, RecipeChangeset};
 use async_trait::async_trait;
 use std::sync::Arc;
