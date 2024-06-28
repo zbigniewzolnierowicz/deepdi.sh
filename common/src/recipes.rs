@@ -65,3 +65,13 @@ pub enum IngredientUnitDTO {
     Cups(f64),
     Other { amount: f64, unit: String },
 }
+
+#[derive(Deserialize, Serialize, TS, Debug)]
+#[ts(export)]
+pub struct UpdateRecipeDTO {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub steps: Option<Vec<String>>,
+    pub time: Option<HashMap<String, u64>>,
+    pub servings: Option<ServingsTypeDTO>,
+}

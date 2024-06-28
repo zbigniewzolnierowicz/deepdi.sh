@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
-use common::ServingsTypeDTO;
+use common::{ServingsTypeDTO, UpdateRecipeDTO};
 use uuid::Uuid;
 
 use crate::domain::entities::recipe::errors::ValidationError;
-use crate::domain::entities::recipe::RecipeChangeset;
+use crate::domain::entities::recipe::{Recipe, RecipeChangeset};
 use crate::domain::repositories::recipe::errors::{
     GetRecipeByIdError, UpdateRecipeError as UpdateRecipeErrorInternal,
 };
@@ -26,7 +26,18 @@ impl From<UpdateRecipeErrorInternal> for UpdateRecipeError {
     fn from(value: UpdateRecipeErrorInternal) -> Self {
         match value {
             UpdateRecipeErrorInternal::Get(GetRecipeByIdError::NotFound(id)) => Self::NotFound(id),
+            UpdateRecipeErrorInternal::Get(GetRecipeByIdError::ValidationError(err)) => err.into(),
             err => Self::Unknown(err.into()),
+        }
+    }
+}
+
+impl From<GetRecipeByIdError> for UpdateRecipeError {
+    fn from(value: GetRecipeByIdError) -> Self {
+        match value {
+            GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
+            GetRecipeByIdError::ValidationError(err) => err.into(),
+            err => Self::Unknown(err.into())
         }
     }
 }
@@ -56,16 +67,38 @@ impl TryFrom<UpdateRecipe> for RecipeChangeset {
     }
 }
 
+impl From<UpdateRecipeDTO> for UpdateRecipe {
+    fn from(value: UpdateRecipeDTO) -> Self {
+        Self {
+            name: value.name,
+            time: value.time.map(|times| {
+                times
+                    .into_iter()
+                    .map(|(k, v)| (k, std::time::Duration::from_secs(v)))
+                    .collect()
+            }),
+            description: value.description,
+            steps: value.steps,
+            servings: value.servings,
+        }
+    }
+}
+
 pub async fn update_recipe(
     recipe_repo: RecipeRepositoryService,
     input: &Uuid,
     update: UpdateRecipe,
-) -> Result<(), UpdateRecipeError> {
+) -> Result<Recipe, UpdateRecipeError> {
     let changeset = update.try_into()?;
     recipe_repo
         .update(input, changeset)
         .await
         .map_err(UpdateRecipeError::from)?;
 
-    Ok(())
+    let recipe = recipe_repo
+        .get_by_id(input)
+        .await
+        .map_err(UpdateRecipeError::from)?;
+
+    Ok(recipe)
 }
