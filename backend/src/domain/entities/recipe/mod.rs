@@ -70,6 +70,13 @@ impl TryFrom<Vec<String>> for RecipeSteps {
     }
 }
 
+impl TryFrom<&Vec<String>> for RecipeSteps {
+    type Error = ValidationError;
+    fn try_from(value: &Vec<String>) -> Result<Self, Self::Error> {
+        RecipeSteps::try_from(value.clone())
+    }
+}
+
 impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
     type Error = ValidationError;
     fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
@@ -127,6 +134,12 @@ impl From<ServingsTypeDTO> for ServingsType {
             ServingsTypeDTO::Exact(a) => Self::Exact(a),
             ServingsTypeDTO::FromTo(a, b) => Self::FromTo(a, b),
         }
+    }
+}
+
+impl From<&ServingsTypeDTO> for ServingsType {
+    fn from(value: &ServingsTypeDTO) -> Self {
+        Self::from(value.clone())
     }
 }
 
