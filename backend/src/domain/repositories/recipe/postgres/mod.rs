@@ -3,7 +3,7 @@ use futures::future::join_all;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::entities::ingredient::IngredientModel;
+use crate::domain::entities::ingredient::{Ingredient, IngredientModel};
 use crate::domain::entities::recipe::{
     IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
@@ -264,6 +264,10 @@ impl RecipeRepository for PostgresRecipeRepository {
         let recipe = self.get_by_id(id).await?;
 
         Ok(recipe)
+    }
+
+    async fn add_ingredient(&self, id: &Uuid, ingredient: Ingredient) -> Result<Recipe, UpdateRecipeError> {
+        todo!()
     }
 }
 

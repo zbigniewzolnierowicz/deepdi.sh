@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Mutex};
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{Recipe, RecipeChangeset},
+    entities::{ingredient::Ingredient, recipe::{Recipe, RecipeChangeset}},
     repositories::recipe::errors::InsertRecipeError,
 };
 
@@ -79,6 +79,10 @@ impl RecipeRepository for InMemoryRecipeRepository {
         };
 
         Ok(recipe.clone())
+    }
+
+    async fn add_ingredient(&self, id: &Uuid, ingredient: Ingredient) -> Result<Recipe, UpdateRecipeError> {
+        todo!()
     }
 }
 
