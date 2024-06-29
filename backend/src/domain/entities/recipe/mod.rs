@@ -41,7 +41,6 @@ impl PartialEq for RecipeIngredients {
     }
 }
 
-
 #[derive(PartialEq, Debug, Clone)]
 pub struct RecipeSteps(Vec<String>);
 
@@ -251,6 +250,24 @@ pub struct RecipeChangeset {
     pub steps: Option<RecipeSteps>,
     pub time: Option<BTreeMap<String, std::time::Duration>>,
     pub servings: Option<ServingsType>,
+}
+
+impl RecipeChangeset {
+    pub fn is_empty(&self) -> bool {
+        let RecipeChangeset {
+            name,
+            description,
+            steps,
+            time,
+            servings,
+        } = self;
+
+        name.is_none()
+            && description.is_none()
+            && steps.is_none()
+            && time.is_none()
+            && servings.is_none()
+    }
 }
 
 #[cfg(test)]

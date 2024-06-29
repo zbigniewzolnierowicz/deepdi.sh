@@ -12,6 +12,9 @@ use crate::domain::repositories::recipe::RecipeRepositoryService;
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum UpdateRecipeError {
+    #[error("You did not provide any changes to be made")]
+    ChangesetEmpty,
+
     #[error("Could not find the ingredient with ID {0}")]
     NotFound(Uuid),
 
@@ -37,7 +40,7 @@ impl From<GetRecipeByIdError> for UpdateRecipeError {
         match value {
             GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
             GetRecipeByIdError::ValidationError(err) => err.into(),
-            err => Self::Unknown(err.into())
+            err => Self::Unknown(err.into()),
         }
     }
 }
@@ -89,7 +92,11 @@ pub async fn update_recipe(
     input: &Uuid,
     update: UpdateRecipe,
 ) -> Result<Recipe, UpdateRecipeError> {
-    let changeset = update.try_into()?;
+    let changeset: RecipeChangeset = update.try_into()?;
+    if changeset.is_empty() {
+        return Err(UpdateRecipeError::ChangesetEmpty);
+    };
+
     recipe_repo
         .update(input, changeset)
         .await

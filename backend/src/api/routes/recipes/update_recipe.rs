@@ -13,6 +13,7 @@ impl MakeError<String> for UpdateRecipeError {
         match self {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::ValidationError(_) => StatusCode::BAD_REQUEST,
+            Self::ChangesetEmpty => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
