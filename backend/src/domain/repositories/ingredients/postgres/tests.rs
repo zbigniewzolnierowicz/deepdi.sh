@@ -1,9 +1,7 @@
 use sqlx::PgPool;
 
 use super::*;
-use crate::domain::entities::ingredient::types::{
-    IngredientDescription, IngredientName, WhichDiets,
-};
+use crate::domain::{entities::ingredient::types::WhichDiets, repositories::ingredients::__test__};
 
 use pretty_assertions::assert_eq;
 
@@ -34,236 +32,66 @@ async fn insert_ingredient_succeeds(pool: PgPool) {
 
 #[sqlx::test]
 async fn insert_ingredient_that_already_exists_fails_id(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name".try_into().unwrap(),
-        description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let result = repo
-        .insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name 2".try_into().unwrap(),
-            description: "Ingredient description 2".try_into().unwrap(),
-            diet_friendly: WhichDiets::new(),
-        })
-        .await
-        .unwrap_err();
-
-    assert!(matches!(
-        result,
-        InsertIngredientError::Conflict(fieldname) if fieldname == "id"
-    ));
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::insert_ingredient_that_already_exists_fails_id(repo).await
 }
 
 #[sqlx::test]
 async fn insert_ingredient_that_already_exists_fails_name(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name".try_into().unwrap(),
-        description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let result = repo
-        .insert(Ingredient {
-            id: Uuid::from_u128(2),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets::new(),
-        })
-        .await
-        .unwrap_err();
-
-    assert!(matches!(
-        result,
-        InsertIngredientError::Conflict(fieldname) if fieldname == "name"
-    ))
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::insert_ingredient_that_already_exists_fails_name(repo).await
 }
 
 #[sqlx::test]
 async fn get_by_id_returns_ingredient(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name".try_into().unwrap(),
-        description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap();
-    assert_eq!(result.name, "Ingredient name".try_into().unwrap());
-    assert_eq!(
-        result.description,
-        "Ingredient description".try_into().unwrap()
-    );
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::get_by_id_returns_ingredient(repo).await
 }
 
 #[sqlx::test]
 async fn get_by_id_returns_error_when_missing(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    let error = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
-
-    assert!(matches!(error, GetIngredientByIdError::NotFound(id) if id == Uuid::from_u128(1)));
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::get_by_id_returns_error_when_missing(repo).await
 }
 
 #[sqlx::test]
 async fn get_all_returns_all_ingredients(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(2),
-        name: "Ingredient name 2".try_into().unwrap(),
-        description: "Ingredient description 2".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let mut result = repo.get_all().await.unwrap();
-    result.sort_by_key(|x| x.id);
-
-    assert_eq!(result.len(), 2);
-
-    for (index, entry) in result.iter().enumerate() {
-        let index = index + 1;
-
-        assert_eq!(entry.id, Uuid::from_u128(index.try_into().unwrap()));
-        assert_eq!(
-            entry.name,
-            IngredientName(format!("Ingredient name {index}"))
-        );
-        assert_eq!(
-            entry.description,
-            IngredientDescription(format!("Ingredient description {index}"))
-        );
-    }
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::get_all_returns_all_ingredients(repo).await
 }
 
 #[sqlx::test]
 async fn get_all_returns_empty_vec(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-    let result = repo.get_all().await.unwrap();
-
-    assert_eq!(result, vec![]);
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::get_all_returns_empty_vec(repo).await
 }
 
 #[sqlx::test]
 async fn updating_an_ingredient_success(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    let input = Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    };
-    repo.insert(input.clone()).await.unwrap();
-
-    let result = repo
-        .update(
-            input.id,
-            IngredientChangeset {
-                name: Some(IngredientName("Ingredient name changed".to_string())),
-                ..Default::default()
-            },
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(
-        result,
-        Ingredient {
-            name: IngredientName("Ingredient name changed".to_string()),
-            ..input
-        }
-    )
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::updating_an_ingredient_success(repo).await
 }
 
 #[sqlx::test]
 async fn updating_with_empty_changeset_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    let input = Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    };
-    repo.insert(input.clone()).await.unwrap();
-
-    let error = repo
-        .update(input.id, IngredientChangeset::default())
-        .await
-        .unwrap_err();
-
-    assert!(
-        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == vec!["name", "description", "diet_friendly"])
-    );
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::updating_with_empty_changeset_fails(repo).await
 }
 
 #[sqlx::test]
 async fn updating_a_missing_file_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    let error = repo
-        .update(
-            Uuid::from_u128(1),
-            IngredientChangeset {
-                name: Some(IngredientName(
-                    "This will fail, so this doesn't matter".to_string(),
-                )),
-                ..Default::default()
-            },
-        )
-        .await
-        .unwrap_err();
-
-    assert!(
-        matches!(error, UpdateIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(1))
-    );
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::updating_a_missing_file_fails(repo).await
 }
 
 #[sqlx::test]
 async fn deleting_works(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-
-    let input = Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    };
-
-    repo.insert(input).await.unwrap();
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::deleting_works(repo).await
 }
 
 #[sqlx::test]
 async fn deleting_nonexistent_ingredient_errors(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool.clone());
-    let error = repo.delete(Uuid::nil()).await.unwrap_err();
-
-    assert!(
-        matches!(error, DeleteIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::nil())
-    );
+    let repo = PostgresIngredientRepository::new(pool);
+    __test__::deleting_works(repo).await
 }

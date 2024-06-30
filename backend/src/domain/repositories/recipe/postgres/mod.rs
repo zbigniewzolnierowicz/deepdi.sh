@@ -8,7 +8,7 @@ use crate::domain::entities::recipe::{
     IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
 
-use super::errors::{DeleteRecipeError, UpdateRecipeError};
+use super::errors::{AddIngredientIntoRecipeError, DeleteRecipeError, UpdateRecipeError};
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -20,9 +20,9 @@ async fn insert_ingredient(
     pool: &PgPool,
     id: Uuid,
     ingredient: &IngredientWithAmount,
-) -> Result<(), InsertRecipeError> {
+) -> Result<(), AddIngredientIntoRecipeError> {
     let amount = serde_json::to_value(ingredient.amount.clone())
-        .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
+        .map_err(|e| AddIngredientIntoRecipeError::UnknownError(e.into()))?;
 
     sqlx::query_file!(
         "queries/recipes/insert_ingredient.sql",
@@ -34,7 +34,7 @@ async fn insert_ingredient(
     )
     .execute(pool)
     .await
-    .map_err(InsertRecipeError::from)?;
+    .map_err(AddIngredientIntoRecipeError::from)?;
 
     Ok(())
 }
@@ -67,13 +67,12 @@ impl RecipeRepository for PostgresRecipeRepository {
         join_all(
             input
                 .ingredients
-                .as_ref()
                 .iter()
                 .map(|i| insert_ingredient(&self.0, result.id, i)),
         )
         .await
         .into_iter()
-        .collect::<Result<Vec<()>, InsertRecipeError>>()?;
+        .collect::<Result<Vec<()>, AddIngredientIntoRecipeError>>()?;
 
         tx.commit().await.map_err(InsertRecipeError::from)?;
 
@@ -264,6 +263,16 @@ impl RecipeRepository for PostgresRecipeRepository {
         let recipe = self.get_by_id(id).await?;
 
         Ok(recipe)
+    }
+
+    async fn add_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: IngredientWithAmount,
+    ) -> Result<(), AddIngredientIntoRecipeError> {
+        insert_ingredient(&self.0, recipe.id, &ingredient).await?;
+
+        Ok(())
     }
 }
 

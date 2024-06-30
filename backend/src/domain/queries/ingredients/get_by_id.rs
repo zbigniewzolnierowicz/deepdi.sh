@@ -27,7 +27,7 @@ pub async fn get_ingredient_by_id(
     repo: IngredientRepositoryService,
     input: Uuid,
 ) -> Result<Ingredient, GetIngredientError> {
-    let result = repo.get_by_id(input).await?;
+    let result = repo.get_by_id(&input).await?;
 
     Ok(result)
 }

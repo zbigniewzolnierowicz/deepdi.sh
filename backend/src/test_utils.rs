@@ -8,6 +8,15 @@ use crate::domain::entities::{
     recipe::Recipe,
 };
 
+pub fn ingredient_fixture() -> Ingredient {
+    Ingredient {
+        id: uuid::Uuid::from_u128(64),
+        name: "Beef".try_into().unwrap(),
+        description: "You killed a cow for it".try_into().unwrap(),
+        diet_friendly: vec![DietFriendly::GlutenFree].into(),
+    }
+}
+
 pub fn recipe_fixture() -> Recipe {
     // Recipe from https://publicdomainrecipes.com/hoisin_tofu_and_broccoli/
     Recipe {

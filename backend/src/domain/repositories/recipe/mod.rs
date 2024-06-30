@@ -2,8 +2,12 @@ pub mod errors;
 pub mod in_memory;
 pub mod postgres;
 
-use crate::domain::entities::recipe::{Recipe, RecipeChangeset};
+#[cfg(test)]
+pub mod __test__;
+
+use crate::domain::entities::recipe::{IngredientWithAmount, Recipe, RecipeChangeset};
 use async_trait::async_trait;
+use errors::AddIngredientIntoRecipeError;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -23,6 +27,12 @@ pub trait RecipeRepository: Send + Sync + 'static {
         id: &Uuid,
         changeset: RecipeChangeset,
     ) -> Result<Recipe, UpdateRecipeError>;
+
+    async fn add_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: IngredientWithAmount,
+    ) -> Result<(), AddIngredientIntoRecipeError>;
 }
 
 pub type RecipeRepositoryService = Arc<Box<dyn RecipeRepository>>;

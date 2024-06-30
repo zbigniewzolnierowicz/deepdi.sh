@@ -6,7 +6,7 @@
 
 | Usual | New |
 |:------| --- |
-| postgres | [SurrealDB](https://surrealdb.com/) (not using this, I wanna show off sqlx) |
+| postgres | [SurrealDB](https://surrealdb.com/) (not using this, I want to show off sqlx) |
 | Spring | [Actix Web](https://actix.rs/) |
 | React | [Leptos](https://leptos.dev/) (not using this, gave up, but using some other cool stuff) |
 | Minio | [Garage](https://garagehq.deuxfleurs.fr/) |

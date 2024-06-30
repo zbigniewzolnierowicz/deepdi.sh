@@ -1,9 +1,13 @@
 pub mod errors;
 use std::collections::BTreeMap;
+use derive_more::DerefMut;
 
-use common::{IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO};
+use common::{
+    IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
+};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
+use shrinkwraprs::Shrinkwrap;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -21,7 +25,7 @@ pub struct Recipe {
     pub time: BTreeMap<String, std::time::Duration>,
     pub servings: ServingsType,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Shrinkwrap, DerefMut)]
 pub struct RecipeIngredients(Vec<IngredientWithAmount>);
 
 impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
@@ -40,7 +44,6 @@ impl PartialEq for RecipeIngredients {
         a.eq(&b)
     }
 }
-
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct RecipeSteps(Vec<String>);
@@ -70,6 +73,13 @@ impl TryFrom<Vec<String>> for RecipeSteps {
     }
 }
 
+impl TryFrom<&Vec<String>> for RecipeSteps {
+    type Error = ValidationError;
+    fn try_from(value: &Vec<String>) -> Result<Self, Self::Error> {
+        RecipeSteps::try_from(value.clone())
+    }
+}
+
 impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
     type Error = ValidationError;
     fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
@@ -81,14 +91,12 @@ impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
     }
 }
 
-impl TryFrom<Recipe> for RecipeDTO {
-    type Error = ValidationError;
-    fn try_from(value: Recipe) -> Result<Self, Self::Error> {
-        Ok(Self {
+impl From<Recipe> for RecipeDTO {
+    fn from(value: Recipe) -> Self {
+        Self {
             id: value.id.to_string(),
             ingredients: value
                 .ingredients
-                .as_ref()
                 .iter()
                 .map(|i| i.clone().into())
                 .collect(),
@@ -101,7 +109,7 @@ impl TryFrom<Recipe> for RecipeDTO {
                 .map(|(k, v)| (k, v.as_secs()))
                 .collect(),
             servings: value.servings.into(),
-        })
+        }
     }
 }
 
@@ -127,6 +135,12 @@ impl From<ServingsTypeDTO> for ServingsType {
             ServingsTypeDTO::Exact(a) => Self::Exact(a),
             ServingsTypeDTO::FromTo(a, b) => Self::FromTo(a, b),
         }
+    }
+}
+
+impl From<&ServingsTypeDTO> for ServingsType {
+    fn from(value: &ServingsTypeDTO) -> Self {
+        Self::from(value.clone())
     }
 }
 
@@ -238,6 +252,51 @@ pub struct RecipeChangeset {
     pub steps: Option<RecipeSteps>,
     pub time: Option<BTreeMap<String, std::time::Duration>>,
     pub servings: Option<ServingsType>,
+}
+
+impl RecipeChangeset {
+    pub fn is_empty(&self) -> bool {
+        let RecipeChangeset {
+            name,
+            description,
+            steps,
+            time,
+            servings,
+        } = self;
+
+        name.is_none()
+            && description.is_none()
+            && steps.is_none()
+            && time.is_none()
+            && servings.is_none()
+    }
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct IngredientAmountData {
+    pub ingredient_id: Uuid,
+    pub amount: IngredientUnit,
+    pub optional: bool,
+    pub notes: Option<String>,
+}
+
+impl From<IngredientAmountDTO> for IngredientAmountData {
+    fn from(
+        IngredientAmountDTO {
+            ingredient_id,
+            amount,
+            optional,
+            notes,
+        }: IngredientAmountDTO,
+    ) -> Self {
+        let amount = amount.into();
+        Self {
+            ingredient_id,
+            amount,
+            optional,
+            notes,
+        }
+    }
 }
 
 #[cfg(test)]

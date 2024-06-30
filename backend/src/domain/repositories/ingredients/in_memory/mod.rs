@@ -51,13 +51,13 @@ impl IngredientRepository for InMemoryIngredientRepository {
         "[INGREDIENT REPOSITORY] [IN MEMORY] Get ingredient with ID",
         skip(self)
     )]
-    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError> {
+    async fn get_by_id(&self, id: &Uuid) -> Result<Ingredient, GetIngredientByIdError> {
         let lock = self.0.lock()?;
 
         let ingredient = lock
             .values()
-            .find(|x| x.id == id)
-            .ok_or(GetIngredientByIdError::NotFound(id))?;
+            .find(|x| x.id == *id)
+            .ok_or(GetIngredientByIdError::NotFound(*id))?;
 
         Ok(ingredient.clone())
     }
@@ -108,7 +108,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Delete an ingredient", skip(self))]
     async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
-        let ingredient = self.get_by_id(id).await?;
+        let ingredient = self.get_by_id(&id).await?;
         let mut lock = self.0.lock()?;
         lock.remove(&ingredient.id);
 
