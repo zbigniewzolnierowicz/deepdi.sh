@@ -6,7 +6,7 @@ use strum::{Display, EnumString, VariantNames};
 
 use super::errors::ValidationError;
 
-#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq, Hash)]
 #[sqlx(transparent)]
 pub struct IngredientName(pub String);
 
@@ -34,7 +34,7 @@ impl TryFrom<&str> for IngredientName {
     }
 }
 
-#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Shrinkwrap, sqlx::Type, Debug, Clone, PartialEq, Eq, Hash)]
 #[sqlx(transparent)]
 pub struct IngredientDescription(pub String);
 

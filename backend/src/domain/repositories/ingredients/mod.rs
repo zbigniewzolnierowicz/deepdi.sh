@@ -23,7 +23,7 @@ use self::errors::{
 #[async_trait]
 pub trait IngredientRepository: Send + Sync + 'static {
     async fn insert(&self, ingredient: Ingredient) -> Result<Ingredient, InsertIngredientError>;
-    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError>;
+    async fn get_by_id(&self, id: &Uuid) -> Result<Ingredient, GetIngredientByIdError>;
     async fn get_all_by_id(&self, ids: &[Uuid]) -> Result<Vec<Ingredient>, GetAllIngredientsError>;
     async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError>;
     async fn update(

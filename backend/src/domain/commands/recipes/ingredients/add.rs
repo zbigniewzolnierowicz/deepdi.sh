@@ -1,10 +1,13 @@
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientAmountData, Recipe},
+    entities::recipe::{IngredientAmountData, IngredientWithAmount, Recipe},
     repositories::{
-        ingredients::errors::GetIngredientByIdError,
-        recipe::{errors::GetRecipeByIdError, RecipeRepositoryService},
+        ingredients::{errors::GetIngredientByIdError, IngredientRepositoryService},
+        recipe::{
+            errors::{GetRecipeByIdError, AddIngredientIntoRecipeError as AddIngredientIntoRecipeErrorInternal},
+            RecipeRepositoryService,
+        },
     },
 };
 
@@ -20,10 +23,46 @@ pub enum AddIngredientToRecipeError {
     Unknown(#[from] eyre::Report),
 }
 
+impl From<AddIngredientIntoRecipeErrorInternal> for AddIngredientToRecipeError {
+    fn from(value: AddIngredientIntoRecipeErrorInternal) -> Self {
+        match value {
+            e => e.into(),
+        }
+    }
+}
+
 pub async fn add_ingredient_to_recipe(
     recipe_repo: RecipeRepositoryService,
+    ingredient_repo: IngredientRepositoryService,
     recipe_id: &Uuid,
     ingredient_amount: IngredientAmountData,
 ) -> Result<Recipe, AddIngredientToRecipeError> {
-    todo!()
+    let recipe = recipe_repo.get_by_id(recipe_id).await?;
+    let ingredient = ingredient_repo
+        .get_by_id(&ingredient_amount.ingredient_id)
+        .await?;
+    let IngredientAmountData {
+        amount,
+        notes,
+        optional,
+        ..
+    } = ingredient_amount;
+
+    recipe_repo
+        .add_ingredient(
+            &recipe,
+            IngredientWithAmount {
+                ingredient,
+                amount,
+                optional,
+                notes,
+            },
+        )
+        .await?;
+
+    let recipe = recipe_repo.get_by_id(recipe_id).await?;
+
+    Ok(recipe)
 }
+
+// TODO: move all tests to commands

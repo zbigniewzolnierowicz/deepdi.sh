@@ -1,17 +1,17 @@
 use async_trait::async_trait;
+use eyre::eyre;
 use std::{collections::HashMap, sync::Mutex};
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::{
-        ingredient::Ingredient,
-        recipe::{Recipe, RecipeChangeset},
-    },
+    entities::recipe::{IngredientWithAmount, Recipe, RecipeChangeset},
     repositories::recipe::errors::InsertRecipeError,
 };
 
 use super::{
-    errors::{DeleteRecipeError, GetRecipeByIdError, UpdateRecipeError},
+    errors::{
+        AddIngredientIntoRecipeError, DeleteRecipeError, GetRecipeByIdError, UpdateRecipeError,
+    },
     RecipeRepository,
 };
 
@@ -86,10 +86,19 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
     async fn add_ingredient(
         &self,
-        id: &Uuid,
-        ingredient: Ingredient,
-    ) -> Result<Recipe, UpdateRecipeError> {
-        todo!()
+        recipe: &Recipe,
+        ingredient: IngredientWithAmount,
+    ) -> Result<(), AddIngredientIntoRecipeError> {
+        let mut lock = self.0.lock()?;
+        let recipe =
+            lock.get_mut(&recipe.id)
+                .ok_or(AddIngredientIntoRecipeError::UnknownError(eyre!(
+                    "Recipe is not in the repo"
+                )))?;
+
+        recipe.ingredients.push(ingredient);
+
+        Ok(())
     }
 }
 

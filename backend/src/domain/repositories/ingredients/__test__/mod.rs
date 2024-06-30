@@ -68,7 +68,7 @@ pub async fn get_by_id_returns_ingredient(repo: impl IngredientRepository) {
     .await
     .unwrap();
 
-    let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap();
+    let result = repo.get_by_id(&Uuid::from_u128(1)).await.unwrap();
     assert_eq!(result.name, "Ingredient name".try_into().unwrap());
     assert_eq!(
         result.description,
@@ -77,7 +77,7 @@ pub async fn get_by_id_returns_ingredient(repo: impl IngredientRepository) {
 }
 
 pub async fn get_by_id_returns_error_when_missing(repo: impl IngredientRepository) {
-    let result = repo.get_by_id(Uuid::from_u128(1)).await.unwrap_err();
+    let result = repo.get_by_id(&Uuid::from_u128(1)).await.unwrap_err();
 
     assert!(matches!(result, GetIngredientByIdError::NotFound(id) if id == Uuid::from_u128(1)));
 }

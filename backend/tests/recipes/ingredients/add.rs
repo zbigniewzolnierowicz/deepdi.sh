@@ -1,5 +1,8 @@
-use common::{IngredientAmountDTO, IngredientDTO, IngredientUnitDTO, RecipeDTO};
+use common::{
+    error::ErrorMessage, IngredientAmountDTO, IngredientDTO, IngredientUnitDTO, RecipeDTO,
+};
 use futures::future::join_all;
+use pretty_assertions::assert_eq;
 use reqwest::{Client, StatusCode};
 use uuid::Uuid;
 
@@ -53,6 +56,7 @@ async fn adding_an_ingredient_to_a_recipe_works() {
     assert_eq!(result.ingredients.len(), 1);
 
     let ingredient_add_path = app.get_base(&format!("recipe/{}/ingredient", result.id));
+    let get_recipe_path = app.get_base(&format!("recipe/{}", result.id));
 
     let ingredient_to_add = IngredientAmountDTO {
         ingredient_id: meat.id,
@@ -71,8 +75,7 @@ async fn adding_an_ingredient_to_a_recipe_works() {
     assert_eq!(result.status(), StatusCode::OK);
 
     let result: RecipeDTO = client
-        .post(&recipe_create_path)
-        .json(&data)
+        .get(&get_recipe_path)
         .send()
         .await
         .unwrap()
@@ -186,5 +189,8 @@ async fn adding_an_ingredient_to_a_nonexistent_recipe_fails() {
         .unwrap();
 
     assert_eq!(result.status(), StatusCode::NOT_FOUND);
-    todo!("We haven't actually implemented the function, and we don't want this to return a false positive")
+
+    let result: ErrorMessage<String> = result.json().await.unwrap();
+
+    assert_eq!(result.kind, "GetRecipe")
 }

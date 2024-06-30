@@ -1,12 +1,11 @@
 use std::collections::BTreeMap;
 
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::entities::recipe::IngredientAmountData;
 use crate::domain::entities::recipe::{
-    errors::ValidationError, IngredientUnit, IngredientWithAmount, Recipe, ServingsType,
+    errors::ValidationError, IngredientWithAmount, Recipe, ServingsType,
 };
 use crate::domain::repositories::{
     ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
@@ -111,7 +110,7 @@ mod tests {
 
     use super::*;
     use crate::domain::{
-        entities::ingredient::{types::DietFriendly, Ingredient, IngredientModel},
+        entities::{ingredient::{types::DietFriendly, Ingredient, IngredientModel}, recipe::IngredientUnit},
         repositories::{
             ingredients::{postgres::PostgresIngredientRepository, InMemoryIngredientRepository},
             recipe::{in_memory::InMemoryRecipeRepository, postgres::PostgresRecipeRepository},

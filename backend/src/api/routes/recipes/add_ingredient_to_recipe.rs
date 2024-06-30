@@ -40,13 +40,21 @@ impl IntoResponse for AddIngredientToRecipeError {
 
 pub async fn add_ingredient_to_recipe_route(
     State(AppState {
-        recipe_repository, ..
+        recipe_repository,
+        ingredient_repository,
+        ..
     }): State<AppState>,
     Path(recipe_id): Path<Uuid>,
     Json(body): Json<IngredientAmountDTO>,
 ) -> Result<Json<RecipeDTO>, AddIngredientToRecipeError> {
     let ingredient_to_add = body.into();
-    let result = add_ingredient_to_recipe(recipe_repository, &recipe_id, ingredient_to_add).await?;
+    let result = add_ingredient_to_recipe(
+        recipe_repository,
+        ingredient_repository,
+        &recipe_id,
+        ingredient_to_add,
+    )
+    .await?;
 
     Ok(axum::Json(result.into()))
 }

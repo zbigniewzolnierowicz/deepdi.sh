@@ -1,11 +1,13 @@
 pub mod errors;
 use std::collections::BTreeMap;
+use derive_more::DerefMut;
 
 use common::{
     IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
 };
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
+use shrinkwraprs::Shrinkwrap;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -23,7 +25,7 @@ pub struct Recipe {
     pub time: BTreeMap<String, std::time::Duration>,
     pub servings: ServingsType,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Shrinkwrap, DerefMut)]
 pub struct RecipeIngredients(Vec<IngredientWithAmount>);
 
 impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
@@ -95,7 +97,6 @@ impl From<Recipe> for RecipeDTO {
             id: value.id.to_string(),
             ingredients: value
                 .ingredients
-                .as_ref()
                 .iter()
                 .map(|i| i.clone().into())
                 .collect(),

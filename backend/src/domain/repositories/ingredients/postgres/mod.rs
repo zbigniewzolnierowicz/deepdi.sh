@@ -69,7 +69,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         "[INGREDIENT REPOSITORY] [POSTGRES] Get ingredient with ID",
         skip(self)
     )]
-    async fn get_by_id(&self, id: Uuid) -> Result<Ingredient, GetIngredientByIdError> {
+    async fn get_by_id(&self, id: &Uuid) -> Result<Ingredient, GetIngredientByIdError> {
         let ingredient = sqlx::query_file_as!(
             IngredientModel,
             "queries/ingredients/get_ingredient_by_id.sql",
@@ -78,7 +78,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         .fetch_one(&self.0)
         .await
         .map_err(|e| match e {
-            SQLXError::RowNotFound => GetIngredientByIdError::NotFound(id),
+            SQLXError::RowNotFound => GetIngredientByIdError::NotFound(*id),
             _ => GetIngredientByIdError::UnknownError(e.into()),
         })?;
 
@@ -107,7 +107,7 @@ impl IngredientRepository for PostgresIngredientRepository {
         id: Uuid,
         changeset: IngredientChangeset,
     ) -> Result<Ingredient, UpdateIngredientError> {
-        let mut ingredient_to_update: IngredientModel = self.get_by_id(id).await?.into();
+        let mut ingredient_to_update: IngredientModel = self.get_by_id(&id).await?.into();
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -194,7 +194,7 @@ impl IngredientRepository for PostgresIngredientRepository {
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Delete an ingredient", skip(self))]
     async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
-        let ingredient_to_delete = self.get_by_id(id).await?;
+        let ingredient_to_delete = self.get_by_id(&id).await?;
 
         sqlx::query_file!(
             "queries/ingredients/delete_ingredient.sql",
