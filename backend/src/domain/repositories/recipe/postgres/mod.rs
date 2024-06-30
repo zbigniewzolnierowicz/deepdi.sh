@@ -266,7 +266,11 @@ impl RecipeRepository for PostgresRecipeRepository {
         Ok(recipe)
     }
 
-    async fn add_ingredient(&self, id: &Uuid, ingredient: Ingredient) -> Result<Recipe, UpdateRecipeError> {
+    async fn add_ingredient(
+        &self,
+        id: &Uuid,
+        ingredient: Ingredient,
+    ) -> Result<Recipe, UpdateRecipeError> {
         todo!()
     }
 }

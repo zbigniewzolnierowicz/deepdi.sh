@@ -38,5 +38,5 @@ pub async fn update_recipe_route(
 ) -> Result<Json<RecipeDTO>, UpdateRecipeError> {
     let recipe = update_recipe(recipe_repository, &recipe_id, body.into()).await?;
 
-    Ok(axum::Json(recipe.try_into()?))
+    Ok(axum::Json(recipe.into()))
 }

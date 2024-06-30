@@ -1,6 +1,4 @@
-use common::{
-    IngredientAmountDTO, IngredientDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO,
-};
+use common::{IngredientAmountDTO, IngredientDTO, IngredientUnitDTO, RecipeDTO};
 use futures::future::join_all;
 use reqwest::{Client, StatusCode};
 use uuid::Uuid;
@@ -60,7 +58,7 @@ async fn adding_an_ingredient_to_a_recipe_works() {
         ingredient_id: meat.id,
         optional: true,
         amount: IngredientUnitDTO::Grams(10.0),
-        notes: None
+        notes: None,
     };
 
     let result = client
@@ -132,7 +130,7 @@ async fn adding_a_nonexistent_ingredient_to_a_recipe_fails() {
         ingredient_id: Uuid::nil(),
         optional: true,
         amount: IngredientUnitDTO::Grams(10.0),
-        notes: None
+        notes: None,
     };
 
     let result = client
@@ -177,7 +175,7 @@ async fn adding_an_ingredient_to_a_nonexistent_recipe_fails() {
         ingredient_id: veg.id,
         optional: true,
         amount: IngredientUnitDTO::Grams(10.0),
-        notes: None
+        notes: None,
     };
 
     let result = client

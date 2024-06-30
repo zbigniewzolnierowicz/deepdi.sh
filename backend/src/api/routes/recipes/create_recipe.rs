@@ -4,9 +4,8 @@ use reqwest::StatusCode;
 
 use crate::api::errors::MakeError;
 use crate::api::AppState;
-use crate::domain::commands::recipes::create::{
-    create_recipe, CreateRecipe, CreateRecipeError, IngredientAmountData,
-};
+use crate::domain::commands::recipes::create::{create_recipe, CreateRecipe, CreateRecipeError};
+use crate::domain::entities::recipe::IngredientAmountData;
 
 impl MakeError<String> for CreateRecipeError {
     fn get_status_code(&self) -> StatusCode {
@@ -63,5 +62,5 @@ pub async fn create_recipe_route(
     };
     let result = create_recipe(recipe_repository, ingredient_repository, &input).await?;
 
-    Ok(Json(result.try_into()?))
+    Ok(Json(result.into()))
 }

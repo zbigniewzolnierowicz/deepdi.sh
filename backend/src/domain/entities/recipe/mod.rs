@@ -1,7 +1,9 @@
 pub mod errors;
 use std::collections::BTreeMap;
 
-use common::{IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO};
+use common::{
+    IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
+};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -87,10 +89,9 @@ impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
     }
 }
 
-impl TryFrom<Recipe> for RecipeDTO {
-    type Error = ValidationError;
-    fn try_from(value: Recipe) -> Result<Self, Self::Error> {
-        Ok(Self {
+impl From<Recipe> for RecipeDTO {
+    fn from(value: Recipe) -> Self {
+        Self {
             id: value.id.to_string(),
             ingredients: value
                 .ingredients
@@ -107,7 +108,7 @@ impl TryFrom<Recipe> for RecipeDTO {
                 .map(|(k, v)| (k, v.as_secs()))
                 .collect(),
             servings: value.servings.into(),
-        })
+        }
     }
 }
 
@@ -267,6 +268,33 @@ impl RecipeChangeset {
             && steps.is_none()
             && time.is_none()
             && servings.is_none()
+    }
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct IngredientAmountData {
+    pub ingredient_id: Uuid,
+    pub amount: IngredientUnit,
+    pub optional: bool,
+    pub notes: Option<String>,
+}
+
+impl From<IngredientAmountDTO> for IngredientAmountData {
+    fn from(
+        IngredientAmountDTO {
+            ingredient_id,
+            amount,
+            optional,
+            notes,
+        }: IngredientAmountDTO,
+    ) -> Self {
+        let amount = amount.into();
+        Self {
+            ingredient_id,
+            amount,
+            optional,
+            notes,
+        }
     }
 }
 

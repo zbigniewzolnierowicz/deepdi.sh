@@ -1,5 +1,5 @@
-use std::{collections::BTreeMap, time::Duration};
 use pretty_assertions::assert_eq;
+use std::{collections::BTreeMap, time::Duration};
 
 use futures::future::join_all;
 use uuid::Uuid;
@@ -9,7 +9,9 @@ use crate::{
         entities::recipe::{Recipe, RecipeChangeset, ServingsType},
         repositories::{
             ingredients::IngredientRepository,
-            recipe::errors::{DeleteRecipeError, GetRecipeByIdError, InsertRecipeError, UpdateRecipeError},
+            recipe::errors::{
+                DeleteRecipeError, GetRecipeByIdError, InsertRecipeError, UpdateRecipeError,
+            },
         },
     },
     test_utils::{recipe_changeset, recipe_fixture},
@@ -123,9 +125,7 @@ pub async fn updating_a_recipe_succeeds(
     );
 }
 
-pub async fn updating_a_nonexistent_recipe_fails(
-    repo: impl RecipeRepository,
-) {
+pub async fn updating_a_nonexistent_recipe_fails(repo: impl RecipeRepository) {
     let recipe = recipe_fixture();
     let changeset = RecipeChangeset {
         name: Some("WE UPDATED THIS THING".to_string()),
