@@ -1,6 +1,6 @@
 pub mod errors;
-use std::collections::BTreeMap;
 use derive_more::DerefMut;
+use std::collections::BTreeMap;
 
 use common::{
     IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
@@ -95,11 +95,7 @@ impl From<Recipe> for RecipeDTO {
     fn from(value: Recipe) -> Self {
         Self {
             id: value.id.to_string(),
-            ingredients: value
-                .ingredients
-                .iter()
-                .map(|i| i.clone().into())
-                .collect(),
+            ingredients: value.ingredients.iter().map(|i| i.clone().into()).collect(),
             name: value.name,
             description: value.description,
             steps: value.steps.0,

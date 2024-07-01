@@ -86,7 +86,7 @@ pub enum AddIngredientIntoRecipeError {
     Conflict(String),
 
     #[error(transparent)]
-    UnknownError(#[from] eyre::Error)
+    UnknownError(#[from] eyre::Error),
 }
 
 impl<T> From<PoisonError<T>> for AddIngredientIntoRecipeError {
@@ -105,7 +105,6 @@ impl From<SQLXError> for AddIngredientIntoRecipeError {
         }
     }
 }
-
 
 impl<T> From<PoisonError<T>> for InsertRecipeError {
     fn from(_value: PoisonError<T>) -> Self {
@@ -147,6 +146,18 @@ pub enum UpdateRecipeError {
 }
 
 impl<T> From<PoisonError<T>> for UpdateRecipeError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum DeleteIngredientFromRecipeError {
+    #[error(transparent)]
+    UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for DeleteIngredientFromRecipeError {
     fn from(_value: PoisonError<T>) -> Self {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }

@@ -5,7 +5,10 @@ use crate::domain::{
     repositories::{
         ingredients::{errors::GetIngredientByIdError, IngredientRepositoryService},
         recipe::{
-            errors::{GetRecipeByIdError, AddIngredientIntoRecipeError as AddIngredientIntoRecipeErrorInternal},
+            errors::{
+                AddIngredientIntoRecipeError as AddIngredientIntoRecipeErrorInternal,
+                GetRecipeByIdError,
+            },
             RecipeRepositoryService,
         },
     },

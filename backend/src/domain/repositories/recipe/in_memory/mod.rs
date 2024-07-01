@@ -10,7 +10,8 @@ use crate::domain::{
 
 use super::{
     errors::{
-        AddIngredientIntoRecipeError, DeleteRecipeError, GetRecipeByIdError, UpdateRecipeError,
+        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
+        GetRecipeByIdError, UpdateRecipeError,
     },
     RecipeRepository,
 };
@@ -90,15 +91,23 @@ impl RecipeRepository for InMemoryRecipeRepository {
         ingredient: IngredientWithAmount,
     ) -> Result<(), AddIngredientIntoRecipeError> {
         let mut lock = self.0.lock()?;
-        let recipe =
-            lock.get_mut(&recipe.id)
-                .ok_or(AddIngredientIntoRecipeError::UnknownError(eyre!(
-                    "Recipe is not in the repo"
-                )))?;
+        let recipe = lock
+            .get_mut(&recipe.id)
+            .ok_or(AddIngredientIntoRecipeError::UnknownError(eyre!(
+                "Recipe is not in the repo"
+            )))?;
 
         recipe.ingredients.push(ingredient);
 
         Ok(())
+    }
+
+    async fn delete_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+    ) -> Result<(), DeleteIngredientFromRecipeError> {
+        todo!()
     }
 }
 

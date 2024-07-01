@@ -8,7 +8,10 @@ use crate::domain::entities::recipe::{
     IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
 
-use super::errors::{AddIngredientIntoRecipeError, DeleteRecipeError, UpdateRecipeError};
+use super::errors::{
+    AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
+    UpdateRecipeError,
+};
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -273,6 +276,14 @@ impl RecipeRepository for PostgresRecipeRepository {
         insert_ingredient(&self.0, recipe.id, &ingredient).await?;
 
         Ok(())
+    }
+
+    async fn delete_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+    ) -> Result<(), DeleteIngredientFromRecipeError> {
+        todo!()
     }
 }
 

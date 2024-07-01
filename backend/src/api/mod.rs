@@ -48,6 +48,10 @@ impl App {
                 "/recipe/:id/ingredient",
                 post(add_ingredient_to_recipe_route),
             )
+            .route(
+                "/recipe/:recipe_id/ingredient/:ingredient_id",
+                delete(delete_ingredient_from_recipe_route),
+            )
             .layer(OtelInResponseLayer)
             .layer(OtelAxumLayer::default())
     }

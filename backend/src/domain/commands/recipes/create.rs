@@ -110,7 +110,10 @@ mod tests {
 
     use super::*;
     use crate::domain::{
-        entities::{ingredient::{types::DietFriendly, Ingredient, IngredientModel}, recipe::IngredientUnit},
+        entities::{
+            ingredient::{types::DietFriendly, Ingredient, IngredientModel},
+            recipe::IngredientUnit,
+        },
         repositories::{
             ingredients::{postgres::PostgresIngredientRepository, InMemoryIngredientRepository},
             recipe::{in_memory::InMemoryRecipeRepository, postgres::PostgresRecipeRepository},
