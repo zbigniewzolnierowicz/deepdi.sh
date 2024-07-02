@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use futures::future::join_all;
 use sqlx::PgPool;
@@ -8,7 +10,11 @@ use crate::domain::entities::recipe::{
     IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
 
-use super::errors::{AddIngredientIntoRecipeError, DeleteRecipeError, UpdateRecipeError};
+use super::errors::{
+    AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
+    UpdateRecipeError,
+};
+use super::RecipeRepositoryService;
 use super::{
     errors::{GetRecipeByIdError, InsertRecipeError},
     RecipeRepository,
@@ -274,11 +280,32 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         Ok(())
     }
+
+    async fn delete_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+    ) -> Result<(), DeleteIngredientFromRecipeError> {
+        sqlx::query_file!(
+            "queries/recipes/delete_ingredient_from_recipe_by_id.sql",
+            recipe.id,
+            ingredient.ingredient.id
+        )
+        .execute(&self.0)
+        .await
+        .map_err(|e| DeleteIngredientFromRecipeError::UnknownError(e.into()))?;
+
+        Ok(())
+    }
 }
 
 impl PostgresRecipeRepository {
     pub fn new(pool: PgPool) -> Self {
         Self(pool)
+    }
+
+    pub fn service(self) -> RecipeRepositoryService {
+        Arc::new(Box::new(self))
     }
 }
 

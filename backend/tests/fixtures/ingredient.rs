@@ -17,3 +17,13 @@ pub fn ingredient_fixture_meat() -> serde_json::Value {
         "diet_friendly": [],
     })
 }
+
+pub fn ingredient_fixture_evil() -> serde_json::Value {
+    serde_json::json!({
+        "name": "Evil Fruit",
+        "description": "It is very evil",
+        "diet_friendly": [
+            "vegan",
+        ]
+    })
+}

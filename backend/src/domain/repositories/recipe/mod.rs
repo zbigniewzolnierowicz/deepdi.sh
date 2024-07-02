@@ -11,7 +11,10 @@ use errors::AddIngredientIntoRecipeError;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use self::errors::{DeleteRecipeError, GetRecipeByIdError, InsertRecipeError, UpdateRecipeError};
+use self::errors::{
+    DeleteIngredientFromRecipeError, DeleteRecipeError, GetRecipeByIdError, InsertRecipeError,
+    UpdateRecipeError,
+};
 
 #[async_trait]
 pub trait RecipeRepository: Send + Sync + 'static {
@@ -33,6 +36,12 @@ pub trait RecipeRepository: Send + Sync + 'static {
         recipe: &Recipe,
         ingredient: IngredientWithAmount,
     ) -> Result<(), AddIngredientIntoRecipeError>;
+
+    async fn delete_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+    ) -> Result<(), DeleteIngredientFromRecipeError>;
 }
 
 pub type RecipeRepositoryService = Arc<Box<dyn RecipeRepository>>;

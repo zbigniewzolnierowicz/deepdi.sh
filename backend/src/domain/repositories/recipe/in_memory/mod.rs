@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 use eyre::eyre;
-use std::{collections::HashMap, sync::Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 use uuid::Uuid;
 
 use crate::domain::{
@@ -10,9 +13,10 @@ use crate::domain::{
 
 use super::{
     errors::{
-        AddIngredientIntoRecipeError, DeleteRecipeError, GetRecipeByIdError, UpdateRecipeError,
+        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
+        GetRecipeByIdError, UpdateRecipeError,
     },
-    RecipeRepository,
+    RecipeRepository, RecipeRepositoryService,
 };
 
 pub struct InMemoryRecipeRepository(pub Mutex<HashMap<uuid::Uuid, Recipe>>);
@@ -90,13 +94,39 @@ impl RecipeRepository for InMemoryRecipeRepository {
         ingredient: IngredientWithAmount,
     ) -> Result<(), AddIngredientIntoRecipeError> {
         let mut lock = self.0.lock()?;
-        let recipe =
-            lock.get_mut(&recipe.id)
-                .ok_or(AddIngredientIntoRecipeError::UnknownError(eyre!(
-                    "Recipe is not in the repo"
-                )))?;
+        let recipe = lock
+            .get_mut(&recipe.id)
+            .ok_or(AddIngredientIntoRecipeError::UnknownError(eyre!(
+                "Recipe is not in the repo"
+            )))?;
 
         recipe.ingredients.push(ingredient);
+
+        Ok(())
+    }
+
+    async fn delete_ingredient(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+    ) -> Result<(), DeleteIngredientFromRecipeError> {
+        let mut lock = self.0.lock()?;
+        let recipe =
+            lock.get_mut(&recipe.id)
+                .ok_or(DeleteIngredientFromRecipeError::UnknownError(eyre!(
+                    "Recipe is not in the repo somehow"
+                )))?;
+
+        let new_ingredients: Vec<_> = recipe
+            .ingredients
+            .iter()
+            .cloned()
+            .filter(|ingam| ingam.ingredient.id != ingredient.ingredient.id)
+            .collect();
+
+        recipe.ingredients = new_ingredients
+            .try_into()
+            .map_err(|e| DeleteIngredientFromRecipeError::ValidationError(e))?;
 
         Ok(())
     }
@@ -111,6 +141,10 @@ impl Default for InMemoryRecipeRepository {
 impl InMemoryRecipeRepository {
     pub fn new() -> Self {
         Self(Mutex::new(HashMap::new()))
+    }
+
+    pub fn service(self) -> RecipeRepositoryService {
+        Arc::new(Box::new(self))
     }
 }
 

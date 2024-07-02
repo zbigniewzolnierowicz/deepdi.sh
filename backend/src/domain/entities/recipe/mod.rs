@@ -1,6 +1,6 @@
 pub mod errors;
-use std::collections::BTreeMap;
 use derive_more::DerefMut;
+use std::collections::BTreeMap;
 
 use common::{
     IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
@@ -45,6 +45,17 @@ impl PartialEq for RecipeIngredients {
     }
 }
 
+impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
+    type Error = ValidationError;
+    fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            Err(ValidationError::EmptyField(vec!["steps"]))
+        } else {
+            Ok(Self(value.to_owned()))
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct RecipeSteps(Vec<String>);
 
@@ -80,26 +91,11 @@ impl TryFrom<&Vec<String>> for RecipeSteps {
     }
 }
 
-impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
-    type Error = ValidationError;
-    fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            Err(ValidationError::EmptyField(vec!["steps"]))
-        } else {
-            Ok(Self(value.to_owned()))
-        }
-    }
-}
-
 impl From<Recipe> for RecipeDTO {
     fn from(value: Recipe) -> Self {
         Self {
             id: value.id.to_string(),
-            ingredients: value
-                .ingredients
-                .iter()
-                .map(|i| i.clone().into())
-                .collect(),
+            ingredients: value.ingredients.iter().map(|i| i.clone().into()).collect(),
             name: value.name,
             description: value.description,
             steps: value.steps.0,
