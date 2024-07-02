@@ -2,6 +2,7 @@ use strum::AsRefStr;
 use thiserror::Error;
 use uuid::Uuid;
 
+use crate::domain::entities::recipe::errors::ValidationError;
 use crate::domain::repositories::recipe::errors::{
     DeleteIngredientFromRecipeError as DeleteIngredientFromRecipeErrorInternal, GetRecipeByIdError,
 };
@@ -16,7 +17,7 @@ pub enum DeleteIngredientFromRecipeError {
     RecipeHasNoIngredientError(Uuid),
 
     #[error("There is only one ingredient in the recipe. A recipe should have one ingredient at minimum.")]
-    LastIngredient,
+    LastIngredientError,
 
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
@@ -25,7 +26,13 @@ pub enum DeleteIngredientFromRecipeError {
 impl From<DeleteIngredientFromRecipeErrorInternal> for DeleteIngredientFromRecipeError {
     fn from(value: DeleteIngredientFromRecipeErrorInternal) -> Self {
         match value {
-            DeleteIngredientFromRecipeErrorInternal::UnknownError(e) => e.into(),
+            DeleteIngredientFromRecipeErrorInternal::RecipeHasNoIngredientError(id) => {
+                Self::RecipeHasNoIngredientError(id)
+            }
+            DeleteIngredientFromRecipeErrorInternal::ValidationError(
+                ValidationError::EmptyField(field),
+            ) if field == vec!["steps"] => Self::LastIngredientError,
+            e => e.into(),
         }
     }
 }
@@ -45,6 +52,10 @@ pub async fn delete_ingredient_from_recipe(
     ingredient_id: &Uuid,
 ) -> Result<(), DeleteIngredientFromRecipeError> {
     let recipe = recipe_repo.get_by_id(recipe_id).await?;
+
+    if recipe.ingredients.len() == 1 {
+        return Err(DeleteIngredientFromRecipeError::LastIngredientError);
+    };
 
     let ingredient_in_recipe = &recipe
         .ingredients
@@ -116,13 +127,17 @@ mod test {
             repo.insert(initial_recipe.clone()).await.unwrap();
 
             let repo: RecipeRepositoryService = Arc::new(Box::new(repo));
-            let error =
-                delete_ingredient_from_recipe(repo.clone(), &initial_recipe.id, &Uuid::nil())
-                    .await
-                    .unwrap_err();
+
+            let error = delete_ingredient_from_recipe(
+                repo.clone(),
+                &initial_recipe.id,
+                &Uuid::from_u128(999),
+            )
+            .await
+            .unwrap_err();
 
             assert!(
-                matches!(error, DeleteIngredientFromRecipeError::RecipeHasNoIngredientError(id) if id == Uuid::nil())
+                matches!(error, DeleteIngredientFromRecipeError::RecipeHasNoIngredientError(id) if id == Uuid::from_u128(999))
             )
         }
 
@@ -175,9 +190,10 @@ mod test {
             .await
             .unwrap_err();
 
-            assert!(
-                matches!(error, DeleteIngredientFromRecipeError::RecipeNotFoundError(id) if id == initial_recipe.id)
-            )
+            assert!(matches!(
+                error,
+                DeleteIngredientFromRecipeError::LastIngredientError
+            ))
         }
     }
 

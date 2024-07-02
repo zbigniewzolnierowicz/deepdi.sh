@@ -19,6 +19,9 @@ impl MakeError<String> for DeleteIngredientFromRecipeError {
             DeleteIngredientFromRecipeError::RecipeHasNoIngredientError(_) => {
                 StatusCode::BAD_REQUEST
             }
+            DeleteIngredientFromRecipeError::LastIngredientError => {
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

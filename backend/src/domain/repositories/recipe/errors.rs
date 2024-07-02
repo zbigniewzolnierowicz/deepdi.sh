@@ -153,6 +153,12 @@ impl<T> From<PoisonError<T>> for UpdateRecipeError {
 
 #[derive(Error, Debug)]
 pub enum DeleteIngredientFromRecipeError {
+    #[error("The recipe has no ingredient with ID of {0}")]
+    RecipeHasNoIngredientError(Uuid),
+
+    #[error(transparent)]
+    ValidationError(ValidationError),
+
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
 }

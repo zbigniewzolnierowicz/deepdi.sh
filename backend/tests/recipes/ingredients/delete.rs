@@ -211,14 +211,14 @@ pub async fn deleting_the_last_ingredient_in_recipe_errors() {
         .await
         .unwrap();
 
-    assert_eq!(result.ingredients.len(), 2);
+    assert_eq!(result.ingredients.len(), 1);
 
     let ingredient_delete_path =
         app.get_base(&format!("recipe/{}/ingredient/{}", result.id, veg.id));
 
     let result = client.delete(&ingredient_delete_path).send().await.unwrap();
 
-    assert_eq!(result.status(), StatusCode::OK);
+    assert_eq!(result.status(), StatusCode::UNPROCESSABLE_ENTITY);
 
     let body: ErrorMessage<String> = result.json().await.unwrap();
 

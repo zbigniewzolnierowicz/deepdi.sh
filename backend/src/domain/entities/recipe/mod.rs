@@ -45,6 +45,17 @@ impl PartialEq for RecipeIngredients {
     }
 }
 
+impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
+    type Error = ValidationError;
+    fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            Err(ValidationError::EmptyField(vec!["steps"]))
+        } else {
+            Ok(Self(value.to_owned()))
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct RecipeSteps(Vec<String>);
 
@@ -77,17 +88,6 @@ impl TryFrom<&Vec<String>> for RecipeSteps {
     type Error = ValidationError;
     fn try_from(value: &Vec<String>) -> Result<Self, Self::Error> {
         RecipeSteps::try_from(value.clone())
-    }
-}
-
-impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
-    type Error = ValidationError;
-    fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            Err(ValidationError::EmptyField(vec!["steps"]))
-        } else {
-            Ok(Self(value.to_owned()))
-        }
     }
 }
 
