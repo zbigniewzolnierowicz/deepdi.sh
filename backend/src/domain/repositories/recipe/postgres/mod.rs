@@ -7,12 +7,12 @@ use uuid::Uuid;
 
 use crate::domain::entities::ingredient::IngredientModel;
 use crate::domain::entities::recipe::{
-    IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
+    IngredientUnit, IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
 
 use super::errors::{
     AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
-    UpdateRecipeError,
+    UpdateIngredientInRecipeError, UpdateRecipeError,
 };
 use super::RecipeRepositoryService;
 use super::{
@@ -296,6 +296,15 @@ impl RecipeRepository for PostgresRecipeRepository {
         .map_err(|e| DeleteIngredientFromRecipeError::UnknownError(e.into()))?;
 
         Ok(())
+    }
+
+    async fn update_ingredient_amount(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+        new_amount: &IngredientUnit,
+    ) -> Result<(), UpdateIngredientInRecipeError> {
+        todo!()
     }
 }
 

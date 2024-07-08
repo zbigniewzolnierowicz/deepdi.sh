@@ -7,14 +7,13 @@ use std::{
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientWithAmount, Recipe, RecipeChangeset},
+    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
     repositories::recipe::errors::InsertRecipeError,
 };
 
 use super::{
     errors::{
-        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
-        GetRecipeByIdError, UpdateRecipeError,
+        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError, GetRecipeByIdError, UpdateIngredientInRecipeError, UpdateRecipeError
     },
     RecipeRepository, RecipeRepositoryService,
 };
@@ -129,6 +128,15 @@ impl RecipeRepository for InMemoryRecipeRepository {
             .map_err(|e| DeleteIngredientFromRecipeError::ValidationError(e))?;
 
         Ok(())
+    }
+
+    async fn update_ingredient_amount(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+        new_amount: &IngredientUnit,
+    ) -> Result<(), UpdateIngredientInRecipeError> {
+        todo!()
     }
 }
 
