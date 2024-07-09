@@ -304,7 +304,26 @@ impl RecipeRepository for PostgresRecipeRepository {
         ingredient: &IngredientWithAmount,
         new_amount: &IngredientUnit,
     ) -> Result<(), UpdateIngredientInRecipeError> {
-        todo!()
+        let tx = self
+            .0
+            .begin()
+            .await?;
+
+        let amount = serde_json::to_value(new_amount)
+            .map_err(|err| UpdateIngredientInRecipeError::UnknownError(err.into()))?;
+
+        sqlx::query_file!(
+            "queries/recipes/update_ingredient_in_recipe.sql",
+            recipe.id,
+            ingredient.ingredient.id,
+            amount
+        )
+        .execute(&self.0)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok(())
     }
 }
 

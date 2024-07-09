@@ -13,7 +13,8 @@ use crate::domain::{
 
 use super::{
     errors::{
-        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError, GetRecipeByIdError, UpdateIngredientInRecipeError, UpdateRecipeError
+        AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
+        GetRecipeByIdError, UpdateIngredientInRecipeError, UpdateRecipeError,
     },
     RecipeRepository, RecipeRepositoryService,
 };
@@ -136,7 +137,24 @@ impl RecipeRepository for InMemoryRecipeRepository {
         ingredient: &IngredientWithAmount,
         new_amount: &IngredientUnit,
     ) -> Result<(), UpdateIngredientInRecipeError> {
-        todo!()
+        let mut lock = self.0.lock()?;
+        let recipe =
+            lock.get_mut(&recipe.id)
+                .ok_or(UpdateIngredientInRecipeError::UnknownError(eyre!(
+                    "Recipe is not in the repo somehow"
+                )))?;
+
+        let ingredient = recipe
+            .ingredients
+            .iter_mut()
+            .find(|i| i.ingredient.id == ingredient.ingredient.id)
+            .ok_or(UpdateIngredientInRecipeError::UnknownError(eyre!(
+                "Ingredient somehow is not in the recipe, but the command made sure there was."
+            )))?;
+        
+        ingredient.amount = new_amount.clone();
+
+        Ok(())
     }
 }
 

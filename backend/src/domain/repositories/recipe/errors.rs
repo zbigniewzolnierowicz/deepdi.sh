@@ -186,3 +186,9 @@ impl<T> From<PoisonError<T>> for UpdateIngredientInRecipeError {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }
+
+impl From<SQLXError> for UpdateIngredientInRecipeError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
