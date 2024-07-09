@@ -1,5 +1,5 @@
 use assert_json_diff::assert_json_include;
-use common::{IngredientDTO, IngredientUnitDTO, RecipeDTO};
+use common::{error::ErrorMessage, IngredientDTO, IngredientUnitDTO, RecipeDTO};
 use futures::future::join_all;
 use reqwest::{Client, StatusCode};
 use uuid::Uuid;
@@ -133,6 +133,10 @@ async fn updating_a_nonexistent_ingredient_in_a_recipe_errors() {
         .unwrap();
 
     assert_eq!(result.status(), StatusCode::NOT_FOUND);
+
+    let result: ErrorMessage<String> = result.json().await.unwrap();
+
+    assert_eq!(result.kind, "MissingIngredient")
 }
 
 #[tokio::test]
@@ -166,4 +170,8 @@ async fn updating_an_ingredient_in_a_nonexistent_recipe_errors() {
         .unwrap();
 
     assert_eq!(result.status(), StatusCode::NOT_FOUND);
+
+    let result: ErrorMessage<String> = result.json().await.unwrap();
+
+    assert_eq!(result.kind, "GetRecipe")
 }
