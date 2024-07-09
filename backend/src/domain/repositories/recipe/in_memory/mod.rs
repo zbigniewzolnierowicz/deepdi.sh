@@ -7,14 +7,14 @@ use std::{
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientWithAmount, Recipe, RecipeChangeset},
+    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
     repositories::recipe::errors::InsertRecipeError,
 };
 
 use super::{
     errors::{
         AddIngredientIntoRecipeError, DeleteIngredientFromRecipeError, DeleteRecipeError,
-        GetRecipeByIdError, UpdateRecipeError,
+        GetRecipeByIdError, UpdateIngredientInRecipeError, UpdateRecipeError,
     },
     RecipeRepository, RecipeRepositoryService,
 };
@@ -127,6 +127,32 @@ impl RecipeRepository for InMemoryRecipeRepository {
         recipe.ingredients = new_ingredients
             .try_into()
             .map_err(|e| DeleteIngredientFromRecipeError::ValidationError(e))?;
+
+        Ok(())
+    }
+
+    async fn update_ingredient_amount(
+        &self,
+        recipe: &Recipe,
+        ingredient: &IngredientWithAmount,
+        new_amount: &IngredientUnit,
+    ) -> Result<(), UpdateIngredientInRecipeError> {
+        let mut lock = self.0.lock()?;
+        let recipe =
+            lock.get_mut(&recipe.id)
+                .ok_or(UpdateIngredientInRecipeError::UnknownError(eyre!(
+                    "Recipe is not in the repo somehow"
+                )))?;
+
+        let ingredient = recipe
+            .ingredients
+            .iter_mut()
+            .find(|i| i.ingredient.id == ingredient.ingredient.id)
+            .ok_or(UpdateIngredientInRecipeError::UnknownError(eyre!(
+                "Ingredient somehow is not in the recipe, but the command made sure there was."
+            )))?;
+        
+        ingredient.amount = new_amount.clone();
 
         Ok(())
     }
