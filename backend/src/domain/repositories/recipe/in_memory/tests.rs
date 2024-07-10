@@ -41,10 +41,3 @@ async fn deleting_a_nonexistent_recipe_fails() {
     let repo = InMemoryRecipeRepository::new();
     __test__::deleting_a_nonexistent_recipe_fails(repo).await
 }
-
-#[tokio::test]
-async fn adding_an_ingredient_to_a_recipe_works() {
-    let ingredient_repo = InMemoryIngredientRepository::new();
-    let repo = InMemoryRecipeRepository::new();
-    __test__::adding_an_ingredient_to_a_recipe_works(repo, ingredient_repo).await
-}

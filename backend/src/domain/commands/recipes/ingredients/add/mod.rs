@@ -68,4 +68,5 @@ pub async fn add_ingredient_to_recipe(
     Ok(recipe)
 }
 
-// TODO: move all tests to commands
+#[cfg(test)]
+mod tests;

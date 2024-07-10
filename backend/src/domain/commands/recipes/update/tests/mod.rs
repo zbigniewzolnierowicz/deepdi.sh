@@ -23,7 +23,7 @@ mod in_memory {
     async fn updating_a_recipe_with_empty_changeset_does_nothing() {
         let ingredient_repo = InMemoryIngredientRepository::new();
         let repo = InMemoryRecipeRepository::new();
-        __tests__::updating_a_recipe_with_empty_changeset_does_nothing(repo, ingredient_repo).await
+        __tests__::updating_a_recipe_with_empty_changeset_errors(repo, ingredient_repo).await
     }
 }
 
@@ -53,6 +53,6 @@ mod sql {
     async fn updating_a_recipe_with_empty_changeset_does_nothing(pool: PgPool) {
         let ingredient_repo = PostgresIngredientRepository::new(pool.clone());
         let repo = PostgresRecipeRepository::new(pool);
-        __tests__::updating_a_recipe_with_empty_changeset_does_nothing(repo, ingredient_repo).await
+        __tests__::updating_a_recipe_with_empty_changeset_errors(repo, ingredient_repo).await
     }
 }

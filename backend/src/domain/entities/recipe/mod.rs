@@ -276,6 +276,17 @@ pub struct IngredientAmountData {
     pub notes: Option<String>,
 }
 
+impl From<IngredientWithAmount> for IngredientAmountData {
+    fn from(value: IngredientWithAmount) -> Self {
+        Self {
+            ingredient_id: value.ingredient.id,
+            amount: value.amount,
+            notes: value.notes,
+            optional: value.optional
+        }
+    }
+}
+
 impl From<IngredientAmountDTO> for IngredientAmountData {
     fn from(
         IngredientAmountDTO {

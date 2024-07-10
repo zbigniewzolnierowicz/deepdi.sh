@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, time::Duration};
 
 use futures::future::join_all;
 
+use crate::domain::commands::recipes::update::UpdateRecipe;
 use crate::domain::entities::recipe::{
     IngredientUnit, IngredientWithAmount, RecipeChangeset, ServingsType,
 };
@@ -93,8 +94,8 @@ pub fn recipe_fixture() -> Recipe {
     }
 }
 
-pub fn recipe_changeset() -> RecipeChangeset {
-    RecipeChangeset {
+pub fn recipe_changeset() -> UpdateRecipe {
+    UpdateRecipe {
         name: Some("WE UPDATED THIS THING".to_string()),
         description: Some("WE UPDATED THAT THING".to_string()),
         time: Some(BTreeMap::from([(
@@ -106,7 +107,7 @@ pub fn recipe_changeset() -> RecipeChangeset {
                 .try_into()
                 .unwrap(),
         ),
-        servings: Some(ServingsType::Exact(4)),
+        servings: Some(ServingsType::Exact(4).into()),
     }
 }
 
@@ -114,11 +115,11 @@ pub async fn insert_all_ingredients_of_recipe(
     ingredient_repo: impl IngredientRepository,
     recipe: &Recipe,
 ) {
-    insert_all_ingredients(ingredient_repo, recipe.ingredients.as_ref()).await;
+    insert_all_ingredients(&ingredient_repo, recipe.ingredients.as_ref()).await;
 }
 
 pub async fn insert_all_ingredients(
-    ingredient_repo: impl IngredientRepository,
+    ingredient_repo: &impl IngredientRepository,
     ingredients: &[IngredientWithAmount],
 ) {
     join_all(
@@ -129,4 +130,3 @@ pub async fn insert_all_ingredients(
     )
     .await;
 }
-

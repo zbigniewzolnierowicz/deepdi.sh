@@ -85,39 +85,3 @@ pub async fn deleting_a_nonexistent_recipe_fails(repo: impl RecipeRepository) {
 
     assert!(matches!(result, DeleteRecipeError::NotFound(id) if id == recipe.id))
 }
-
-pub async fn adding_an_ingredient_to_a_recipe_works(
-    repo: impl RecipeRepository,
-    ingredient_repo: impl IngredientRepository,
-) {
-    let recipe = recipe_fixture();
-    let ingredient = IngredientWithAmount {
-        ingredient: ingredient_fixture(),
-        amount: IngredientUnit::Grams(666.0),
-        notes: None,
-        optional: true,
-    };
-
-    let mut all_ingredients = recipe.ingredients.to_vec().clone();
-    all_ingredients.push(ingredient.clone());
-
-    insert_all_ingredients(ingredient_repo, &all_ingredients).await;
-
-    let recipe = repo.insert(recipe.clone()).await.unwrap();
-
-    repo.add_ingredient(&recipe, ingredient.clone())
-        .await
-        .unwrap();
-
-    let updated_recipe = repo.get_by_id(&recipe.id).await.unwrap();
-
-    let expected: HashSet<_> = all_ingredients
-        .iter()
-        .map(|item| item.ingredient.id)
-        .collect();
-
-    assert!(updated_recipe
-        .ingredients
-        .iter()
-        .all(|item| expected.contains(&item.ingredient.id)));
-}

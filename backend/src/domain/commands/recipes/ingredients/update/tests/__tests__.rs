@@ -1,21 +1,19 @@
 use uuid::Uuid;
 
-use crate::domain::{
-    commands::recipes::ingredients::update::{
-        update_ingredient_in_recipe, UpdateIngredientInRecipeError,
+use crate::{
+    domain::{
+        commands::recipes::ingredients::update::{
+            update_ingredient_in_recipe, UpdateIngredientInRecipeError,
+        },
+        entities::recipe::IngredientUnit,
+        repositories::{
+            ingredients::IngredientRepository,
+            recipe::{errors::GetRecipeByIdError, RecipeRepository, RecipeRepositoryService},
+        },
     },
-    entities::recipe::IngredientUnit,
-    repositories::recipe::{errors::GetRecipeByIdError, RecipeRepositoryService},
+    test_utils::{insert_all_ingredients_of_recipe, recipe_fixture},
 };
 use std::sync::Arc;
-
-use crate::{
-    domain::repositories::{
-        ingredients::IngredientRepository,
-        recipe::{RecipeRepository, __test__::insert_all_ingredients_of_recipe},
-    },
-    test_utils::recipe_fixture,
-};
 
 pub async fn updating_ingredient_in_recipe_works(
     recipe_repo: impl RecipeRepository,

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use crate::domain::commands::recipes::update::{update_recipe, UpdateRecipe, UpdateRecipeError};
-use crate::domain::entities::recipe::{Recipe, RecipeChangeset, ServingsType};
+use crate::domain::entities::recipe::{Recipe, ServingsType};
 use crate::domain::repositories::ingredients::IngredientRepository;
 
 use crate::domain::repositories::recipe::{RecipeRepository, RecipeRepositoryService};
@@ -18,7 +18,7 @@ pub async fn updating_a_recipe_succeeds(
     let changeset = recipe_changeset();
     insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
 
-    let result = repo.insert(recipe.clone()).await.unwrap();
+    recipe_repo.insert(recipe.clone()).await.unwrap();
 
     let result = update_recipe(recipe_repo, &recipe.id, changeset)
         .await
@@ -55,7 +55,7 @@ pub async fn updating_a_nonexistent_recipe_fails(repo: impl RecipeRepository) {
     assert!(matches!(result, UpdateRecipeError::NotFound(id) if id == recipe.id))
 }
 
-pub async fn updating_a_recipe_with_empty_changeset_does_nothing(
+pub async fn updating_a_recipe_with_empty_changeset_errors(
     repo: impl RecipeRepository,
     ingredient_repo: impl IngredientRepository,
 ) {
@@ -70,7 +70,7 @@ pub async fn updating_a_recipe_with_empty_changeset_does_nothing(
 
     let result = update_recipe(recipe_repo, &recipe.id, changeset)
         .await
-        .unwrap();
+        .unwrap_err();
 
-    assert_eq!(recipe, result);
+    assert!(matches!(result, UpdateRecipeError::ChangesetEmpty))
 }

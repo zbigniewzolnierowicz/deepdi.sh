@@ -44,10 +44,3 @@ async fn deleting_a_nonexistent_recipe_fails(pool: PgPool) {
     let repo = PostgresRecipeRepository::new(pool.clone());
     __test__::deleting_a_nonexistent_recipe_fails(repo).await
 }
-
-#[sqlx::test]
-async fn adding_an_ingredient_to_a_recipe_works(pool: PgPool) {
-    let ingredient_repo = PostgresIngredientRepository::new(pool.clone());
-    let repo = PostgresRecipeRepository::new(pool);
-    __test__::adding_an_ingredient_to_a_recipe_works(repo, ingredient_repo).await
-}
