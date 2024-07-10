@@ -16,7 +16,7 @@ pub async fn updating_a_recipe_succeeds(
     let recipe_repo: RecipeRepositoryService = Arc::new(Box::new(repo));
     let recipe = recipe_fixture();
     let changeset = recipe_changeset();
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
     recipe_repo.insert(recipe.clone()).await.unwrap();
 
@@ -65,7 +65,7 @@ pub async fn updating_a_recipe_with_empty_changeset_errors(
     let changeset = UpdateRecipe {
         ..Default::default()
     };
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
     recipe_repo.insert(recipe.clone()).await.unwrap();
 
     let result = update_recipe(recipe_repo, &recipe.id, changeset)

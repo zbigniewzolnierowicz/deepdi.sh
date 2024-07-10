@@ -4,7 +4,7 @@ use crate::{
     domain::{
         commands::recipes::ingredients::add::add_ingredient_to_recipe, entities::recipe::{IngredientAmountData, IngredientUnit, IngredientWithAmount}, repositories::{ingredients::{IngredientRepository, IngredientRepositoryService}, recipe::{RecipeRepository, RecipeRepositoryService}}
     },
-    test_utils::{ingredient_fixture, insert_all_ingredients, recipe_fixture},
+    test_utils::{ingredient_fixture, insert_all_ingredients, insert_all_ingredients_of_recipe, recipe_fixture},
 };
 
 pub async fn adding_an_ingredient_to_a_recipe_works(
@@ -41,4 +41,25 @@ pub async fn adding_an_ingredient_to_a_recipe_works(
         .ingredients
         .iter()
         .all(|item| expected.contains(&item.ingredient.id)));
+}
+
+pub async fn adding_a_nonexistent_ingredient_to_a_recipe_errors(
+    recipe_repo: impl RecipeRepository,
+    ing_repo: impl IngredientRepository,
+) {
+    let recipe = recipe_fixture();
+    let ingredient = IngredientWithAmount {
+        ingredient: ingredient_fixture(),
+        amount: IngredientUnit::Grams(666.0),
+        notes: None,
+        optional: true,
+    };
+
+    insert_all_ingredients_of_recipe(&ing_repo, &recipe).await;
+    let recipe = recipe_repo.insert(recipe.clone()).await.unwrap();
+
+    let recipe_repo: RecipeRepositoryService = Arc::new(Box::new(recipe_repo));
+    let ingredient_repo: IngredientRepositoryService = Arc::new(Box::new(ing_repo));
+
+    let ingredient_payload = IngredientAmountData::from(ingredient.clone());
 }

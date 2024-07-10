@@ -20,7 +20,7 @@ pub async fn updating_ingredient_in_recipe_works(
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
     recipe_repo.insert(initial_recipe.clone()).await.unwrap();
 
     let ingredient_to_update = initial_recipe.ingredients.first().unwrap();
@@ -45,7 +45,7 @@ pub async fn updating_ingredient_in_nonexistent_recipe_errors(
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
 
     let ingredient_to_update = initial_recipe.ingredients.first().unwrap();
     let amount = IngredientUnit::Cups(2.0);
@@ -71,7 +71,7 @@ pub async fn updating_nonexistent_ingredient_in_recipe_errors(
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
     recipe_repo.insert(initial_recipe.clone()).await.unwrap();
 
     let amount = IngredientUnit::Cups(2.0);

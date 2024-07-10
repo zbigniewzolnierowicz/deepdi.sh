@@ -112,10 +112,10 @@ pub fn recipe_changeset() -> UpdateRecipe {
 }
 
 pub async fn insert_all_ingredients_of_recipe(
-    ingredient_repo: impl IngredientRepository,
+    ingredient_repo: &impl IngredientRepository,
     recipe: &Recipe,
 ) {
-    insert_all_ingredients(&ingredient_repo, recipe.ingredients.as_ref()).await;
+    insert_all_ingredients(ingredient_repo, recipe.ingredients.as_ref()).await;
 }
 
 pub async fn insert_all_ingredients(

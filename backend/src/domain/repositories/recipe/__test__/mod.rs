@@ -24,7 +24,7 @@ pub async fn creating_recipe_works(
 ) {
     let recipe = recipe_fixture();
 
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
     let result = repo.insert(recipe.clone()).await.unwrap();
     assert_eq!(recipe, result);
@@ -36,7 +36,7 @@ pub async fn inserting_recipe_with_same_id_fails(
 ) {
     let recipe = recipe_fixture();
 
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
     repo.insert(recipe.clone()).await.unwrap();
 
@@ -51,7 +51,7 @@ pub async fn getting_recipe_by_id_works(
 ) {
     let recipe = recipe_fixture();
 
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
     repo.insert(recipe.clone()).await.unwrap();
 
@@ -72,7 +72,7 @@ pub async fn deleting_a_recipe_succeeds(
 ) {
     let recipe = recipe_fixture();
 
-    insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
     let result = repo.insert(recipe.clone()).await.unwrap();
 
