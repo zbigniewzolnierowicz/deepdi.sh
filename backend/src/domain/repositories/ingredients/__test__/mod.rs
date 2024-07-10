@@ -1,8 +1,7 @@
 use super::*;
-use crate::{domain::entities::ingredient::{
-    errors::ValidationError,
-    types::{IngredientDescription, IngredientName, WhichDiets},
-}, test_utils::ingredient_fixture};
+use crate::domain::entities::ingredient::types::{
+    IngredientDescription, IngredientName, WhichDiets,
+};
 
 use pretty_assertions::assert_eq;
 
@@ -126,75 +125,6 @@ pub async fn get_all_returns_empty_vec(repo: impl IngredientRepository) {
     let result = repo.get_all().await.unwrap();
 
     assert_eq!(result, vec![]);
-}
-
-pub async fn updating_an_ingredient_success(repo: impl IngredientRepository) {
-    let input = Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    };
-    repo.insert(input.clone()).await.unwrap();
-
-    repo
-        .update(
-            &input,
-            IngredientChangeset {
-                name: Some(IngredientName("Ingredient name changed".to_string())),
-                ..Default::default()
-            },
-        )
-        .await
-        .unwrap();
-
-    let result = repo.get_by_id(&input.id).await.unwrap();
-
-    assert_eq!(
-        result,
-        Ingredient {
-            name: IngredientName("Ingredient name changed".to_string()),
-            ..input
-        }
-    )
-}
-
-pub async fn updating_with_empty_changeset_fails(repo: impl IngredientRepository) {
-    let input = Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name 1".try_into().unwrap(),
-        description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    };
-    repo.insert(input.clone()).await.unwrap();
-
-    let error = repo
-        .update(&input, IngredientChangeset::default())
-        .await
-        .unwrap_err();
-
-    assert!(
-        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == vec!["name", "description", "diet_friendly"])
-    );
-}
-
-pub async fn updating_a_missing_file_fails(repo: impl IngredientRepository) {
-    let error = repo
-        .update(
-            &ingredient_fixture(),
-            IngredientChangeset {
-                name: Some(IngredientName(
-                    "This will fail, so this doesn't matter".to_string(),
-                )),
-                ..Default::default()
-            },
-        )
-        .await
-        .unwrap_err();
-
-    assert!(
-        matches!(error, UpdateIngredientError::Get(GetIngredientByIdError::NotFound(id)) if id == Uuid::from_u128(1))
-    );
 }
 
 pub async fn deleting_works(repo: impl IngredientRepository) {

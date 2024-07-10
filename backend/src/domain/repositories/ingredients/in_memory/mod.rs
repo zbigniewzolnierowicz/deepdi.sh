@@ -78,9 +78,9 @@ impl IngredientRepository for InMemoryIngredientRepository {
         let mut lock = self.0.lock()?;
         let id = &ingredient.id;
 
-        let ingredient = lock
-            .get_mut(&id)
-            .ok_or(GetIngredientByIdError::UnknownError(eyre::eyre!(
+        let ingredient =
+            lock.get_mut(id)
+                .ok_or(UpdateIngredientError::UnknownError(eyre::eyre!(
                 "For some reason this ingredient wasn't found, even though we made sure it was."
             )))?;
 

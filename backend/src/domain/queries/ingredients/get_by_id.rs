@@ -38,7 +38,7 @@ mod tests {
 
     use crate::domain::{
         entities::ingredient::types::{DietFriendly, IngredientDescription, IngredientName},
-        repositories::ingredients::InMemoryIngredientRepository,
+        repositories::ingredients::in_memory::InMemoryIngredientRepository,
     };
 
     use super::*;

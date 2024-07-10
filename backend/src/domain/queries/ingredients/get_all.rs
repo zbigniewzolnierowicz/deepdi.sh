@@ -35,7 +35,7 @@ mod tests {
         entities::ingredient::types::{
             DietFriendly, IngredientDescription, IngredientName, WhichDiets,
         },
-        repositories::ingredients::InMemoryIngredientRepository,
+        repositories::ingredients::in_memory::InMemoryIngredientRepository,
     };
 
     use pretty_assertions::assert_eq;

@@ -5,9 +5,6 @@ pub mod postgres;
 #[cfg(test)]
 pub mod __test__;
 
-#[cfg(test)]
-pub use in_memory::InMemoryIngredientRepository;
-
 use std::sync::Arc;
 
 use async_trait::async_trait;

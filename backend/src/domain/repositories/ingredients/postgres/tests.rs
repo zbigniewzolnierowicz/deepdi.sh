@@ -67,24 +67,6 @@ async fn get_all_returns_empty_vec(pool: PgPool) {
 }
 
 #[sqlx::test]
-async fn updating_an_ingredient_success(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool);
-    __test__::updating_an_ingredient_success(repo).await
-}
-
-#[sqlx::test]
-async fn updating_with_empty_changeset_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool);
-    __test__::updating_with_empty_changeset_fails(repo).await
-}
-
-#[sqlx::test]
-async fn updating_a_missing_file_fails(pool: PgPool) {
-    let repo = PostgresIngredientRepository::new(pool);
-    __test__::updating_a_missing_file_fails(repo).await
-}
-
-#[sqlx::test]
 async fn deleting_works(pool: PgPool) {
     let repo = PostgresIngredientRepository::new(pool);
     __test__::deleting_works(repo).await

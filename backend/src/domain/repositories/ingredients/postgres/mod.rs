@@ -127,7 +127,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
 
         if let Some(name) = name {
-            if name != *ingredient_to_update.name {
+            if name != ingredient_to_update.name {
                 sqlx::query!(
                     r#"
                     UPDATE ingredients
@@ -138,10 +138,9 @@ impl IngredientRepository for PostgresIngredientRepository {
                     id,
                     name,
                 )
-                .fetch_one(&self.0)
-                .await
-                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
-            };
+                .execute(&self.0)
+                .await?;
+            }
         };
 
         if let Some(description) = description {
@@ -157,8 +156,7 @@ impl IngredientRepository for PostgresIngredientRepository {
                     description,
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
+                .await?;
             }
         };
 
@@ -175,14 +173,11 @@ impl IngredientRepository for PostgresIngredientRepository {
                     &diet_friendly
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
+                .await?;
             }
         };
 
-        tx.commit()
-            .await
-            .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
+        tx.commit().await?;
 
         Ok(())
     }

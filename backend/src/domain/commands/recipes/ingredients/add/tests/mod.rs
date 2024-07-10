@@ -3,7 +3,7 @@ mod __tests__;
 mod in_memory {
     use super::__tests__;
     use crate::domain::repositories::{
-        ingredients::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
+        ingredients::in_memory::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
     };
 
     #[tokio::test]

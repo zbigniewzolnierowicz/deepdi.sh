@@ -1,7 +1,7 @@
 mod __tests__;
 mod in_memory {
     use super::__tests__;
-    use crate::domain::repositories::ingredients::InMemoryIngredientRepository;
+    use crate::domain::repositories::ingredients::in_memory::InMemoryIngredientRepository;
 
     #[tokio::test]
     async fn creates_an_ingredient() {

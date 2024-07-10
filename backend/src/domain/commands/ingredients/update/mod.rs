@@ -9,7 +9,7 @@ use crate::domain::{
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UpdateIngredient {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -55,22 +55,23 @@ pub enum UpdateIngredientError {
     NotFound(Uuid),
 
     #[error(transparent)]
+    ValidationError(ValidationError),
+
+    #[error(transparent)]
     Internal(#[from] eyre::Error),
 }
 
 impl From<ValidationError> for UpdateIngredientError {
     fn from(value: ValidationError) -> Self {
-        Self::Internal(value.into())
+        Self::ValidationError(value)
     }
 }
 
 impl From<UpdateIngredientErrorInternal> for UpdateIngredientError {
     fn from(value: UpdateIngredientErrorInternal) -> Self {
         match value {
-            UpdateIngredientErrorInternal::Get(GetIngredientByIdError::NotFound(id)) => {
-                Self::NotFound(id)
-            }
-            e => Self::Internal(e.into()),
+            UpdateIngredientErrorInternal::ValidationError(v) => Self::ValidationError(v),
+            e => e.into(),
         }
     }
 }
@@ -96,9 +97,12 @@ pub async fn update_ingredient(
     let ingredient: IngredientChangeset = input.try_into()?;
 
     tracing::info!("Sending changeset to ingredient repository");
-    repo.update(&ingredient_to_change, ingredient).await?;
+    repo.update(&ingredient_to_change, ingredient.clone()).await?;
 
     let result = repo.get_by_id(&id).await?;
 
     Ok(result)
 }
+
+#[cfg(test)]
+mod tests;
