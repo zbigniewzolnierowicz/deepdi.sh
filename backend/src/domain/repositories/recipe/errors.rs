@@ -37,6 +37,18 @@ impl<T> From<PoisonError<T>> for GetRecipeByIdError {
     }
 }
 
+impl From<SQLXError> for GetRecipeByIdError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
+
+impl From<serde_json::Error> for GetRecipeByIdError {
+    fn from(e: serde_json::Error) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
+
 /// Turns out Postgres doesn't return the column name for unique constraints isn't returned.
 /// This function maps constraints to fields
 fn constraint_to_field(field: &str) -> &str {
@@ -55,9 +67,6 @@ fn constraint_to_field(field: &str) -> &str {
 pub enum InsertRecipeError {
     #[error("The recipe with field {0} of the given value already exists")]
     Conflict(String),
-
-    #[error(transparent)]
-    Get(#[from] GetRecipeByIdError),
 
     #[error(transparent)]
     ValidationError(#[from] ValidationError),
@@ -114,25 +123,19 @@ impl<T> From<PoisonError<T>> for InsertRecipeError {
 
 #[derive(Error, Debug)]
 pub enum DeleteRecipeError {
-    #[error("The recipe with ID of {0} was not found")]
-    NotFound(Uuid),
-
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
-}
-
-impl From<GetRecipeByIdError> for DeleteRecipeError {
-    fn from(value: GetRecipeByIdError) -> Self {
-        match value {
-            GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
-            e => Self::UnknownError(e.into()),
-        }
-    }
 }
 
 impl<T> From<PoisonError<T>> for DeleteRecipeError {
     fn from(_value: PoisonError<T>) -> Self {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
+impl From<SQLXError> for DeleteRecipeError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
     }
 }
 
@@ -148,6 +151,12 @@ impl<T> From<PoisonError<T>> for UpdateRecipeError {
     }
 }
 
+impl From<SQLXError> for UpdateRecipeError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum DeleteIngredientFromRecipeError {
     #[error(transparent)]
@@ -160,6 +169,12 @@ pub enum DeleteIngredientFromRecipeError {
 impl<T> From<PoisonError<T>> for DeleteIngredientFromRecipeError {
     fn from(_value: PoisonError<T>) -> Self {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
+impl From<SQLXError> for DeleteIngredientFromRecipeError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
     }
 }
 
@@ -183,6 +198,12 @@ impl<T> From<PoisonError<T>> for UpdateIngredientInRecipeError {
 
 impl From<SQLXError> for UpdateIngredientInRecipeError {
     fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
+
+impl From<serde_json::Error> for UpdateIngredientInRecipeError {
+    fn from(e: serde_json::Error) -> Self {
         Self::UnknownError(e.into())
     }
 }

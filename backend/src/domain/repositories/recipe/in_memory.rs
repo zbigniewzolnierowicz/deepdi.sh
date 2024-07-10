@@ -24,7 +24,7 @@ pub struct InMemoryRecipeRepository(pub Mutex<HashMap<uuid::Uuid, Recipe>>);
 
 #[async_trait]
 impl RecipeRepository for InMemoryRecipeRepository {
-    async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError> {
+    async fn insert(&self, input: Recipe) -> Result<(), InsertRecipeError> {
         let mut lock = self.0.lock()?;
 
         if lock.iter().any(|(id, _)| id == &input.id) {
@@ -34,7 +34,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
         lock.insert(input.id, input.clone());
 
-        Ok(input)
+        Ok(())
     }
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError> {
@@ -48,10 +48,14 @@ impl RecipeRepository for InMemoryRecipeRepository {
         Ok(result)
     }
 
-    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
+    async fn delete(&self, recipe: &Recipe) -> Result<(), DeleteRecipeError> {
+        let id = &recipe.id;
         let mut lock = self.0.lock()?;
 
-        lock.remove(id).ok_or(DeleteRecipeError::NotFound(*id))?;
+        lock.remove(id)
+            .ok_or(DeleteRecipeError::UnknownError(eyre!(
+                "The recipe could not be found somehow"
+            )))?;
 
         Ok(())
     }
@@ -64,7 +68,9 @@ impl RecipeRepository for InMemoryRecipeRepository {
         let mut lock = self.0.lock()?;
         let recipe = lock
             .get_mut(&recipe.id)
-            .ok_or(UpdateRecipeError::UnknownError(eyre!("The recipe could not be found somehow")))?;
+            .ok_or(UpdateRecipeError::UnknownError(eyre!(
+                "The recipe could not be found somehow"
+            )))?;
 
         if let Some(v) = changeset.name {
             recipe.name = v;
@@ -152,7 +158,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
             .ok_or(UpdateIngredientInRecipeError::UnknownError(eyre!(
                 "Ingredient somehow is not in the recipe, but the command made sure there was."
             )))?;
-        
+
         ingredient.amount = new_amount.clone();
 
         Ok(())

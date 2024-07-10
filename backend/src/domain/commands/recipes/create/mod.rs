@@ -7,6 +7,7 @@ use crate::domain::entities::recipe::IngredientAmountData;
 use crate::domain::entities::recipe::{
     errors::ValidationError, IngredientWithAmount, Recipe, ServingsType,
 };
+use crate::domain::repositories::recipe::errors::GetRecipeByIdError;
 use crate::domain::repositories::{
     ingredients::{errors::GetAllIngredientsError, IngredientRepositoryService},
     recipe::{errors::InsertRecipeError, RecipeRepositoryService},
@@ -41,6 +42,12 @@ impl From<GetAllIngredientsError> for CreateRecipeError {
             }
             e => Self::Unknown(e.into()),
         }
+    }
+}
+
+impl From<GetRecipeByIdError> for CreateRecipeError {
+    fn from(value: GetRecipeByIdError) -> Self {
+        Self::Unknown(value.into())
     }
 }
 
@@ -100,9 +107,11 @@ pub async fn create_recipe(
         )
         .collect();
 
-    let recipe = recipe_repo
+    let id = Uuid::now_v7();
+
+    recipe_repo
         .insert(Recipe {
-            id: Uuid::now_v7(),
+            id,
             name: input.name.to_string(),
             description: input.description.to_string(),
             steps: input.steps.clone().try_into()?,
@@ -111,6 +120,8 @@ pub async fn create_recipe(
             servings: input.servings.clone(),
         })
         .await?;
+
+    let recipe = recipe_repo.get_by_id(&id).await?;
 
     Ok(recipe)
 }

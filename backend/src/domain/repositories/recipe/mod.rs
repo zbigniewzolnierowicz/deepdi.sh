@@ -15,11 +15,11 @@ use self::errors::{
 #[async_trait]
 pub trait RecipeRepository: Send + Sync + 'static {
     // TODO: Include user information
-    async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError>;
+    async fn insert(&self, input: Recipe) -> Result<(), InsertRecipeError>;
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError>;
 
-    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError>;
+    async fn delete(&self, recipe: &Recipe) -> Result<(), DeleteRecipeError>;
 
     async fn update(
         &self,

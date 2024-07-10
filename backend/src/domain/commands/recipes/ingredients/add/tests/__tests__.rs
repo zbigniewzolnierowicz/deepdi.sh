@@ -40,7 +40,7 @@ pub async fn adding_an_ingredient_to_a_recipe_works(
 
     let ingredient_payload = IngredientAmountData::from(ingredient.clone());
 
-    let recipe = recipe_repo.insert(recipe.clone()).await.unwrap();
+    recipe_repo.insert(recipe.clone()).await.unwrap();
 
     let updated_recipe =
         add_ingredient_to_recipe(recipe_repo, ingredient_repo, &recipe.id, ingredient_payload)
@@ -71,7 +71,7 @@ pub async fn adding_a_nonexistent_ingredient_to_a_recipe_errors(
     };
 
     insert_all_ingredients_of_recipe(&ing_repo, &recipe).await;
-    let recipe = recipe_repo.insert(recipe.clone()).await.unwrap();
+    recipe_repo.insert(recipe.clone()).await.unwrap();
 
     let recipe_repo: RecipeRepositoryService = Arc::new(Box::new(recipe_repo));
     let ingredient_repo: IngredientRepositoryService = Arc::new(Box::new(ing_repo));

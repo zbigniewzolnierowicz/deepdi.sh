@@ -20,9 +20,9 @@ pub async fn deleting_a_recipe_succeeds(
 
     insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
 
-    let result = repo.insert(recipe.clone()).await.unwrap();
+    repo.insert(recipe.clone()).await.unwrap();
 
-    delete_recipe(repo, &result.id).await.unwrap();
+    delete_recipe(repo, &recipe.id).await.unwrap();
 }
 
 pub async fn deleting_a_nonexistent_recipe_fails(repo: impl RecipeRepository) {

@@ -1,6 +1,8 @@
 use uuid::Uuid;
 
-use crate::domain::repositories::recipe::errors::DeleteRecipeError as DeleteRecipeErrorInternal;
+use crate::domain::repositories::recipe::errors::{
+    DeleteRecipeError as DeleteRecipeErrorInternal, GetRecipeByIdError,
+};
 use crate::domain::repositories::recipe::RecipeRepositoryService;
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
@@ -14,9 +16,15 @@ pub enum DeleteRecipeError {
 
 impl From<DeleteRecipeErrorInternal> for DeleteRecipeError {
     fn from(value: DeleteRecipeErrorInternal) -> Self {
+        Self::Unknown(value.into())
+    }
+}
+
+impl From<GetRecipeByIdError> for DeleteRecipeError {
+    fn from(value: GetRecipeByIdError) -> Self {
         match value {
-            DeleteRecipeErrorInternal::NotFound(id) => Self::NotFound(id),
-            DeleteRecipeErrorInternal::UnknownError(err) => Self::Unknown(err),
+            GetRecipeByIdError::NotFound(id) => Self::NotFound(id),
+            e => e.into(),
         }
     }
 }
@@ -25,10 +33,9 @@ pub async fn delete_recipe(
     recipe_repo: RecipeRepositoryService,
     input: &Uuid,
 ) -> Result<(), DeleteRecipeError> {
-    recipe_repo
-        .delete(input)
-        .await
-        .map_err(DeleteRecipeError::from)?;
+    let recipe = recipe_repo.get_by_id(input).await?;
+
+    recipe_repo.delete(&recipe).await?;
 
     Ok(())
 }

@@ -47,7 +47,7 @@ async fn insert_ingredient(
 
 #[async_trait]
 impl RecipeRepository for PostgresRecipeRepository {
-    async fn insert(&self, input: Recipe) -> Result<Recipe, InsertRecipeError> {
+    async fn insert(&self, input: Recipe) -> Result<(), InsertRecipeError> {
         let time = serde_json::to_value(&input.time)
             .map_err(|e| InsertRecipeError::UnknownError(e.into()))?;
 
@@ -82,9 +82,7 @@ impl RecipeRepository for PostgresRecipeRepository {
 
         tx.commit().await.map_err(InsertRecipeError::from)?;
 
-        self.get_by_id(&result.id)
-            .await
-            .map_err(InsertRecipeError::Get)
+        Ok(())
     }
 
     async fn get_by_id(&self, id: &Uuid) -> Result<Recipe, GetRecipeByIdError> {
@@ -99,8 +97,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             id
         )
         .fetch_all(&self.0)
-        .await
-        .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
+        .await?;
 
         let ingredients = result_ingredients
             .iter()
@@ -108,11 +105,9 @@ impl RecipeRepository for PostgresRecipeRepository {
             .collect::<Result<Vec<_>, _>>()
             .map_err(GetRecipeByIdError::from)?;
 
-        let time = serde_json::from_value(result.time)
-            .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
+        let time = serde_json::from_value(result.time)?;
 
-        let servings = serde_json::from_value(result.servings)
-            .map_err(|e| GetRecipeByIdError::UnknownError(e.into()))?;
+        let servings = serde_json::from_value(result.servings)?;
 
         let recipe = Recipe {
             id: result.id,
@@ -127,31 +122,21 @@ impl RecipeRepository for PostgresRecipeRepository {
         Ok(recipe)
     }
 
-    async fn delete(&self, id: &Uuid) -> Result<(), DeleteRecipeError> {
-        let recipe = self.get_by_id(id).await?;
-
-        let tx = self
-            .0
-            .begin()
-            .await
-            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+    async fn delete(&self, recipe: &Recipe) -> Result<(), DeleteRecipeError> {
+        let tx = self.0.begin().await?;
 
         sqlx::query_file!(
             "queries/recipes/delete_ingredients_for_recipe.sql",
             recipe.id
         )
         .execute(&self.0)
-        .await
-        .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+        .await?;
 
         sqlx::query_file!("queries/recipes/delete_recipe.sql", recipe.id)
             .execute(&self.0)
-            .await
-            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+            .await?;
 
-        tx.commit()
-            .await
-            .map_err(|e| DeleteRecipeError::UnknownError(e.into()))?;
+        tx.commit().await?;
 
         Ok(())
     }
@@ -162,11 +147,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         changeset: RecipeChangeset,
     ) -> Result<(), UpdateRecipeError> {
         let id = &recipe.id;
-        let tx = self
-            .0
-            .begin()
-            .await
-            .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+        let tx = self.0.begin().await?;
 
         if let Some(value) = changeset.name {
             if value != recipe.name {
@@ -180,8 +161,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                     value
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+                .await?;
             }
         };
 
@@ -197,8 +177,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                     value
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+                .await?;
             }
         };
 
@@ -217,8 +196,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                     value
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+                .await?;
             }
         }
 
@@ -237,8 +215,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                     value
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+                .await?;
             }
         }
 
@@ -256,8 +233,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                     value
                 )
                 .execute(&self.0)
-                .await
-                .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
+                .await?;
             }
         }
 
@@ -288,8 +264,7 @@ impl RecipeRepository for PostgresRecipeRepository {
             ingredient.ingredient.id
         )
         .execute(&self.0)
-        .await
-        .map_err(|e| DeleteIngredientFromRecipeError::UnknownError(e.into()))?;
+        .await?;
 
         Ok(())
     }
@@ -300,13 +275,9 @@ impl RecipeRepository for PostgresRecipeRepository {
         ingredient: &IngredientWithAmount,
         new_amount: &IngredientUnit,
     ) -> Result<(), UpdateIngredientInRecipeError> {
-        let tx = self
-            .0
-            .begin()
-            .await?;
+        let tx = self.0.begin().await?;
 
-        let amount = serde_json::to_value(new_amount)
-            .map_err(|err| UpdateIngredientInRecipeError::UnknownError(err.into()))?;
+        let amount = serde_json::to_value(new_amount)?;
 
         sqlx::query_file!(
             "queries/recipes/update_ingredient_in_recipe.sql",
