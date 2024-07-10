@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use eyre::eyre;
+use once_cell::sync::Lazy;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -57,13 +58,13 @@ impl RecipeRepository for InMemoryRecipeRepository {
 
     async fn update(
         &self,
-        id: &Uuid,
+        recipe: &Recipe,
         changeset: RecipeChangeset,
-    ) -> Result<Recipe, UpdateRecipeError> {
+    ) -> Result<(), UpdateRecipeError> {
         let mut lock = self.0.lock()?;
         let recipe = lock
-            .get_mut(id)
-            .ok_or(UpdateRecipeError::Get(GetRecipeByIdError::NotFound(*id)))?;
+            .get_mut(&recipe.id)
+            .ok_or(UpdateRecipeError::UnknownError(eyre!("The recipe could not be found somehow")))?;
 
         if let Some(v) = changeset.name {
             recipe.name = v;
@@ -85,7 +86,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
             recipe.description = v;
         };
 
-        Ok(recipe.clone())
+        Ok(())
     }
 
     async fn add_ingredient(

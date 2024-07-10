@@ -27,11 +27,7 @@ pub enum UpdateRecipeError {
 
 impl From<UpdateRecipeErrorInternal> for UpdateRecipeError {
     fn from(value: UpdateRecipeErrorInternal) -> Self {
-        match value {
-            UpdateRecipeErrorInternal::Get(GetRecipeByIdError::NotFound(id)) => Self::NotFound(id),
-            UpdateRecipeErrorInternal::Get(GetRecipeByIdError::ValidationError(err)) => err.into(),
-            err => Self::Unknown(err.into()),
-        }
+        Self::Unknown(value.into())
     }
 }
 
@@ -97,10 +93,9 @@ pub async fn update_recipe(
         return Err(UpdateRecipeError::ChangesetEmpty);
     };
 
-    recipe_repo
-        .update(input, changeset)
-        .await
-        .map_err(UpdateRecipeError::from)?;
+    let recipe = recipe_repo.get_by_id(input).await?;
+
+    recipe_repo.update(&recipe, changeset).await?;
 
     let recipe = recipe_repo
         .get_by_id(input)

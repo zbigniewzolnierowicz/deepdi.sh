@@ -139,9 +139,6 @@ impl<T> From<PoisonError<T>> for DeleteRecipeError {
 #[derive(Error, Debug)]
 pub enum UpdateRecipeError {
     #[error(transparent)]
-    Get(#[from] GetRecipeByIdError),
-
-    #[error(transparent)]
     UnknownError(#[from] eyre::Error),
 }
 
@@ -153,9 +150,6 @@ impl<T> From<PoisonError<T>> for UpdateRecipeError {
 
 #[derive(Error, Debug)]
 pub enum DeleteIngredientFromRecipeError {
-    #[error("The recipe has no ingredient with ID of {0}")]
-    RecipeHasNoIngredientError(Uuid),
-
     #[error(transparent)]
     ValidationError(ValidationError),
 

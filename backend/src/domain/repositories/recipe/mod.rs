@@ -27,9 +27,9 @@ pub trait RecipeRepository: Send + Sync + 'static {
 
     async fn update(
         &self,
-        id: &Uuid,
+        recipe: &Recipe,
         changeset: RecipeChangeset,
-    ) -> Result<Recipe, UpdateRecipeError>;
+    ) -> Result<(), UpdateRecipeError>;
 
     async fn add_ingredient(
         &self,

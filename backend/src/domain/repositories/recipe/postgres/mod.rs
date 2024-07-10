@@ -158,11 +158,10 @@ impl RecipeRepository for PostgresRecipeRepository {
 
     async fn update(
         &self,
-        id: &Uuid,
+        recipe: &Recipe,
         changeset: RecipeChangeset,
-    ) -> Result<Recipe, UpdateRecipeError> {
-        let recipe = self.get_by_id(id).await?;
-
+    ) -> Result<(), UpdateRecipeError> {
+        let id = &recipe.id;
         let tx = self
             .0
             .begin()
@@ -265,10 +264,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         tx.commit()
             .await
             .map_err(|e| UpdateRecipeError::UnknownError(e.into()))?;
-
-        let recipe = self.get_by_id(id).await?;
-
-        Ok(recipe)
+        Ok(())
     }
 
     async fn add_ingredient(

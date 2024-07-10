@@ -26,9 +26,6 @@ pub enum DeleteIngredientFromRecipeError {
 impl From<DeleteIngredientFromRecipeErrorInternal> for DeleteIngredientFromRecipeError {
     fn from(value: DeleteIngredientFromRecipeErrorInternal) -> Self {
         match value {
-            DeleteIngredientFromRecipeErrorInternal::RecipeHasNoIngredientError(id) => {
-                Self::RecipeHasNoIngredientError(id)
-            }
             DeleteIngredientFromRecipeErrorInternal::ValidationError(
                 ValidationError::EmptyField(field),
             ) if field == vec!["steps"] => Self::LastIngredientError,

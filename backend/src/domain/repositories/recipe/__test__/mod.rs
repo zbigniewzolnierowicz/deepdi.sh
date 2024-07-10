@@ -121,7 +121,7 @@ pub async fn updating_a_recipe_succeeds(
     insert_all_ingredients_of_recipe(ingredient_repo, &recipe).await;
 
     let result = repo.insert(recipe.clone()).await.unwrap();
-    repo.update(&result.id, changeset).await.unwrap();
+    repo.update(&result, changeset).await.unwrap();
     let result = repo.get_by_id(&result.id).await.unwrap();
 
     assert_eq!(
