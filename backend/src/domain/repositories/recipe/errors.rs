@@ -162,3 +162,27 @@ impl<T> From<PoisonError<T>> for DeleteIngredientFromRecipeError {
         eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }
+
+#[derive(Error, Debug)]
+pub enum UpdateIngredientInRecipeError {
+    #[error("The recipe has no ingredient with ID of {0}")]
+    RecipeHasNoIngredientError(Uuid),
+
+    #[error(transparent)]
+    ValidationError(ValidationError),
+
+    #[error(transparent)]
+    UnknownError(#[from] eyre::Error),
+}
+
+impl<T> From<PoisonError<T>> for UpdateIngredientInRecipeError {
+    fn from(_value: PoisonError<T>) -> Self {
+        eyre!("Recipe repository lock was poisoned during a previous access and can no longer be locked").into()
+    }
+}
+
+impl From<SQLXError> for UpdateIngredientInRecipeError {
+    fn from(e: SQLXError) -> Self {
+        Self::UnknownError(e.into())
+    }
+}

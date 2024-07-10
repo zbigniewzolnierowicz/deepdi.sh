@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ingredients_recipes\nSET amount = $3\nWHERE ingredient_id = $2\nAND recipe_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Json"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9aa5f5fb7781ca39f8652dfe0e8fbb3854723ea42aa1fa0133b9e5b7fe1b10d7"
+}
