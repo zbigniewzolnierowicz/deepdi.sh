@@ -28,9 +28,9 @@ pub trait IngredientRepository: Send + Sync + 'static {
     async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError>;
     async fn update(
         &self,
-        id: Uuid,
+        ingredient: &Ingredient,
         changeset: IngredientChangeset,
-    ) -> Result<Ingredient, UpdateIngredientError>;
+    ) -> Result<(), UpdateIngredientError>;
     async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError>;
 }
 

@@ -75,15 +75,30 @@ impl From<UpdateIngredientErrorInternal> for UpdateIngredientError {
     }
 }
 
+impl From<GetIngredientByIdError> for UpdateIngredientError {
+    fn from(value: GetIngredientByIdError) -> Self {
+        match value {
+            GetIngredientByIdError::NotFound(id) => Self::NotFound(id),
+            e => e.into(),
+        }
+    }
+}
+
 #[tracing::instrument("[COMMAND] Updating an existing ingredient", skip(repo))]
 pub async fn update_ingredient(
     repo: IngredientRepositoryService,
     id: Uuid,
     input: &UpdateIngredient,
 ) -> Result<Ingredient, UpdateIngredientError> {
+    let ingredient_to_change = repo.get_by_id(&id).await?;
+
     tracing::info!("Serializing input into a changeset");
     let ingredient: IngredientChangeset = input.try_into()?;
+
     tracing::info!("Sending changeset to ingredient repository");
-    let result = repo.update(id, ingredient).await?;
+    repo.update(&ingredient_to_change, ingredient).await?;
+
+    let result = repo.get_by_id(&id).await?;
+
     Ok(result)
 }

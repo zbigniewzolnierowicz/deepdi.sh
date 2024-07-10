@@ -72,14 +72,17 @@ impl IngredientRepository for InMemoryIngredientRepository {
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Update ingredient", skip(self))]
     async fn update(
         &self,
-        id: Uuid,
+        ingredient: &Ingredient,
         changeset: IngredientChangeset,
-    ) -> Result<Ingredient, UpdateIngredientError> {
+    ) -> Result<(), UpdateIngredientError> {
         let mut lock = self.0.lock()?;
+        let id = &ingredient.id;
 
         let ingredient = lock
             .get_mut(&id)
-            .ok_or(GetIngredientByIdError::NotFound(id))?;
+            .ok_or(GetIngredientByIdError::UnknownError(eyre::eyre!(
+                "For some reason this ingredient wasn't found, even though we made sure it was."
+            )))?;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -103,7 +106,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
             ingredient.diet_friendly = new_diets.into();
         }
 
-        Ok(ingredient.clone())
+        Ok(())
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Delete an ingredient", skip(self))]

@@ -104,10 +104,11 @@ impl IngredientRepository for PostgresIngredientRepository {
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Update ingredient", skip(self))]
     async fn update(
         &self,
-        id: Uuid,
+        ingredient: &Ingredient,
         changeset: IngredientChangeset,
-    ) -> Result<Ingredient, UpdateIngredientError> {
-        let mut ingredient_to_update: IngredientModel = self.get_by_id(&id).await?.into();
+    ) -> Result<(), UpdateIngredientError> {
+        let ingredient_to_update: IngredientModel = ingredient.clone().into();
+        let id = &ingredient_to_update.id;
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
@@ -127,15 +128,13 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         if let Some(name) = name {
             if name != *ingredient_to_update.name {
-                ingredient_to_update = sqlx::query_as!(
-                    IngredientModel,
+                sqlx::query!(
                     r#"
                     UPDATE ingredients
                     SET
                     name = $2
                     WHERE id = $1
-                    RETURNING id, name, description, diet_friendly
-                "#,
+                    "#,
                     id,
                     name,
                 )
@@ -147,19 +146,17 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         if let Some(description) = description {
             if description != ingredient_to_update.description {
-                ingredient_to_update = sqlx::query_as!(
-                    IngredientModel,
+                sqlx::query!(
                     r#"
                     UPDATE ingredients
                     SET
                     description = $2
                     WHERE id = $1
-                    RETURNING id, name, description, diet_friendly
                     "#,
                     id,
                     description,
                 )
-                .fetch_one(&self.0)
+                .execute(&self.0)
                 .await
                 .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
             }
@@ -167,19 +164,17 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         if let Some(diet_friendly) = diet_friendly {
             if diet_friendly != ingredient_to_update.diet_friendly {
-                ingredient_to_update = sqlx::query_as!(
-                    IngredientModel,
+                sqlx::query!(
                     r#"
                     UPDATE ingredients
                     SET
                     diet_friendly = $2
                     WHERE id = $1
-                    RETURNING id, name, description, diet_friendly
                     "#,
                     id,
                     &diet_friendly
                 )
-                .fetch_one(&self.0)
+                .execute(&self.0)
                 .await
                 .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
             }
@@ -189,7 +184,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             .await
             .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
 
-        Ok(ingredient_to_update.try_into()?)
+        Ok(())
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Delete an ingredient", skip(self))]

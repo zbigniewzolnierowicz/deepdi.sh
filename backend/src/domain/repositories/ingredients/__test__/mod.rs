@@ -1,8 +1,8 @@
 use super::*;
-use crate::domain::entities::ingredient::{
+use crate::{domain::entities::ingredient::{
     errors::ValidationError,
     types::{IngredientDescription, IngredientName, WhichDiets},
-};
+}, test_utils::ingredient_fixture};
 
 use pretty_assertions::assert_eq;
 
@@ -137,9 +137,9 @@ pub async fn updating_an_ingredient_success(repo: impl IngredientRepository) {
     };
     repo.insert(input.clone()).await.unwrap();
 
-    let result = repo
+    repo
         .update(
-            input.id,
+            &input,
             IngredientChangeset {
                 name: Some(IngredientName("Ingredient name changed".to_string())),
                 ..Default::default()
@@ -147,6 +147,8 @@ pub async fn updating_an_ingredient_success(repo: impl IngredientRepository) {
         )
         .await
         .unwrap();
+
+    let result = repo.get_by_id(&input.id).await.unwrap();
 
     assert_eq!(
         result,
@@ -167,7 +169,7 @@ pub async fn updating_with_empty_changeset_fails(repo: impl IngredientRepository
     repo.insert(input.clone()).await.unwrap();
 
     let error = repo
-        .update(input.id, IngredientChangeset::default())
+        .update(&input, IngredientChangeset::default())
         .await
         .unwrap_err();
 
@@ -179,7 +181,7 @@ pub async fn updating_with_empty_changeset_fails(repo: impl IngredientRepository
 pub async fn updating_a_missing_file_fails(repo: impl IngredientRepository) {
     let error = repo
         .update(
-            Uuid::from_u128(1),
+            &ingredient_fixture(),
             IngredientChangeset {
                 name: Some(IngredientName(
                     "This will fail, so this doesn't matter".to_string(),
