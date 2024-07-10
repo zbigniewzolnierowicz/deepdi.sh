@@ -85,10 +85,10 @@ mod test {
                 entities::recipe::{IngredientWithAmount, Recipe},
                 repositories::{
                     ingredients::IngredientRepository,
-                    recipe::{RecipeRepository, __test__::insert_all_ingredients_of_recipe},
+                    recipe::RecipeRepository,
                 },
             },
-            test_utils::{ingredient_fixture, recipe_fixture},
+            test_utils::{ingredient_fixture, insert_all_ingredients_of_recipe, recipe_fixture},
         };
 
         pub async fn deleting_an_existing_ingredient_works(

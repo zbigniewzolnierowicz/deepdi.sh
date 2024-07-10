@@ -104,3 +104,6 @@ pub async fn update_recipe(
 
     Ok(recipe)
 }
+
+#[cfg(test)]
+mod tests;

@@ -1,5 +1,7 @@
 use std::{collections::BTreeMap, time::Duration};
 
+use futures::future::join_all;
+
 use crate::domain::entities::recipe::{
     IngredientUnit, IngredientWithAmount, RecipeChangeset, ServingsType,
 };
@@ -7,6 +9,7 @@ use crate::domain::entities::{
     ingredient::{types::DietFriendly, Ingredient},
     recipe::Recipe,
 };
+use crate::domain::repositories::ingredients::IngredientRepository;
 
 pub fn ingredient_fixture() -> Ingredient {
     Ingredient {
@@ -106,3 +109,24 @@ pub fn recipe_changeset() -> RecipeChangeset {
         servings: Some(ServingsType::Exact(4)),
     }
 }
+
+pub async fn insert_all_ingredients_of_recipe(
+    ingredient_repo: impl IngredientRepository,
+    recipe: &Recipe,
+) {
+    insert_all_ingredients(ingredient_repo, recipe.ingredients.as_ref()).await;
+}
+
+pub async fn insert_all_ingredients(
+    ingredient_repo: impl IngredientRepository,
+    ingredients: &[IngredientWithAmount],
+) {
+    join_all(
+        ingredients
+            .as_ref()
+            .iter()
+            .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
+    )
+    .await;
+}
+
