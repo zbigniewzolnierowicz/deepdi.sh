@@ -1,7 +1,8 @@
 mod __tests__;
 mod in_memory {
     use crate::domain::repositories::{
-        ingredients::in_memory::InMemoryIngredientRepository, recipe::in_memory::InMemoryRecipeRepository,
+        ingredients::in_memory::InMemoryIngredientRepository,
+        recipe::in_memory::InMemoryRecipeRepository,
     };
 
     use super::__tests__;

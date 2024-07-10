@@ -5,7 +5,10 @@ use reqwest::{Client, StatusCode};
 use uuid::Uuid;
 
 use crate::{
-    fixtures::{ingredient::{ingredient_fixture, ingredient_fixture_meat}, recipe::recipe_fixture},
+    fixtures::{
+        ingredient::{ingredient_fixture, ingredient_fixture_meat},
+        recipe::recipe_fixture,
+    },
     setup::TestApp,
 };
 
@@ -118,10 +121,8 @@ async fn updating_a_nonexistent_ingredient_in_a_recipe_errors() {
 
     assert_eq!(result.ingredients.len(), 1);
 
-    let ingredient_update_path = app.get_base(&format!(
-        "recipe/{}/ingredient/{}",
-        result.id, meat.id
-    ));
+    let ingredient_update_path =
+        app.get_base(&format!("recipe/{}/ingredient/{}", result.id, meat.id));
 
     let ingredient_to_add = IngredientUnitDTO::Grams(999.0);
 
@@ -157,7 +158,8 @@ async fn updating_an_ingredient_in_a_nonexistent_recipe_errors() {
 
     let ingredient_update_path = app.get_base(&format!(
         "recipe/{}/ingredient/{}",
-        Uuid::nil(), ingredient.id
+        Uuid::nil(),
+        ingredient.id
     ));
 
     let ingredient_to_add = IngredientUnitDTO::Grams(999.0);

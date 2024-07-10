@@ -2,14 +2,17 @@ pub mod errors;
 pub mod in_memory;
 pub mod postgres;
 
-use crate::domain::entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset};
+use crate::domain::entities::recipe::{
+    IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset,
+};
 use async_trait::async_trait;
 use errors::AddIngredientIntoRecipeError;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use self::errors::{
-    DeleteIngredientFromRecipeError, DeleteRecipeError, GetRecipeByIdError, InsertRecipeError, UpdateIngredientInRecipeError, UpdateRecipeError
+    DeleteIngredientFromRecipeError, DeleteRecipeError, GetRecipeByIdError, InsertRecipeError,
+    UpdateIngredientInRecipeError, UpdateRecipeError,
 };
 
 #[async_trait]

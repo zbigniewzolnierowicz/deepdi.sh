@@ -5,58 +5,6 @@ use crate::domain::entities::ingredient::types::{
 
 use pretty_assertions::assert_eq;
 
-pub async fn insert_ingredient_that_already_exists_fails_id(repo: impl IngredientRepository) {
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name".try_into().unwrap(),
-        description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let result = repo
-        .insert(Ingredient {
-            id: Uuid::from_u128(1),
-            name: "Ingredient name 2".try_into().unwrap(),
-            description: "Ingredient description 2".try_into().unwrap(),
-            diet_friendly: WhichDiets::new(),
-        })
-        .await
-        .unwrap_err();
-
-    assert!(matches!(
-        result,
-        InsertIngredientError::Conflict(fieldname) if fieldname == "id"
-    ))
-}
-
-pub async fn insert_ingredient_that_already_exists_fails_name(repo: impl IngredientRepository) {
-    repo.insert(Ingredient {
-        id: Uuid::from_u128(1),
-        name: "Ingredient name".try_into().unwrap(),
-        description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
-    })
-    .await
-    .unwrap();
-
-    let result = repo
-        .insert(Ingredient {
-            id: Uuid::from_u128(2),
-            name: "Ingredient name".try_into().unwrap(),
-            description: "Ingredient description".try_into().unwrap(),
-            diet_friendly: WhichDiets::new(),
-        })
-        .await
-        .unwrap_err();
-
-    assert!(matches!(
-        result,
-        InsertIngredientError::Conflict(fieldname) if fieldname == "name"
-    ))
-}
-
 pub async fn get_by_id_returns_ingredient(repo: impl IngredientRepository) {
     repo.insert(Ingredient {
         id: Uuid::from_u128(1),

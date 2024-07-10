@@ -1,4 +1,3 @@
-
 use eyre::eyre;
 use sqlx::Error as SQLXError;
 use std::sync::PoisonError;

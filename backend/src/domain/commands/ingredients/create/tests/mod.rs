@@ -27,6 +27,12 @@ mod in_memory {
     async fn incorrect_ingredient_is_not_persisted() {
         __tests__::incorrect_ingredient_is_not_persisted(InMemoryIngredientRepository::new()).await;
     }
+
+    #[tokio::test]
+    async fn inserting_an_ingredient_with_a_name_that_already_exists_fails() {
+        let repo = InMemoryIngredientRepository::new();
+        __tests__::inserting_an_ingredient_with_a_name_that_already_exists_fails(repo).await
+    }
 }
 
 mod sql {
@@ -60,5 +66,11 @@ mod sql {
     async fn incorrect_ingredient_is_not_persisted(pool: PgPool) {
         __tests__::incorrect_ingredient_is_not_persisted(PostgresIngredientRepository::new(pool))
             .await;
+    }
+
+    #[sqlx::test]
+    async fn inserting_an_ingredient_with_a_name_that_already_exists_fails(pool: PgPool) {
+        let repo = PostgresIngredientRepository::new(pool);
+        __tests__::inserting_an_ingredient_with_a_name_that_already_exists_fails(repo).await
     }
 }

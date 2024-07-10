@@ -97,7 +97,8 @@ pub async fn update_ingredient(
     let ingredient: IngredientChangeset = input.try_into()?;
 
     tracing::info!("Sending changeset to ingredient repository");
-    repo.update(&ingredient_to_change, ingredient.clone()).await?;
+    repo.update(&ingredient_to_change, ingredient.clone())
+        .await?;
 
     let result = repo.get_by_id(&id).await?;
 
