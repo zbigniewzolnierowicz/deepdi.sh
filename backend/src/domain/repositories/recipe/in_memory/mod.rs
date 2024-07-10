@@ -120,13 +120,13 @@ impl RecipeRepository for InMemoryRecipeRepository {
         let new_ingredients: Vec<_> = recipe
             .ingredients
             .iter()
+            .filter(|&ingam| ingam.ingredient.id != ingredient.ingredient.id)
             .cloned()
-            .filter(|ingam| ingam.ingredient.id != ingredient.ingredient.id)
             .collect();
 
         recipe.ingredients = new_ingredients
             .try_into()
-            .map_err(|e| DeleteIngredientFromRecipeError::ValidationError(e))?;
+            .map_err(DeleteIngredientFromRecipeError::ValidationError)?;
 
         Ok(())
     }

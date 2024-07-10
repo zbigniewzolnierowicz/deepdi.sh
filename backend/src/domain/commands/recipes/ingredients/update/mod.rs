@@ -50,7 +50,7 @@ pub async fn update_ingredient_in_recipe(
         .ok_or_else(|| UpdateIngredientInRecipeError::MissingIngredient(*ingredient_id))?;
 
     recipe_repo
-        .update_ingredient_amount(&recipe, &ingredient_in_recipe, &amount)
+        .update_ingredient_amount(&recipe, ingredient_in_recipe, &amount)
         .await?;
 
     let recipe = recipe_repo.get_by_id(recipe_id).await?;

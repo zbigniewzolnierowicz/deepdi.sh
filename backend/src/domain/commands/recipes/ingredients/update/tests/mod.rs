@@ -1,4 +1,4 @@
-pub mod __tests__;
+mod __tests__;
 
 mod in_memory {
     use super::__tests__;

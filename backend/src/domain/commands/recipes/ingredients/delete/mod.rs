@@ -63,7 +63,7 @@ pub async fn delete_ingredient_from_recipe(
         })?;
 
     recipe_repo
-        .delete_ingredient(&recipe, &ingredient_in_recipe)
+        .delete_ingredient(&recipe, ingredient_in_recipe)
         .await?;
 
     Ok(())

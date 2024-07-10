@@ -1,4 +1,4 @@
-pub(self) mod __tests__;
+mod __tests__;
 
 mod in_memory {
     use crate::domain::repositories::{

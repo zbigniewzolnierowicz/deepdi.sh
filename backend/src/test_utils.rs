@@ -3,9 +3,7 @@ use std::{collections::BTreeMap, time::Duration};
 use futures::future::join_all;
 
 use crate::domain::commands::recipes::update::UpdateRecipe;
-use crate::domain::entities::recipe::{
-    IngredientUnit, IngredientWithAmount, RecipeChangeset, ServingsType,
-};
+use crate::domain::entities::recipe::{IngredientUnit, IngredientWithAmount, ServingsType};
 use crate::domain::entities::{
     ingredient::{types::DietFriendly, Ingredient},
     recipe::Recipe,
@@ -102,11 +100,7 @@ pub fn recipe_changeset() -> UpdateRecipe {
             "Prep time".to_string(),
             Duration::from_secs(60),
         )])),
-        steps: Some(
-            vec!["WE UPDATED ANOTHER THING".to_string()]
-                .try_into()
-                .unwrap(),
-        ),
+        steps: Some(vec!["WE UPDATED ANOTHER THING".to_string()]),
         servings: Some(ServingsType::Exact(4).into()),
     }
 }

@@ -28,9 +28,7 @@ pub enum AddIngredientToRecipeError {
 
 impl From<AddIngredientIntoRecipeErrorInternal> for AddIngredientToRecipeError {
     fn from(value: AddIngredientIntoRecipeErrorInternal) -> Self {
-        match value {
-            e => e.into(),
-        }
+        value.into()
     }
 }
 

@@ -2,9 +2,21 @@ use std::{collections::HashSet, sync::Arc};
 
 use crate::{
     domain::{
-        commands::recipes::ingredients::add::add_ingredient_to_recipe, entities::recipe::{IngredientAmountData, IngredientUnit, IngredientWithAmount}, repositories::{ingredients::{IngredientRepository, IngredientRepositoryService}, recipe::{RecipeRepository, RecipeRepositoryService}}
+        commands::recipes::ingredients::add::{
+            add_ingredient_to_recipe, AddIngredientToRecipeError,
+        },
+        entities::recipe::{IngredientAmountData, IngredientUnit, IngredientWithAmount},
+        repositories::{
+            ingredients::{
+                errors::GetIngredientByIdError, IngredientRepository, IngredientRepositoryService,
+            },
+            recipe::{RecipeRepository, RecipeRepositoryService},
+        },
     },
-    test_utils::{ingredient_fixture, insert_all_ingredients, insert_all_ingredients_of_recipe, recipe_fixture},
+    test_utils::{
+        ingredient_fixture, insert_all_ingredients, insert_all_ingredients_of_recipe,
+        recipe_fixture,
+    },
 };
 
 pub async fn adding_an_ingredient_to_a_recipe_works(
@@ -30,7 +42,10 @@ pub async fn adding_an_ingredient_to_a_recipe_works(
 
     let recipe = recipe_repo.insert(recipe.clone()).await.unwrap();
 
-    let updated_recipe = add_ingredient_to_recipe(recipe_repo, ingredient_repo, &recipe.id, ingredient_payload).await.unwrap();
+    let updated_recipe =
+        add_ingredient_to_recipe(recipe_repo, ingredient_repo, &recipe.id, ingredient_payload)
+            .await
+            .unwrap();
 
     let expected: HashSet<_> = all_ingredients
         .iter()
@@ -62,4 +77,14 @@ pub async fn adding_a_nonexistent_ingredient_to_a_recipe_errors(
     let ingredient_repo: IngredientRepositoryService = Arc::new(Box::new(ing_repo));
 
     let ingredient_payload = IngredientAmountData::from(ingredient.clone());
+
+    let error =
+        add_ingredient_to_recipe(recipe_repo, ingredient_repo, &recipe.id, ingredient_payload)
+            .await
+            .unwrap_err();
+
+    assert!(matches!(
+        error,
+        AddIngredientToRecipeError::GetIngredient(GetIngredientByIdError::NotFound(_))
+    ))
 }

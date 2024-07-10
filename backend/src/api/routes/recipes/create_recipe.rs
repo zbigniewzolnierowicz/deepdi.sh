@@ -49,8 +49,8 @@ pub async fn create_recipe_route(
         .collect();
 
     let input = CreateRecipe {
-        name: &body.name,
-        description: &body.description,
+        name: body.name,
+        description: body.description,
         servings: body.servings.into(),
         time: body
             .time
