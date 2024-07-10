@@ -39,3 +39,6 @@ pub async fn get_recipe_by_id(
 
     Ok(result)
 }
+
+#[cfg(test)]
+mod tests;

@@ -332,6 +332,3 @@ impl PostgresRecipeRepository {
         Arc::new(Box::new(self))
     }
 }
-
-#[cfg(test)]
-mod tests;

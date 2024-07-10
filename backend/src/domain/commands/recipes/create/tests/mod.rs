@@ -22,6 +22,13 @@ mod in_memory {
         __tests__::create_recipe_without_proper_ingredients_errors(recipe_repo, ingredient_repo)
             .await;
     }
+
+    #[tokio::test]
+    async fn inserting_recipe_with_same_id_fails() {
+        let repo = InMemoryRecipeRepository::new();
+        let ingredient_repo = InMemoryIngredientRepository::new();
+        __tests__::inserting_recipe_with_same_id_fails(repo, ingredient_repo).await
+    }
 }
 
 mod sql {
@@ -48,5 +55,12 @@ mod sql {
 
         __tests__::create_recipe_without_proper_ingredients_errors(recipe_repo, ingredient_repo)
             .await;
+    }
+
+    #[sqlx::test]
+    async fn inserting_recipe_with_same_id_fails(pool: PgPool) {
+        let repo = PostgresRecipeRepository::new(pool.clone());
+        let ingredient_repo = PostgresIngredientRepository::new(pool.clone());
+        __tests__::inserting_recipe_with_same_id_fails(repo, ingredient_repo).await
     }
 }

@@ -8,7 +8,7 @@ use crate::{
         commands::recipes::create::{create_recipe, CreateRecipeError},
         repositories::{
             ingredients::{IngredientRepository, IngredientRepositoryService},
-            recipe::{RecipeRepository, RecipeRepositoryService},
+            recipe::{errors::InsertRecipeError, RecipeRepository, RecipeRepositoryService},
         },
     },
     test_utils::{insert_all_ingredients_of_recipe, recipe_fixture},
@@ -51,4 +51,19 @@ pub async fn create_recipe_with_proper_ingredients(
         .ingredients
         .iter()
         .all(|ing| recipe.ingredients.contains(ing)))
+}
+
+pub async fn inserting_recipe_with_same_id_fails(
+    repo: impl RecipeRepository,
+    ingredient_repo: impl IngredientRepository,
+) {
+    let recipe = recipe_fixture();
+
+    insert_all_ingredients_of_recipe(&ingredient_repo, &recipe).await;
+
+    repo.insert(recipe.clone()).await.unwrap();
+
+    let error = repo.insert(recipe.clone()).await.unwrap_err();
+
+    assert!(matches!(error, InsertRecipeError::Conflict(a) if a == "recipe id"));
 }

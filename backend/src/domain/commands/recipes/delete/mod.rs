@@ -32,3 +32,6 @@ pub async fn delete_recipe(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests;

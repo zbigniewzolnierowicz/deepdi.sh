@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use eyre::eyre;
+
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -179,6 +180,3 @@ impl From<HashMap<uuid::Uuid, Recipe>> for InMemoryRecipeRepository {
         Self(Mutex::new(value))
     }
 }
-
-#[cfg(test)]
-mod tests;
