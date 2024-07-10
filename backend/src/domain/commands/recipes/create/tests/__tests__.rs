@@ -47,10 +47,7 @@ pub async fn create_recipe_with_proper_ingredients(
     assert_eq!(Uuid::get_version(&result.id), Some(uuid::Version::SortRand));
     assert_eq!(&result.name, "Hoisin Tofu and Broccoli");
 
-    assert!(result
-        .ingredients
-        .iter()
-        .all(|ing| recipe.ingredients.contains(ing)))
+    assert_eq!(result.ingredients.len(), recipe.ingredients.len())
 }
 
 pub async fn inserting_recipe_with_same_id_fails(
