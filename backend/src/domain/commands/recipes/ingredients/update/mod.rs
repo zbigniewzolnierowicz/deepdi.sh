@@ -26,12 +26,7 @@ pub enum UpdateIngredientInRecipeError {
 
 impl From<UpdateIngredientInRecipeErrorInternal> for UpdateIngredientInRecipeError {
     fn from(value: UpdateIngredientInRecipeErrorInternal) -> Self {
-        match value {
-            UpdateIngredientInRecipeErrorInternal::RecipeHasNoIngredientError(id) => {
-                Self::MissingIngredient(id)
-            }
-            e => e.into(),
-        }
+        value.into()
     }
 }
 
@@ -47,7 +42,9 @@ pub async fn update_ingredient_in_recipe(
         .ingredients
         .iter()
         .find(|x| x.ingredient.id == *ingredient_id)
-        .ok_or_else(|| UpdateIngredientInRecipeError::MissingIngredient(*ingredient_id))?;
+        .ok_or(UpdateIngredientInRecipeError::MissingIngredient(
+            *ingredient_id,
+        ))?;
 
     recipe_repo
         .update_ingredient_amount(&recipe, ingredient_in_recipe, &amount)
