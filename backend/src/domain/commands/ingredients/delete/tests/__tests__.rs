@@ -53,6 +53,7 @@ pub async fn deleting_an_ingredient_still_in_use_by_recipes_errors(
 ) {
     let recipe = recipe_fixture();
     insert_all_ingredients_of_recipe(&repo, &recipe).await;
+    recipe_repo.insert(recipe.clone()).await.unwrap();
     let input = &recipe.ingredients.first().unwrap().ingredient.id;
 
     let repo: IngredientRepositoryService = Arc::new(Box::new(repo));

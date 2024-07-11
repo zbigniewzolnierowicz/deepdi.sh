@@ -297,7 +297,16 @@ impl RecipeRepository for PostgresRecipeRepository {
         &self,
         ingredient: Ingredient,
     ) -> eyre::Result<bool> {
-        todo!()
+        let recipes_using_ingredient = sqlx::query_file!(
+            "queries/recipes/get_recipes_using_ingredient.sql",
+            ingredient.id
+        )
+        .fetch_optional(&self.0)
+        .await?;
+
+        dbg!(&recipes_using_ingredient);
+
+        Ok(recipes_using_ingredient.is_some())
     }
 }
 

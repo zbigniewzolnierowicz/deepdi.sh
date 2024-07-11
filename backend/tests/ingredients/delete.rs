@@ -1,5 +1,4 @@
-use common::{IngredientDTO, RecipeDTO};
-use futures::future::join_all;
+use common::IngredientDTO;
 use reqwest::{Client, StatusCode};
 use uuid::Uuid;
 
