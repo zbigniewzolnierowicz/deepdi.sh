@@ -1,28 +1,26 @@
 use uuid::Uuid;
 
-use crate::domain::{
-    commands::recipes::ingredients::update::{
-        update_ingredient_in_recipe, UpdateIngredientInRecipeError,
+use crate::{
+    domain::{
+        commands::recipes::ingredients::update::{
+            update_ingredient_in_recipe, UpdateIngredientInRecipeError,
+        },
+        entities::recipe::IngredientUnit,
+        repositories::{
+            ingredients::IngredientRepository,
+            recipe::{errors::GetRecipeByIdError, RecipeRepository, RecipeRepositoryService},
+        },
     },
-    entities::recipe::IngredientUnit,
-    repositories::recipe::{errors::GetRecipeByIdError, RecipeRepositoryService},
+    test_utils::{insert_all_ingredients_of_recipe, recipe_fixture},
 };
 use std::sync::Arc;
-
-use crate::{
-    domain::repositories::{
-        ingredients::IngredientRepository,
-        recipe::{RecipeRepository, __test__::insert_all_ingredients_of_recipe},
-    },
-    test_utils::recipe_fixture,
-};
 
 pub async fn updating_ingredient_in_recipe_works(
     recipe_repo: impl RecipeRepository,
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
     recipe_repo.insert(initial_recipe.clone()).await.unwrap();
 
     let ingredient_to_update = initial_recipe.ingredients.first().unwrap();
@@ -47,7 +45,7 @@ pub async fn updating_ingredient_in_nonexistent_recipe_errors(
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
 
     let ingredient_to_update = initial_recipe.ingredients.first().unwrap();
     let amount = IngredientUnit::Cups(2.0);
@@ -73,7 +71,7 @@ pub async fn updating_nonexistent_ingredient_in_recipe_errors(
     ingredient_repo: impl IngredientRepository,
 ) {
     let initial_recipe = recipe_fixture();
-    insert_all_ingredients_of_recipe(ingredient_repo, &initial_recipe).await;
+    insert_all_ingredients_of_recipe(&ingredient_repo, &initial_recipe).await;
     recipe_repo.insert(initial_recipe.clone()).await.unwrap();
 
     let amount = IngredientUnit::Cups(2.0);

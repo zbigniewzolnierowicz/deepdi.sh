@@ -5,9 +5,6 @@ pub mod postgres;
 #[cfg(test)]
 pub mod __test__;
 
-#[cfg(test)]
-pub use in_memory::InMemoryIngredientRepository;
-
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -28,10 +25,10 @@ pub trait IngredientRepository: Send + Sync + 'static {
     async fn get_all(&self) -> Result<Vec<Ingredient>, GetAllIngredientsError>;
     async fn update(
         &self,
-        id: Uuid,
+        ingredient: &Ingredient,
         changeset: IngredientChangeset,
-    ) -> Result<Ingredient, UpdateIngredientError>;
-    async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError>;
+    ) -> Result<(), UpdateIngredientError>;
+    async fn delete(&self, ingredient: Ingredient) -> Result<(), DeleteIngredientError>;
 }
 
 pub type IngredientRepositoryService = Arc<Box<dyn IngredientRepository>>;

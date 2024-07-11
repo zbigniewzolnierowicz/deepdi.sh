@@ -34,6 +34,20 @@ impl AsRef<[IngredientWithAmount]> for RecipeIngredients {
     }
 }
 
+impl From<RecipeIngredients> for Vec<IngredientAmountData> {
+    fn from(val: RecipeIngredients) -> Self {
+        val.0
+            .into_iter()
+            .map(|i| IngredientAmountData {
+                ingredient_id: i.ingredient.id,
+                notes: i.notes,
+                amount: i.amount,
+                optional: i.optional,
+            })
+            .collect()
+    }
+}
+
 impl PartialEq for RecipeIngredients {
     fn eq(&self, other: &Self) -> bool {
         let mut a = self.0.clone();
@@ -274,6 +288,17 @@ pub struct IngredientAmountData {
     pub amount: IngredientUnit,
     pub optional: bool,
     pub notes: Option<String>,
+}
+
+impl From<IngredientWithAmount> for IngredientAmountData {
+    fn from(value: IngredientWithAmount) -> Self {
+        Self {
+            ingredient_id: value.ingredient.id,
+            amount: value.amount,
+            notes: value.notes,
+            optional: value.optional,
+        }
+    }
 }
 
 impl From<IngredientAmountDTO> for IngredientAmountData {

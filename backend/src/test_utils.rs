@@ -1,12 +1,14 @@
 use std::{collections::BTreeMap, time::Duration};
 
-use crate::domain::entities::recipe::{
-    IngredientUnit, IngredientWithAmount, RecipeChangeset, ServingsType,
-};
+use futures::future::join_all;
+
+use crate::domain::commands::recipes::update::UpdateRecipe;
+use crate::domain::entities::recipe::{IngredientUnit, IngredientWithAmount, ServingsType};
 use crate::domain::entities::{
     ingredient::{types::DietFriendly, Ingredient},
     recipe::Recipe,
 };
+use crate::domain::repositories::ingredients::IngredientRepository;
 
 pub fn ingredient_fixture() -> Ingredient {
     Ingredient {
@@ -90,19 +92,35 @@ pub fn recipe_fixture() -> Recipe {
     }
 }
 
-pub fn recipe_changeset() -> RecipeChangeset {
-    RecipeChangeset {
+pub fn recipe_changeset() -> UpdateRecipe {
+    UpdateRecipe {
         name: Some("WE UPDATED THIS THING".to_string()),
         description: Some("WE UPDATED THAT THING".to_string()),
         time: Some(BTreeMap::from([(
             "Prep time".to_string(),
             Duration::from_secs(60),
         )])),
-        steps: Some(
-            vec!["WE UPDATED ANOTHER THING".to_string()]
-                .try_into()
-                .unwrap(),
-        ),
-        servings: Some(ServingsType::Exact(4)),
+        steps: Some(vec!["WE UPDATED ANOTHER THING".to_string()]),
+        servings: Some(ServingsType::Exact(4).into()),
     }
+}
+
+pub async fn insert_all_ingredients_of_recipe(
+    ingredient_repo: &impl IngredientRepository,
+    recipe: &Recipe,
+) {
+    insert_all_ingredients(ingredient_repo, recipe.ingredients.as_ref()).await;
+}
+
+pub async fn insert_all_ingredients(
+    ingredient_repo: &impl IngredientRepository,
+    ingredients: &[IngredientWithAmount],
+) {
+    join_all(
+        ingredients
+            .as_ref()
+            .iter()
+            .map(|i| async { ingredient_repo.insert(i.ingredient.clone()).await.unwrap() }),
+    )
+    .await;
 }

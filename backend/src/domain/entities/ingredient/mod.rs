@@ -111,7 +111,7 @@ impl From<IngredientModel> for common::IngredientDTO {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct IngredientChangeset {
     pub name: Option<IngredientName>,
     pub description: Option<IngredientDescription>,
