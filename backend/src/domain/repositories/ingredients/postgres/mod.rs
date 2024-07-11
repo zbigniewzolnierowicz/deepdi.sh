@@ -92,8 +92,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             "queries/ingredients/get_all_ingredients.sql",
         )
         .fetch_all(&self.0)
-        .await
-        .map_err(|e| GetAllIngredientsError::UnknownError(e.into()))?
+        .await?
         .par_iter()
         .filter_map(|i| i.try_into().ok())
         .collect();
@@ -120,11 +119,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             ));
         };
 
-        let tx = self
-            .0
-            .begin()
-            .await
-            .map_err(|e| UpdateIngredientError::UnknownError(e.into()))?;
+        let tx = self.0.begin().await?;
 
         if let Some(name) = name {
             if name != ingredient_to_update.name {
@@ -183,16 +178,10 @@ impl IngredientRepository for PostgresIngredientRepository {
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [POSTGRES] Delete an ingredient", skip(self))]
-    async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
-        let ingredient_to_delete = self.get_by_id(&id).await?;
-
-        sqlx::query_file!(
-            "queries/ingredients/delete_ingredient.sql",
-            ingredient_to_delete.id
-        )
-        .execute(&self.0)
-        .await
-        .map_err(|e| DeleteIngredientError::UnknownError(e.into()))?;
+    async fn delete(&self, ingredient: Ingredient) -> Result<(), DeleteIngredientError> {
+        sqlx::query_file!("queries/ingredients/delete_ingredient.sql", ingredient.id)
+            .execute(&self.0)
+            .await?;
 
         Ok(())
     }

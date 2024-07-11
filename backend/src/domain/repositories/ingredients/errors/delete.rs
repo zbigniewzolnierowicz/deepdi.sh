@@ -18,3 +18,10 @@ impl<T> From<PoisonError<T>> for DeleteIngredientError {
         eyre!("Ingredient repository lock was poisoned during a previous access and can no longer be locked").into()
     }
 }
+
+impl From<sqlx::Error> for DeleteIngredientError {
+    fn from(e: sqlx::Error) -> Self {
+        Self::UnknownError(e.into())
+    }
+}
+

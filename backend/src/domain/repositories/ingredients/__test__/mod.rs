@@ -1,5 +1,5 @@
 use super::*;
-use crate::domain::entities::ingredient::types::WhichDiets;
+use crate::{domain::entities::ingredient::types::WhichDiets, test_utils::ingredient_fixture};
 
 pub async fn deleting_works(repo: impl IngredientRepository) {
     let input = Ingredient {
@@ -10,11 +10,11 @@ pub async fn deleting_works(repo: impl IngredientRepository) {
     };
 
     let insert_result = repo.insert(input).await.unwrap();
-    repo.delete(insert_result.id).await.unwrap();
+    repo.delete(insert_result).await.unwrap();
 }
 
 pub async fn deleting_nonexistent_ingredient_errors(repo: impl IngredientRepository) {
-    let error = repo.delete(Uuid::nil()).await.unwrap_err();
+    let error = repo.delete(ingredient_fixture()).await.unwrap_err();
 
     assert!(matches!(
         error,

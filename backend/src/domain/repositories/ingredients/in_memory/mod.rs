@@ -110,8 +110,7 @@ impl IngredientRepository for InMemoryIngredientRepository {
     }
 
     #[tracing::instrument("[INGREDIENT REPOSITORY] [IN MEMORY] Delete an ingredient", skip(self))]
-    async fn delete(&self, id: Uuid) -> Result<(), DeleteIngredientError> {
-        let ingredient = self.get_by_id(&id).await?;
+    async fn delete(&self, ingredient: Ingredient) -> Result<(), DeleteIngredientError> {
         let mut lock = self.0.lock()?;
         lock.remove(&ingredient.id);
 
