@@ -34,7 +34,7 @@ pub async fn get_ingredient_by_id_route(
         ..
     }): State<AppState>,
 ) -> Result<Json<IngredientDTO>, GetIngredientError> {
-    let result = get_ingredient_by_id(ingredient_repository, ingredient_id).await?;
+    let result = get_ingredient_by_id(ingredient_repository, &ingredient_id).await?;
 
     Ok(Json(result.into()))
 }
