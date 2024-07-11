@@ -9,7 +9,7 @@ use crate::domain::repositories::{
     recipe::RecipeRepositoryService,
 };
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, strum::AsRefStr)]
 pub enum DeleteIngredientError {
     #[error("The ingredient with ID of {0} was not found.")]
     NotFound(Uuid),
