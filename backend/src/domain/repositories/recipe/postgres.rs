@@ -5,7 +5,7 @@ use futures::future::join_all;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::entities::ingredient::IngredientModel;
+use crate::domain::entities::ingredient::{Ingredient, IngredientModel};
 use crate::domain::entities::recipe::{
     IngredientUnit, IngredientWithAmount, IngredientWithAmountModel, Recipe, RecipeChangeset,
 };
@@ -291,6 +291,13 @@ impl RecipeRepository for PostgresRecipeRepository {
         tx.commit().await?;
 
         Ok(())
+    }
+
+    async fn recipes_containing_ingredient_exist(
+        &self,
+        ingredient: Ingredient,
+    ) -> eyre::Result<bool> {
+        todo!()
     }
 }
 

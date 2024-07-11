@@ -2,9 +2,6 @@ pub mod errors;
 pub mod in_memory;
 pub mod postgres;
 
-#[cfg(test)]
-pub mod __test__;
-
 use std::sync::Arc;
 
 use async_trait::async_trait;

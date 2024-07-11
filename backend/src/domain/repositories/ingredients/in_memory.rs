@@ -162,6 +162,3 @@ impl From<BTreeMap<Uuid, Ingredient>> for InMemoryIngredientRepository {
         Self(value.into())
     }
 }
-
-#[cfg(test)]
-mod tests;

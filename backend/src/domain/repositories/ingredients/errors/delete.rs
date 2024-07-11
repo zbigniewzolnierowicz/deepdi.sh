@@ -2,13 +2,8 @@ use eyre::eyre;
 use std::sync::PoisonError;
 use thiserror::Error;
 
-use super::GetIngredientByIdError;
-
 #[derive(Error, Debug)]
 pub enum DeleteIngredientError {
-    #[error(transparent)]
-    Get(#[from] GetIngredientByIdError),
-
     #[error(transparent)]
     UnknownError(#[from] eyre::Error),
 }

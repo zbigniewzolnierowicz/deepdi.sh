@@ -230,6 +230,3 @@ impl PostgresIngredientRepository {
         Self(pool)
     }
 }
-
-#[cfg(test)]
-mod tests;

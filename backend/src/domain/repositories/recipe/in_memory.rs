@@ -8,7 +8,7 @@ use std::{
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
+    entities::{ingredient::Ingredient, recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset}},
     repositories::recipe::errors::InsertRecipeError,
 };
 
@@ -162,6 +162,13 @@ impl RecipeRepository for InMemoryRecipeRepository {
         ingredient.amount = new_amount.clone();
 
         Ok(())
+    }
+
+    async fn recipes_containing_ingredient_exist(
+        &self,
+        ingredient: Ingredient,
+    ) -> eyre::Result<bool> {
+        todo!()
     }
 }
 
