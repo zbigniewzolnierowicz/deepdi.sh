@@ -1,5 +1,6 @@
 use axum::{extract::State, response::IntoResponse, Json};
 use common::{CreateIngredientDTO, IngredientDTO};
+use reqwest::StatusCode;
 
 use crate::{
     api::{errors::MakeError, AppState},
@@ -30,13 +31,14 @@ pub async fn create_ingredient_route(
         ..
     }): State<AppState>,
     Json(body): Json<CreateIngredientDTO>,
-) -> Result<Json<IngredientDTO>, CreateIngredientError> {
+) -> Result<impl IntoResponse, CreateIngredientError> {
     let input = CreateIngredient {
         name: &body.name,
         description: &body.description,
         diet_friendly: body.diet_friendly.unwrap_or_default(),
     };
     let result = create_ingredient(ingredient_repository, &input).await?;
+    let result: IngredientDTO = result.into();
 
-    Ok(Json(result.into()))
+    Ok((StatusCode::CREATED, Json(result)))
 }

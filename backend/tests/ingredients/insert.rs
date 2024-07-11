@@ -21,7 +21,7 @@ async fn inserting_ingredient_succeeds() {
         .await
         .unwrap();
 
-    assert_eq!(request.status(), StatusCode::OK);
+    assert_eq!(request.status(), StatusCode::CREATED);
 
     let body = request.json::<IngredientDTO>().await.unwrap();
 
@@ -77,7 +77,7 @@ async fn incorrect_diets_are_ignored() {
         .await
         .unwrap();
 
-    assert_eq!(request.status(), StatusCode::OK);
+    assert_eq!(request.status(), StatusCode::CREATED);
 
     let body = request.json::<IngredientDTO>().await.unwrap();
 

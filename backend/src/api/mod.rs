@@ -39,6 +39,7 @@ impl App {
             .route("/ingredient/create", post(create_ingredient_route))
             .route("/ingredient/:id", put(update_ingredient_route))
             .route("/ingredient/:id", get(get_ingredient_by_id_route))
+            .route("/ingredient/:id", delete(delete_ingredient_route))
             .route("/ingredient", get(get_all_ingredients_route))
             .route("/recipe/create", post(create_recipe_route))
             .route("/recipe/:id", get(get_recipe_by_id_route))

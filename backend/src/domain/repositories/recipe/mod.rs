@@ -2,8 +2,9 @@ pub mod errors;
 pub mod in_memory;
 pub mod postgres;
 
-use crate::domain::entities::recipe::{
-    IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset,
+use crate::domain::entities::{
+    ingredient::Ingredient,
+    recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
 };
 use async_trait::async_trait;
 use errors::AddIngredientIntoRecipeError;
@@ -48,6 +49,11 @@ pub trait RecipeRepository: Send + Sync + 'static {
         ingredient: &IngredientWithAmount,
         new_amount: &IngredientUnit,
     ) -> Result<(), UpdateIngredientInRecipeError>;
+
+    async fn recipes_containing_ingredient_exist(
+        &self,
+        ingredient: Ingredient,
+    ) -> eyre::Result<bool>;
 }
 
 pub type RecipeRepositoryService = Arc<Box<dyn RecipeRepository>>;

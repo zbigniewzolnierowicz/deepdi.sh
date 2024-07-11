@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use eyre::eyre;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use std::{
     collections::HashMap,
@@ -8,7 +9,10 @@ use std::{
 use uuid::Uuid;
 
 use crate::domain::{
-    entities::recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
+    entities::{
+        ingredient::Ingredient,
+        recipe::{IngredientUnit, IngredientWithAmount, Recipe, RecipeChangeset},
+    },
     repositories::recipe::errors::InsertRecipeError,
 };
 
@@ -162,6 +166,20 @@ impl RecipeRepository for InMemoryRecipeRepository {
         ingredient.amount = new_amount.clone();
 
         Ok(())
+    }
+
+    async fn recipes_containing_ingredient_exist(
+        &self,
+        ingredient: Ingredient,
+    ) -> eyre::Result<bool> {
+        let lock = self.0.lock().map_err(|_| eyre!("Poison issue"))?;
+        let some_recipe_with_ingredient = lock.par_iter().find_any(|(_id, r)| {
+            r.ingredients
+                .iter()
+                .any(|i| i.ingredient.id == ingredient.id)
+        });
+
+        Ok(some_recipe_with_ingredient.is_some())
     }
 }
 

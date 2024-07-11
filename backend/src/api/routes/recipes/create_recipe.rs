@@ -36,7 +36,7 @@ pub async fn create_recipe_route(
         ..
     }): State<AppState>,
     Json(body): Json<CreateRecipeDTO>,
-) -> Result<Json<RecipeDTO>, CreateRecipeError> {
+) -> Result<impl IntoResponse, CreateRecipeError> {
     let ingredients: Vec<IngredientAmountData> = body
         .ingredients
         .into_iter()
@@ -60,7 +60,7 @@ pub async fn create_recipe_route(
         steps: body.steps,
         ingredients,
     };
-    let result = create_recipe(recipe_repository, ingredient_repository, &input).await?;
+    let result: RecipeDTO = create_recipe(recipe_repository, ingredient_repository, &input).await?.into();
 
-    Ok(Json(result.into()))
+    Ok((StatusCode::CREATED, Json(result)))
 }
