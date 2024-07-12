@@ -22,7 +22,8 @@ POST http://localhost:8111/recipe/create
     {
       "ingredient_id": "{{id}}",
       "amount": {
-        "grams": 100.0
+        "_type": "grams",
+        "amount": 100.0
       },
       "optional": false,
       "notes": null

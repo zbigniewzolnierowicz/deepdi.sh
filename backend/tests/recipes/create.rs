@@ -81,7 +81,8 @@ async fn inserting_recipe_with_incorrect_ingredients_fails() {
                 "ingredient_id": uuid::Uuid::nil(),
                 "optional": false,
                 "amount": {
-                    "grams": 100.0
+                    "_type": "grams",
+                    "amount": 100.0
                 },
             }
         ],
@@ -142,14 +143,16 @@ async fn inserting_recipe_with_partially_incorrect_ingredients() {
                 "ingredient_id": uuid::Uuid::nil(),
                 "optional": false,
                 "amount": {
-                    "grams": 100.0
+                    "_type": "grams",
+                    "amount": 100.0
                 },
             },
             {
                 "ingredient_id": ingredients[0].id,
                 "optional": false,
                 "amount": {
-                    "grams": 100.0
+                    "_type": "cups",
+                    "amount": 2.0
                 },
             }
         ],
