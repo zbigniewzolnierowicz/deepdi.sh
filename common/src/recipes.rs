@@ -56,7 +56,7 @@ pub struct IngredientWithAmountDTO {
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(rename_all = "snake_case")]
+#[serde(tag = "_type", content = "amount", rename_all = "snake_case")]
 #[ts(export)]
 pub enum IngredientUnitDTO {
     Mililiters(f64),

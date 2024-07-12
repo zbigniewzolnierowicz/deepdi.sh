@@ -1,2 +1,5 @@
 [settings]
 env_file = ".env"
+
+[tools]
+node = "20"
