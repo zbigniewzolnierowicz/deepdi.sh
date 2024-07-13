@@ -9,6 +9,8 @@ import {
 import './tailwind.css';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/playfair-display';
+import { FC, PropsWithChildren } from 'react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,6 +30,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+const Providers: FC<PropsWithChildren> = ({ children }) => (
+  <Tooltip.Provider>
+    {children}
+  </Tooltip.Provider>
+);
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <Providers>
+      <div className="bg-background-950">
+        <Outlet />
+      </div>
+    </Providers>
+  );
 }

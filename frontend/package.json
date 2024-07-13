@@ -14,6 +14,7 @@
     "@fontsource-variable/playfair-display": "^5.0.25",
     "@fontsource-variable/raleway": "^5.0.20",
     "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-tooltip": "^1.1.2",
     "@remix-run/node": "^2.10.2",
     "@remix-run/react": "^2.10.2",
     "@remix-run/serve": "^2.10.2",

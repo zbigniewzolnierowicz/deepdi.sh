@@ -18,6 +18,7 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
+/** @type {import('eslint').Linter.Config} */
 export default [
   {
     ignores: ['!**/.server', '!**/.client'],
@@ -122,4 +123,10 @@ export default [
     jsx: true,
     semi: true,
   }),
+  {
+    rules: {
+      'react/prop-types': 'off',
+      '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'non-jsx' }],
+    },
+  },
 ];
