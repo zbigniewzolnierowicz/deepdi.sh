@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+vars:
+  dir: frontend
+
+tasks:
+  dev:
+    desc: "[FRONTEND] start up development server"
+    cmd: pnpm dev
+    dir: "{{.dir}}"
+  lint:
+    desc: "[FRONTEND] lint"
+    cmd: pnpm lint
+    dir: "{{.dir}}"
+  lint:fix:
+    desc: "[FRONTEND] fix linting errors"
+    cmd: pnpm lint --fix
+    dir: "{{.dir}}"

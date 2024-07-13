@@ -3,8 +3,14 @@
 version: "3"
 
 includes:
-  backend: ./.taskfiles/Backend/Taskfile.yaml
-
+  backend: 
+    taskfile: ./.taskfiles/Backend/Taskfile.yaml
+    aliases:
+      - be
+  frontend:
+    taskfile: ./.taskfiles/Frontend/Taskfile.yaml
+    aliases:
+      - fe
 tasks:
   default: task -l
   db:prepare:
