@@ -2,6 +2,7 @@ repos:
 - repo: local
   hooks:
     - id: sqlx-prepare-check
+      files: '^backend/(.*)'
       name: Check if the prepared queries are correct
       entry: task db:check
       language: system
