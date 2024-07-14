@@ -5,7 +5,10 @@ import { IngredientWithAmountDTO } from 'common/bindings/IngredientWithAmountDTO
 import convert from 'convert-units';
 import { formatQuantity } from 'format-quantity';
 import { DetailedHTMLProps, FC, HTMLAttributes, PropsWithChildren } from 'react';
-import { Cup, Scales, Spoon, Info } from '~/icons';
+import Cup from '~/icons/cup.svg?react';
+import Spoon from '~/icons/spoon.svg?react';
+import Scales from '~/icons/scales.svg?react';
+import Info from '~/icons/info.svg?react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 export const UnitIcon: FC<{ unit: IngredientUnitDTO['_type'] }> = ({ unit }) => {
@@ -19,8 +22,6 @@ export const UnitIcon: FC<{ unit: IngredientUnitDTO['_type'] }> = ({ unit }) => 
       return <Scales />;
     default:
       return '';
-    // return <span className="w-[24px] h-full" />;
-    // return <Carrot />;
   }
 };
 

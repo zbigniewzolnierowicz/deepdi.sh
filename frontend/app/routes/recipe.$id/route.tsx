@@ -1,9 +1,8 @@
 import { json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { type RecipeDTO } from 'common/bindings/RecipeDTO';
-import { FC, PropsWithChildren } from 'react';
-import { clsx } from 'clsx';
 import { Recipe } from '~/components/recipe/recipe';
+import { Centered } from '~/components/centered';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -96,14 +95,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
     recipe,
   });
 }
-
-const Centered: FC<PropsWithChildren<{ className?: string }>> = ({ className, children }) => {
-  return (
-    <div className={clsx('max-w-screen-md mx-auto', className)}>
-      {children}
-    </div>
-  );
-};
 
 export default function RecipeRoute() {
   const { recipe } = useLoaderData<typeof loader>();

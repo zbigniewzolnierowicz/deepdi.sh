@@ -14,8 +14,9 @@ export default {
         '5xl': '4.210rem',
       },
       fontFamily: {
-        heading: 'Playfair Display Variable',
-        body: 'Raleway Variable',
+        // https://systemfontstack.com/
+        heading: 'Playfair Display Variable, Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol',
+        body: 'Raleway Variable, -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif',
       },
       fontWeight: {
         normal: '400',

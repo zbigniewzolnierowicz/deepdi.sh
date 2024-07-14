@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-svgr/client" />
+
 import {
   Links,
   Meta,
@@ -9,6 +11,7 @@ import {
 import './tailwind.css';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/playfair-display';
+
 import { FC, PropsWithChildren } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -21,7 +24,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-background-950 font-body">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -39,9 +42,7 @@ const Providers: FC<PropsWithChildren> = ({ children }) => (
 export default function App() {
   return (
     <Providers>
-      <div className="bg-background-950">
-        <Outlet />
-      </div>
+      <Outlet />
     </Providers>
   );
 }
