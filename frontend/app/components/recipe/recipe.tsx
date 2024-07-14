@@ -1,33 +1,15 @@
 import { RecipeDTO } from 'common/bindings/RecipeDTO';
-import React, { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import { IngredientList } from './ingredientList';
-import { clsx } from 'clsx';
 import { formatDuration } from 'date-fns';
 import { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
 import { convertSecondsToDuration } from '~/utils/convertSecondsToDuration';
-
-type HeadingType = React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-
-const Title: FC<PropsWithChildren<HeadingType>> = ({ children, className, ...props }) => (
-  <h1 className={clsx('text-3xl font-heading text-text-50 mb-2', className)} {...props}>
-    {children}
-  </h1>
-);
+import { Title, Heading } from '~/components/headings';
 
 const Description: FC<PropsWithChildren> = ({ children }) => (
   <p className="mb-2">
     {children}
   </p>
-);
-
-const Heading: FC<PropsWithChildren<HeadingType>> = ({
-  children,
-  className,
-  ...props
-}) => (
-  <h2 className={clsx('text-2xl font-heading text-text-50 mb-2', className)} {...props}>
-    {children}
-  </h2>
 );
 
 const Step: FC<{ step: string; index: number }> = ({ step, index }) => (

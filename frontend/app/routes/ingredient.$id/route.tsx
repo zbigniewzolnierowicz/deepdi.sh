@@ -9,7 +9,7 @@ import { DietList } from '~/components/ingredients/diets';
 type TitleProps = DetailedHTMLProps<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
 
 const Title: FC<TitleProps> = ({ children, className, ...props }) => (
-  <h1 className={clsx('text-2xl font-heading capitalize', className)} {...props}>{children}</h1>
+  <h1 className={clsx('text-3xl font-heading capitalize', className)} {...props}>{children}</h1>
 );
 
 type DescriptionProps = DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
