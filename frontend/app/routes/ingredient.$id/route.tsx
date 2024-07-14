@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from '@remix-run/node';
+import { LoaderFunctionArgs, redirect, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { clsx } from 'clsx';
 import { IngredientDTO } from 'common/bindings/IngredientDTO';
@@ -9,7 +9,7 @@ import { DietList } from '~/components/ingredients/diets';
 type TitleProps = DetailedHTMLProps<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
 
 const Title: FC<TitleProps> = ({ children, className, ...props }) => (
-  <h1 className={clsx('text-2xl font-heading', className)} {...props}>{children}</h1>
+  <h1 className={clsx('text-2xl font-heading capitalize', className)} {...props}>{children}</h1>
 );
 
 type DescriptionProps = DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
@@ -17,17 +17,24 @@ const Description: FC<DescriptionProps> = ({ children, className, ...props }) =>
   <p className={clsx(className)} {...props}>{children}</p>
 );
 
-export function loader({ params }: LoaderFunctionArgs) {
-  const ingredient: IngredientDTO = {
-    id: params.id ?? '00000000-0000-0000-0000-000000000000',
-    name: 'Cucumber',
-    description: 'Cucumbers are a thing!',
-    diet_friendly: ['vegan', 'vegetarian'],
-  };
+export async function loader({ params }: LoaderFunctionArgs) {
+  if (!params.id) return redirect('/');
 
-  return {
+  const ingredient: IngredientDTO | undefined = await fetch(`http://localhost:8111/ingredient/${params.id}`)
+    .then((res) => {
+      if (res.status !== 200) {
+        return undefined;
+      }
+
+      return res.json();
+    });
+
+  if (!ingredient) return redirect('/');
+
+  return json({
+    id: params.id,
     ingredient,
-  };
+  });
 }
 
 export default function IngredientRoute() {
