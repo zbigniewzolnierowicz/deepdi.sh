@@ -1,8 +1,8 @@
-import { RecipeDTO } from 'common/bindings/RecipeDTO';
-import { FC, PropsWithChildren } from 'react';
+import type { RecipeDTO } from 'common/bindings/RecipeDTO';
+import type { FC, PropsWithChildren } from 'react';
 import { IngredientList } from './ingredientList';
 import { formatDuration } from 'date-fns';
-import { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
+import type { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
 import { convertSecondsToDuration } from '~/utils/convertSecondsToDuration';
 import { Title, Heading } from '~/components/headings';
 

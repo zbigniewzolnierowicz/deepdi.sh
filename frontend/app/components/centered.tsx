@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 export const Centered: FC<PropsWithChildren<{ className?: string }>> = ({ className, children }) => {
   return (

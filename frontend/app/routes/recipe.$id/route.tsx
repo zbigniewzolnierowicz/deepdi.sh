@@ -1,4 +1,5 @@
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { type RecipeDTO } from 'common/bindings/RecipeDTO';
 import { Recipe } from '~/components/recipe/recipe';

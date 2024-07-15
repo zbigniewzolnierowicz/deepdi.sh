@@ -1,10 +1,10 @@
 import { Link } from '@remix-run/react';
 import { clsx } from 'clsx';
-import { IngredientUnitDTO } from 'common/bindings/IngredientUnitDTO';
-import { IngredientWithAmountDTO } from 'common/bindings/IngredientWithAmountDTO';
+import type { IngredientUnitDTO } from 'common/bindings/IngredientUnitDTO';
+import type { IngredientWithAmountDTO } from 'common/bindings/IngredientWithAmountDTO';
 import convert from 'convert-units';
 import { formatQuantity } from 'format-quantity';
-import { DetailedHTMLProps, FC, HTMLAttributes, PropsWithChildren } from 'react';
+import type { DetailedHTMLProps, FC, HTMLAttributes, PropsWithChildren } from 'react';
 import Cup from '~/icons/cup.svg?react';
 import Spoon from '~/icons/spoon.svg?react';
 import Scales from '~/icons/scales.svg?react';

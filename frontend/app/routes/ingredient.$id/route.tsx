@@ -1,8 +1,9 @@
-import { LoaderFunctionArgs, redirect, json } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { redirect, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { clsx } from 'clsx';
-import { IngredientDTO } from 'common/bindings/IngredientDTO';
-import { DetailedHTMLProps, FC, HTMLAttributes } from 'react';
+import type { IngredientDTO } from 'common/bindings/IngredientDTO';
+import type { DetailedHTMLProps, FC, HTMLAttributes } from 'react';
 import { Centered } from '~/components/centered';
 import { DietList } from '~/components/ingredients/diets';
 

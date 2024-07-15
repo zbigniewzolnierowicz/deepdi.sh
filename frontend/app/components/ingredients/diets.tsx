@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { FC } from 'react';
+import type { FC } from 'react';
 import Deny from '~/icons/deny.svg?react';
 import Allow from '~/icons/check.svg?react';
 

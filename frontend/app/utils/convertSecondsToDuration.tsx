@@ -1,4 +1,4 @@
-import { Duration } from 'date-fns';
+import type { Duration } from 'date-fns';
 
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOUR = 60;

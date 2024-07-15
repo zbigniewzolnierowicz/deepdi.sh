@@ -93,6 +93,10 @@ export default [
 
     languageOptions: {
       parser: tseslint.parser,
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
 
     settings: {
@@ -107,6 +111,10 @@ export default [
           alwaysTryTypes: true,
         },
       },
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-exports': 'error',
+      '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
   {
