@@ -20,6 +20,10 @@ tasks:
     desc: "Run every migration"
     cmds:
       - task: backend:migrate
+  db:reset:
+    desc: "Reset database"
+    dir: "backend"
+    cmd: cargo sqlx database reset
   db:check:
     desc: "Check if SQLx prepared files are generated"
     cmd: cargo sqlx prepare --workspace --check -- --tests

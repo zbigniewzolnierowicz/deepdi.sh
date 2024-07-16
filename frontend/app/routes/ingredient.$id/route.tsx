@@ -1,22 +1,11 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
-import { clsx } from 'clsx';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
-import type { DetailedHTMLProps, FC, HTMLAttributes } from 'react';
 import { Centered } from '~/components/centered';
 import { DietList } from '~/components/ingredients/diets';
-
-type TitleProps = DetailedHTMLProps<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-
-const Title: FC<TitleProps> = ({ children, className, ...props }) => (
-  <h1 className={clsx('text-3xl font-heading capitalize', className)} {...props}>{children}</h1>
-);
-
-type DescriptionProps = DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-const Description: FC<DescriptionProps> = ({ children, className, ...props }) => (
-  <p className={clsx(className)} {...props}>{children}</p>
-);
+import { Editor } from '~/components/editor';
+import { Title } from '~/components/headings';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   if (!params.id) return redirect('/');
@@ -40,6 +29,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function IngredientRoute() {
   const { ingredient } = useLoaderData<typeof loader>();
+  const description = JSON.parse(ingredient.description);
+
   return (
     <Centered className="p-2">
       <Title>{ingredient.name}</Title>
@@ -47,7 +38,7 @@ export default function IngredientRoute() {
         className="2xl:absolute top-8 left-[calc(50%_-_768px_+_2rem)] mt-2 2xl:mt-0 w-full 2xl:w-80"
         diets={ingredient.diet_friendly}
       />
-      <Description className="mt-4">{ingredient.description}</Description>
+      <Editor value={description} editable={false} onChange={() => { }} />
     </Centered>
   );
 }
