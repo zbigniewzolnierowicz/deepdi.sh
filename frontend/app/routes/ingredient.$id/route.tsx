@@ -4,8 +4,8 @@ import { useLoaderData } from '@remix-run/react';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
 import { Centered } from '~/components/centered';
 import { DietList } from '~/components/ingredients/diets';
-import { Editor } from '~/components/editor';
 import { Title } from '~/components/headings';
+import { LexicalToReact } from '~/components/editor/renderReact';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   if (!params.id) return redirect('/');
@@ -38,7 +38,7 @@ export default function IngredientRoute() {
         className="2xl:absolute top-8 left-[calc(50%_-_768px_+_2rem)] mt-2 2xl:mt-0 w-full 2xl:w-80"
         diets={ingredient.diet_friendly}
       />
-      <Editor value={description} editable={false} onChange={() => { }} />
+      <LexicalToReact data={description} />
     </Centered>
   );
 }

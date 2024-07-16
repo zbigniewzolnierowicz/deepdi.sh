@@ -4,7 +4,6 @@ import { Form, useActionData, useSubmit } from '@remix-run/react';
 import { clsx } from 'clsx';
 import type { FC, PropsWithChildren } from 'react';
 import { Centered } from '~/components/centered';
-import { Title } from '~/components/headings';
 import Edit from '~/icons/edit.svg?react';
 import { Controller, useForm } from 'react-hook-form';
 import type { CreateIngredientDTO } from 'common/bindings/CreateIngredientDTO';
@@ -60,7 +59,6 @@ export default function CreateIngredientRoute() {
 
   return (
     <Centered>
-      <Title className="text-2xl">Creating a new ingredient</Title>
       {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
       <Form
         onSubmit={handleSubmit(submitData)}

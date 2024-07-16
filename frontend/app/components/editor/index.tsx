@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ParagraphNode, type SerializedEditorState } from 'lexical';
+import type { SerializedEditorState } from 'lexical';
 
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import type { InitialConfigType } from '@lexical/react/LexicalComposer';
@@ -12,45 +12,27 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { CodeNode } from '@lexical/code';
-import { ListItemNode, ListNode } from '@lexical/list';
-import { LinkNode } from '@lexical/link';
-import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-
 import { clsx } from 'clsx';
+import { EDITOR_NODES, theme } from './settings';
 
 type EditorProps<T> = {
   onChange: (data: T) => void;
   value?: T;
   className?: string;
   editable?: boolean;
+  name?: string;
 };
 
-export const EDITOR_NODES = [
-  HeadingNode,
-  QuoteNode,
-  ParagraphNode,
-  HorizontalRuleNode,
-  CodeNode,
-  ListNode,
-  ListItemNode,
-  LinkNode,
-];
-
-export const Editor: FC<EditorProps<SerializedEditorState>> = ({ onChange, value, className, editable = true }) => {
+export const Editor: FC<EditorProps<SerializedEditorState>> = ({
+  onChange,
+  value,
+  name,
+  className,
+  editable = true,
+}) => {
   const initialConfig: InitialConfigType = {
     namespace: 'MyEditor',
-    theme: {
-      paragraph: 'mb-1 last:mb-0 font-body',
-      heading: {
-        h1: 'font-heading mb-1 text-2xl',
-        h2: 'font-heading mb-1 text-xl',
-        h3: 'font-heading mb-1 text-lg font-extrabold',
-        h4: 'font-heading mb-1 text-lg',
-      },
-      hr: 'background-red',
-    },
+    theme,
     onError: console.error,
     editorState(editor) {
       if (!value) return;
@@ -71,6 +53,7 @@ export const Editor: FC<EditorProps<SerializedEditorState>> = ({ onChange, value
           contentEditable={(
             <ContentEditable
               className="col-start-1 col-end-1 row-start-1 row-end-1"
+              name={name}
             />
           )}
           placeholder={(

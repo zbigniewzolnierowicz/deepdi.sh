@@ -9,12 +9,17 @@ export const Title: FC<PropsWithChildren<HeadingType>> = ({ children, className,
   </h1>
 );
 
-export const Heading: FC<PropsWithChildren<HeadingType>> = ({
+export const Heading: FC<PropsWithChildren<HeadingType & {
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}>> = ({
+  as: As = 'h2',
   children,
   className,
   ...props
-}) => (
-  <h2 className={clsx('text-2xl font-heading text-text-50 mb-2', className)} {...props}>
-    {children}
-  </h2>
-);
+}) => {
+  return (
+    <As className={clsx('text-2xl font-heading text-text-50 mb-2', className)} {...props}>
+      {children}
+    </As>
+  );
+};
