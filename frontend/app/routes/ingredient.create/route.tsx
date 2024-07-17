@@ -63,7 +63,7 @@ export default function CreateIngredientRoute() {
       {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
       <Form
         onSubmit={handleSubmit(submitData)}
-        className="flex flex-col"
+        className="flex flex-col p-2"
       >
         <Label for="name">Ingredient name</Label>
         <div
