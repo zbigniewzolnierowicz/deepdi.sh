@@ -1,4 +1,14 @@
-# Recipes
+# deepdi.sh
+
+## FAQ
+
+> The integration tests are failing because of image pulling!
+
+Simply pull the `postgres:11-alpine` image manually:
+
+```bash
+docker pull postgres:11-alpine
+```
 
 ## Tools used:
 

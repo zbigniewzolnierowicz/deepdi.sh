@@ -1,14 +1,14 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, time::Duration};
 
 use backend::api::AppBuilder;
-use sqlx::{postgres::PgConnectOptions, PgPool};
+use sqlx::{pool::PoolOptions, postgres::PgConnectOptions, PgPool, Postgres};
 use testcontainers::{runners::AsyncRunner, ContainerAsync};
-use testcontainers_modules::postgres::Postgres;
+use testcontainers_modules::postgres::Postgres as PostgresContainer;
 use tokio::net::TcpListener;
 
 pub struct TestApp {
     /// We are storing this, because if this goes out of scope, the container will be cleaned up.
-    _db_container: ContainerAsync<Postgres>,
+    _db_container: ContainerAsync<PostgresContainer>,
     pub addr: SocketAddr,
     pub db: PgPool,
 }
@@ -19,7 +19,7 @@ impl TestApp {
         let password = "recipes";
         let database = "recipes";
 
-        let node = Postgres::default()
+        let node = PostgresContainer::default()
             .with_user(username)
             .with_password(password)
             .with_db_name(database)
@@ -33,7 +33,11 @@ impl TestApp {
             .password(password)
             .database(database);
 
-        let db: PgPool = PgPool::connect_with(db_opts).await.unwrap();
+        let db: PgPool = PoolOptions::<Postgres>::new()
+            .max_connections(100)
+            .idle_timeout(std::time::Duration::from_secs(60))
+            .acquire_timeout(Duration::from_secs(60))
+            .connect_lazy_with(db_opts);
 
         sqlx::migrate!().run(&db).await.unwrap();
 

@@ -11,3 +11,6 @@ tasks:
     desc: "[BACKEND] Check for unused dependencies"
     cmd: "cargo +nightly udeps --all-targets"
     ignore_error: true
+  dev:
+    desc: "[BACKEND] start development server"
+    cmd: bacon run
