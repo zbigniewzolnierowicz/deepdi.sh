@@ -11,6 +11,7 @@ import { assert } from 'typia';
 import { Editor } from '~/components/editor';
 import type { SerializedEditorState } from 'lexical';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
+import { editBorder } from '~/utils/classes';
 
 const Label: FC<PropsWithChildren<{ for: string; className?: string }>> = ({ children, for: htmlFor, className }) => (
   <label htmlFor={htmlFor} className={clsx('font-heading text-xl font-semibold', className)}>
@@ -66,10 +67,10 @@ export default function CreateIngredientRoute() {
       >
         <Label for="name">Ingredient name</Label>
         <div
-          className="flex flex-row justify-stretch items-end \
-          pb-2 pr-2 \
-          transition-colors \
-          border-b-2 border-background-800 focus-within:border-primary-400"
+          className={clsx([
+            'flex flex-row justify-stretch items-end', 'pb-2 pr-2',
+            editBorder,
+          ])}
         >
           <input
             id="name"
@@ -89,8 +90,7 @@ export default function CreateIngredientRoute() {
           control={control}
           render={({ field }) => (
             <Editor
-              className="mt-4 prose p-2 \
-                  border-b-2 border-background-800 focus-within:border-primary-400"
+              className={clsx('mt-4 prose p-2', editBorder)}
               name={field.name}
               value={field.value}
               onChange={field.onChange}
