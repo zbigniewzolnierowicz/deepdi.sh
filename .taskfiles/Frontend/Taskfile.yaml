@@ -20,4 +20,7 @@ tasks:
   install:
     desc: "[FRONTEND] install dependencies"
     cmd: "pnpm install"
+    aliases:
+      - i
+      - deps
     dir: "{{.dir}}"
