@@ -12,8 +12,9 @@ import './tailwind.css';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/playfair-display';
 
-import type { FC, PropsWithChildren } from 'react';
+import { Suspense, type FC, type PropsWithChildren } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { Toaster } from 'sonner';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,6 +44,16 @@ export default function App() {
   return (
     <Providers>
       <Outlet />
+      <Suspense fallback={null}>
+        <Toaster
+          toastOptions={{
+            classNames: {
+              toast: 'text-body shadow-md shadow-black-100',
+              default: 'bg-background-950 border-background-800',
+            },
+          }}
+        />
+      </Suspense>
     </Providers>
   );
 }

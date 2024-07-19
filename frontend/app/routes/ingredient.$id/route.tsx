@@ -3,7 +3,7 @@ import { redirect, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
 import { Centered } from '~/components/centered';
-import { DietList } from '~/components/ingredients/diets';
+import { DietList } from '~/components/ingredients/dietList';
 import { Title } from '~/components/headings';
 import { LexicalToReact } from '~/components/editor/renderReact';
 import { makeTitle } from '~/utils/makeTitle';

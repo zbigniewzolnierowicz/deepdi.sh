@@ -5,21 +5,21 @@ import type { IngredientWithAmountDTO } from 'common/bindings/IngredientWithAmou
 import convert from 'convert-units';
 import { formatQuantity } from 'format-quantity';
 import type { DetailedHTMLProps, FC, HTMLAttributes, PropsWithChildren } from 'react';
-import Cup from '~/icons/cup.svg?react';
 import Spoon from '~/icons/spoon.svg?react';
-import Scales from '~/icons/scales.svg?react';
-import Info from '~/icons/info.svg?react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { CircleHelpIcon, GlassWaterIcon, WeightIcon } from 'lucide-react';
 
-export const UnitIcon: FC<{ unit: IngredientUnitDTO['_type'] }> = ({ unit }) => {
+type UnitIconProps = { unit: IngredientUnitDTO['_type'] };
+
+export const UnitIcon: FC<UnitIconProps> = ({ unit }) => {
   switch (unit) {
     case 'mililiters':
     case 'cups':
-      return <Cup />;
+      return <GlassWaterIcon />;
     case 'teaspoons':
       return <Spoon />;
     case 'grams':
-      return <Scales />;
+      return <WeightIcon />;
     default:
       return '';
   }
@@ -58,10 +58,27 @@ const mapIngredientUnit = (ingredientUnit: IngredientUnitDTO): { unit: string; v
   return unit;
 };
 
-function IngredientListElement({ children, className, ...props }: PropsWithChildren<DetailedHTMLProps<HTMLAttributes<HTMLUListElement>, HTMLUListElement>>) {
+type IngredientListElementProps =
+    PropsWithChildren<
+      DetailedHTMLProps<
+        HTMLAttributes<HTMLUListElement>,
+        HTMLUListElement
+      >
+    >;
+
+function IngredientListElement({ children, className, ...props }: IngredientListElementProps) {
   return (
     <ul
-      className={clsx('flex flex-col w-full border-background-800 border-solid border rounded shadow-primary-900 shadow-md text-md', className)}
+      className={
+        clsx(
+          'flex flex-col',
+          'w-full',
+          'border-background-800 border-solid border rounded',
+          'shadow-primary-900 shadow-md',
+          'text-md',
+          className,
+        )
+      }
       {...props}
     >
       {children}
@@ -69,7 +86,9 @@ function IngredientListElement({ children, className, ...props }: PropsWithChild
   );
 }
 
-export function IngredientList({ ingredients, className }: { ingredients: IngredientWithAmountDTO[]; className: string }) {
+type IngredientListProps = { ingredients: IngredientWithAmountDTO[]; className: string };
+
+export function IngredientList({ ingredients, className }: IngredientListProps) {
   return (
     <IngredientListElement className={clsx(className)}>
       {ingredients.map(ingredientWithAmount => (
@@ -102,7 +121,7 @@ export function IngredientListItem({ ingredient }: { ingredient: IngredientWithA
             </b>
             {ingredient.notes && (
               <Tooltip.Trigger>
-                <Info className="text-primary-300" />
+                <CircleHelpIcon className="text-primary-300" />
               </Tooltip.Trigger>
             )}
           </div>

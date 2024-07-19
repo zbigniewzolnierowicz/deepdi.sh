@@ -1,8 +1,7 @@
 import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Form, useActionData, useSubmit } from '@remix-run/react';
+import { Form, useActionData, useNavigate, useSubmit } from '@remix-run/react';
 import { clsx } from 'clsx';
-import type { ReactElement } from 'react';
 import { Centered } from '~/components/centered';
 import { Controller, useForm } from 'react-hook-form';
 import type { CreateIngredientDTO } from 'common/bindings/CreateIngredientDTO';
@@ -11,12 +10,14 @@ import { Editor } from '~/components/editor';
 import type { SerializedEditorState } from 'lexical';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
 import { editBorder } from '~/utils/classes';
-import { WheatOffIcon, CarrotIcon, Icon, PenLineIcon } from 'lucide-react';
-import { carton } from '@lucide/lab';
+import { PenLineIcon } from 'lucide-react';
 import { Label } from '~/components/form/label';
 import { CheckboxRow } from '~/components/form/checkbox';
 import { renderToPlaintext } from '~/components/editor/renderPlaintext';
 import { makeTitle } from '~/utils/makeTitle';
+import { diets } from '~/components/ingredients/diets';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 export const meta: MetaFunction = () => [
   { title: makeTitle('Create a new ingredient') },
@@ -45,24 +46,6 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
-const diets: { id: string; name: string; icon?: ReactElement }[] = [
-  {
-    id: 'vegan',
-    name: 'Vegan',
-    icon: <CarrotIcon />,
-  },
-  {
-    id: 'vegetarian',
-    name: 'Vegetarian',
-    icon: <Icon iconNode={carton} />,
-  },
-  {
-    id: 'gluten_free',
-    name: 'Gluten-free',
-    icon: <WheatOffIcon />,
-  },
-];
-
 interface IngredientCreateForm {
   name: string;
   description: SerializedEditorState;
@@ -72,6 +55,7 @@ interface IngredientCreateForm {
 export default function CreateIngredientRoute() {
   const data = useActionData<typeof action>();
   const submit = useSubmit();
+  const navigate = useNavigate();
   const { register, handleSubmit, control } = useForm<IngredientCreateForm>();
 
   const submitData = (data: IngredientCreateForm) => {
@@ -83,9 +67,22 @@ export default function CreateIngredientRoute() {
     submit({ ...payload }, { method: 'post', action: '/ingredient/create' });
   };
 
+  useEffect(() => {
+    if (data?.ingredient) {
+      toast(`Ingredient "${data?.ingredient.name}" was successfully created`, {
+        richColors: true,
+        action: {
+          label: 'Open',
+          onClick: () => navigate(`/ingredient/${data.ingredient.id}`),
+        },
+      });
+
+      navigate('/ingredient');
+    }
+  }, [data, navigate]);
+
   return (
     <Centered>
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
       <Form
         onSubmit={handleSubmit(submitData)}
         className="flex flex-col p-2"
@@ -145,7 +142,6 @@ export default function CreateIngredientRoute() {
           />
         </div>
         {/* TODO: add error messages */}
-
         <button type="submit">Submit</button>
       </Form>
     </Centered>

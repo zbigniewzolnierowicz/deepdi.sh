@@ -1,46 +1,27 @@
-import { clsx } from 'clsx';
-import type { FC } from 'react';
-import Deny from '~/icons/deny.svg?react';
-import Allow from '~/icons/check.svg?react';
+import { carton } from '@lucide/lab';
+import { CarrotIcon, Icon, WheatOffIcon } from 'lucide-react';
+import type { ReactElement } from 'react';
 
-type Diet = {
-  text: string;
-};
-
-const Diets: Record<string, Diet> = {
-  vegan: {
-    text: 'Vegan',
+export const diets: { id: string; name: string; icon?: ReactElement; friendly: string; unfriendly: string }[] = [
+  {
+    id: 'vegan',
+    name: 'Vegan',
+    icon: <CarrotIcon />,
+    friendly: 'This ingredient is vegan friendly',
+    unfriendly: 'This ingredient is not vegan friendly',
   },
-  vegetarian: {
-    text: 'Vegetarian',
+  {
+    id: 'vegetarian',
+    name: 'Vegetarian',
+    icon: <Icon iconNode={carton} />,
+    friendly: 'This ingredient is vegetarian friendly',
+    unfriendly: 'This ingredient is not vegetarian friendly',
   },
-  gluten_free: {
-    text: 'Gluten free',
+  {
+    id: 'gluten_free',
+    name: 'Gluten-free',
+    icon: <WheatOffIcon />,
+    friendly: 'This ingredient is gluten free.',
+    unfriendly: 'This ingredient contains gluten.',
   },
-};
-
-export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: inputDiets, className }) => {
-  const diets = Object.entries(Diets).map(([id, data]) => ({
-    id,
-    ...data,
-    violates: inputDiets.includes(id),
-  }));
-
-  return (
-    <div className={clsx('mr-2', className)}>
-      <div className="font-semibold font-heading border-b-2 pb-2 mb-2 border-background-700">Diets</div>
-      <ul>
-        {diets.map(diet => (
-          <li key={diet.id} className="flex flex-row justify-between items-center mb-1 last:mb-0">
-            <span>{diet.text}</span>
-            <div>
-              {diet.violates
-                ? <Allow className="text-green-900" />
-                : <Deny className="text-red-900" />}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+];

@@ -52,13 +52,13 @@ export const Editor: FC<EditorProps<SerializedEditorState>> = ({
         <RichTextPlugin
           contentEditable={(
             <ContentEditable
-              className="col-start-1 col-end-1 row-start-1 row-end-1 outline-none"
+              className="col-start-1 col-end-1 row-start-1 row-end-1 outline-none z-0"
               name={name}
             />
           )}
           placeholder={(
             <div
-              className="col-start-1 col-end-1 row-start-1 row-end-1 pointer-events-none font-extrabold text-text-800"
+              className="col-start-1 col-end-1 row-start-1 row-end-1 pointer-events-none font-extrabold text-text-800 -z-10"
             >
               Enter some text...
             </div>
