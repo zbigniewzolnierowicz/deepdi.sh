@@ -1,14 +1,14 @@
 import type { SerializedHeadingNode } from '@lexical/rich-text';
 import type { SerializedEditorState, SerializedLexicalNode, SerializedParagraphNode, SerializedTextNode } from 'lexical';
 import { IS_BOLD, IS_CODE, IS_HIGHLIGHT, IS_ITALIC, IS_SUBSCRIPT, IS_SUPERSCRIPT } from 'lexical';
-import type { FC, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { is } from 'typia';
 import { Heading } from '../headings';
 import type { SerializedLinkNode } from '@lexical/link';
 import { theme } from './settings';
 
-export const LexicalToReact: FC<{ data: unknown }> = ({ data }): ReactElement => {
+export function LexicalToReact<T extends object>({ data }: { data?: T }): ReactElement {
   const mapChildrenToElement = (d: SerializedLexicalNode, i: number) => (
     <LexicalToReact data={d} key={d.type + d.version + i} />
   );

@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
@@ -6,6 +6,7 @@ import { Centered } from '~/components/centered';
 import { DietList } from '~/components/ingredients/diets';
 import { Title } from '~/components/headings';
 import { LexicalToReact } from '~/components/editor/renderReact';
+import { makeTitle } from '~/utils/makeTitle';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   if (!params.id) return redirect('/');
@@ -26,6 +27,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
     ingredient,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
+  { title: makeTitle(data?.ingredient.name) }
+]
 
 export default function IngredientRoute() {
   const { ingredient } = useLoaderData<typeof loader>();

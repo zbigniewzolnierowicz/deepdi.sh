@@ -17,3 +17,7 @@ tasks:
     desc: "[FRONTEND] fix linting errors"
     cmd: pnpm lint --fix
     dir: "{{.dir}}"
+  install:
+    desc: "[FRONTEND] install dependencies"
+    cmd: "pnpm install"
+    dir: "{{.dir}}"

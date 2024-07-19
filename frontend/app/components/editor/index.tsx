@@ -52,7 +52,7 @@ export const Editor: FC<EditorProps<SerializedEditorState>> = ({
         <RichTextPlugin
           contentEditable={(
             <ContentEditable
-              className="col-start-1 col-end-1 row-start-1 row-end-1"
+              className="col-start-1 col-end-1 row-start-1 row-end-1 outline-none"
               name={name}
             />
           )}
