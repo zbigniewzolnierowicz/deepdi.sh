@@ -19,8 +19,8 @@ import { renderToPlaintext } from '~/components/editor/renderPlaintext';
 import { makeTitle } from '~/utils/makeTitle';
 
 export const meta: MetaFunction = () => [
-  { title: makeTitle('Create a new ingredient') }
-]
+  { title: makeTitle('Create a new ingredient') },
+];
 
 export async function action({ request }: ActionFunctionArgs) {
   const data = await request.formData();
@@ -29,7 +29,11 @@ export async function action({ request }: ActionFunctionArgs) {
     ...Object.fromEntries(data.entries()),
   };
 
-  const ingredient = assert<CreateIngredientDTO>(parsed);
+  const ingredient = assert<CreateIngredientDTO>({
+    name: parsed.name as string,
+    description: parsed.description as string,
+    diet_friendly: (parsed.dietFriendly as unknown as string).split(','),
+  });
 
   const createdIngredient: IngredientDTO = await fetch(
     'http://localhost:8111/ingredient/create',
@@ -39,12 +43,6 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({
     ingredient: createdIngredient,
   });
-}
-
-interface IngredientCreateForm {
-  name: string;
-  description: SerializedEditorState;
-  dietFriendly?: string[];
 }
 
 const diets: { id: string; name: string; icon?: ReactElement }[] = [
@@ -64,6 +62,12 @@ const diets: { id: string; name: string; icon?: ReactElement }[] = [
     icon: <WheatOffIcon />,
   },
 ];
+
+interface IngredientCreateForm {
+  name: string;
+  description: SerializedEditorState;
+  dietFriendly?: string[];
+}
 
 export default function CreateIngredientRoute() {
   const data = useActionData<typeof action>();
@@ -128,7 +132,7 @@ export default function CreateIngredientRoute() {
             control={control}
             rules={{
               required: true,
-              validate: (value) => !!renderToPlaintext(value)
+              validate: value => !!renderToPlaintext(value),
             }}
             render={({ field }) => (
               <Editor

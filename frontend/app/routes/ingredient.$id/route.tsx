@@ -29,8 +29,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  { title: makeTitle(data?.ingredient.name) }
-]
+  { title: makeTitle(data?.ingredient.name) },
+];
 
 export default function IngredientRoute() {
   const { ingredient } = useLoaderData<typeof loader>();
