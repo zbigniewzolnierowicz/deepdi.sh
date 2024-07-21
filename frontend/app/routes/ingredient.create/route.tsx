@@ -18,6 +18,7 @@ import { makeTitle } from '~/utils/makeTitle';
 import { diets } from '~/components/ingredients/diets';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+// import { Handle } from '~/utils/types';
 
 export const meta: MetaFunction = () => [
   { title: makeTitle('Create a new ingredient') },
@@ -142,8 +143,25 @@ export default function CreateIngredientRoute() {
           />
         </div>
         {/* TODO: add error messages */}
-        <button type="submit">Submit</button>
+        <button
+          type="submit"
+          className={clsx(
+            'bg-background-400 hover:bg-background-500 active:bg-background-400',
+            'font-bold text-text-900 font-body uppercase',
+            'w-fit ml-auto mt-3 p-2',
+            'rounded-lg border-2 border-primary-400',
+            'transition-colors',
+          )}
+        >
+          Submit
+        </button>
       </Form>
     </Centered>
   );
 }
+
+/*
+export const handle: Handle = {
+  noBar: true,
+};
+*/
