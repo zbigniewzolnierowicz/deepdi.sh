@@ -1,7 +1,15 @@
+import type { MetaFunction } from '@remix-run/react';
 import { Link, useLoaderData } from '@remix-run/react';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
 import { Centered } from '~/components/centered';
 import { Title } from '~/components/headings';
+import { makeTitle } from '~/utils/makeTitle';
+
+export const meta: MetaFunction<typeof loader> = () => {
+  return [
+    { title: makeTitle('Ingredients') },
+  ];
+};
 
 export async function loader() {
   const ingredients: IngredientDTO[] = await fetch('http://localhost:8111/ingredient').then(res => res.json());

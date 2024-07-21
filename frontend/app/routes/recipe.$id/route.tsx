@@ -4,11 +4,11 @@ import { useLoaderData } from '@remix-run/react';
 import { type RecipeDTO } from 'common/bindings/RecipeDTO';
 import { Recipe } from '~/components/recipe/recipe';
 import { Centered } from '~/components/centered';
+import { makeTitle } from '~/utils/makeTitle';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: data?.recipe.name ? `${data.recipe.name} - deepdi.sh` : 'deepdi.sh' },
-    { name: 'description', content: 'Welcome to Remix!' },
+    { title: makeTitle(data?.recipe.name) },
   ];
 };
 
