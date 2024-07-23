@@ -40,7 +40,7 @@ export default function IngredientRoute() {
     <Centered className="p-2">
       <Title>{ingredient.name}</Title>
       <DietList
-        className="2xl:absolute top-8 left-[calc(50%_-_768px_+_2rem)] mt-2 2xl:mt-0 w-full 2xl:w-80"
+        className="2xl:absolute top-24 left-[calc(50%_-_768px_+_2rem)] mt-2 2xl:mt-0 w-full 2xl:w-80"
         diets={ingredient.diet_friendly}
       />
       <LexicalToReact data={description} />

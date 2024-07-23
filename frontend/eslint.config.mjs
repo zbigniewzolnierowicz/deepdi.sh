@@ -135,6 +135,18 @@ export default [
     rules: {
       'react/prop-types': 'off',
       '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'non-jsx' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'all',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
 ];

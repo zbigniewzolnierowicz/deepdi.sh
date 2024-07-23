@@ -23,6 +23,7 @@
     "@lexical/react": "^0.16.1",
     "@lexical/rich-text": "^0.16.1",
     "@lucide/lab": "^0.1.2",
+    "@radix-ui/react-navigation-menu": "^1.2.0",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@remix-run/node": "^2.10.2",

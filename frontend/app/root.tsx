@@ -60,8 +60,8 @@ export default function App() {
 
   return (
     <Providers>
-      <div>
-        {!showNoTopBar && <TopBar />}
+      {!showNoTopBar && <TopBar />}
+      <div className="pt-16">
         <Outlet />
       </div>
     </Providers>

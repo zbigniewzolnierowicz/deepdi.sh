@@ -41,6 +41,8 @@
         "transform": "typia/lib/transform"
       }
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   }
 }
