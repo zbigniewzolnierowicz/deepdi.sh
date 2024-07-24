@@ -14,3 +14,9 @@ tasks:
   dev:
     desc: "[BACKEND] start development server"
     cmd: bacon run
+  install:
+    desc: "[BACKEND] install dependencies"
+    cmd: "cargo fetch"
+    aliases:
+      - i
+      - deps

@@ -24,3 +24,8 @@ tasks:
       - i
       - deps
     dir: "{{.dir}}"
+  unused:
+    desc: "Check for unused dependencies on the frontend"
+    cmd: "npx knip"
+    dir: "{{.dir}}"
+    ignore_error: true
