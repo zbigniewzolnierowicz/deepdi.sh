@@ -25,4 +25,4 @@ export function Heading<T extends ElementType>({
       {children}
     </Component>
   );
-};
+}

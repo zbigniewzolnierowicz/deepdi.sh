@@ -4,14 +4,14 @@
  * and should modify this configuration to best suit your team's needs.
  */
 
-const stylistic = require('@stylistic/eslint-plugin')
+const stylistic = require('@stylistic/eslint-plugin');
 
 const customizedStylistic = stylistic.configs.customize({
   indent: 2,
   quotes: 'single',
   semi: true,
   jsx: true,
-})
+});
 
 /** @type {import('eslint').Linter.Config} */
 module.exports = {

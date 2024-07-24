@@ -20,3 +20,22 @@ tasks:
     aliases:
       - i
       - deps
+  lint:
+    desc: "[BACKEND] run linters"
+    cmds:
+      - task: clippy
+      - task: fmt
+  lint:fix:
+    desc: "[BACKEND] fix linting errors"
+    cmds:
+      - task: clippy
+      - task: fmt:fix
+  clippy:
+    desc: "[BACKEND] run cargo-clippy"
+    cmd: "cargo clippy"
+  fmt:
+    desc: "[BACKEND] run cargo-fmt in check mode"
+    cmd: "cargo fmt --check"
+  fmt:fix:
+    desc: "[BACKEND] run cargo-fmt"
+    cmd: "cargo fmt"

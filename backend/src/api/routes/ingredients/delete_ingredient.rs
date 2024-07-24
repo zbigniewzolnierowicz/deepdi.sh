@@ -18,7 +18,7 @@ impl MakeError<String> for DeleteIngredientError {
         match self {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::InUseByRecipe => StatusCode::CONFLICT,
-            _ => StatusCode::INTERNAL_SERVER_ERROR
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

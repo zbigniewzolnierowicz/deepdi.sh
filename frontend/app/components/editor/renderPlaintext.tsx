@@ -18,4 +18,4 @@ export function renderToPlaintext<T extends object>(data?: T): string | null {
   else {
     return '';
   }
-};
+}

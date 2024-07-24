@@ -55,3 +55,13 @@ tasks:
     aliases:
       - i
       - deps
+  lint:
+    desc: "Lint everything"
+    cmds:
+      - task: backend:lint
+      - task: frontend:lint
+  lint:fix:
+    desc: "Fix linting errors"
+    cmds:
+      - task: backend:lint:fix
+      - task: frontend:lint:fix

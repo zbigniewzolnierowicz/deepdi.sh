@@ -80,4 +80,4 @@ export function LexicalToReact<T extends object>({ data }: { data?: T }): ReactE
 
   console.error('variant not implemented', data);
   return <></>;
-};
+}

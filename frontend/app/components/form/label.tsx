@@ -20,4 +20,4 @@ export function Label<T extends ElementType>({
       {children}
     </Component>
   );
-};
+}
