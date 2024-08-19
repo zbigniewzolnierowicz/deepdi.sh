@@ -21,7 +21,7 @@
       {
         "ordinal": 3,
         "name": "steps",
-        "type_info": "VarcharArray"
+        "type_info": "TextArray"
       },
       {
         "ordinal": 4,

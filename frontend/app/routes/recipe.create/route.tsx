@@ -15,10 +15,22 @@ import { renderToPlaintext } from '~/components/editor/renderPlaintext';
 import { ErrorLine } from '~/components/form/error';
 import { Label } from '~/components/form/label';
 import { editBorder } from '~/utils/classes';
+import { assert } from 'typia';
+import { CreateRecipeDTO } from 'common/bindings/CreateRecipeDTO';
+import { ActionFunctionArgs } from '@remix-run/node';
 
-export async function action() {
+export async function action({ request }: ActionFunctionArgs) {
+  const data = assert<CreateRecipeDTO>(await request.json());
+  console.log(data);
+
+  const res = await fetch('http://localhost:8111/recipe/create',
+    { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } },
+  );
+  const recipe: RecipeDTO = await res.json();
+  console.log('RECIPE', recipe);
+
   return {
-    recipe: {} as RecipeDTO,
+    recipe,
   };
 }
 
@@ -70,10 +82,11 @@ const UNITS: IngredientUnitDTO['_type'][] = ['cups', 'grams', 'other', 'teaspoon
 export default function CreateRecipeRoute() {
   const data = useActionData<typeof action>();
   const { availableIngredients } = useLoaderData<typeof loader>();
-  const _submit = useSubmit();
+  const submit = useSubmit();
   const navigate = useNavigate();
   const { register, handleSubmit, control, formState } = useForm<RecipeCreateForm>({
     reValidateMode: 'onSubmit',
+    criteriaMode: 'all',
   });
   const steps = useFieldArray({
     name: 'steps',
@@ -90,14 +103,34 @@ export default function CreateRecipeRoute() {
   const ingredients = useFieldArray({
     name: 'ingredients',
     control,
+    rules: {
+      required: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
+      minLength: {
+        value: MIN_AMOUNT,
+        message: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
+      },
+    },
   });
 
   const submitData = (data: RecipeCreateForm) => {
+    console.group('SUBMITTING');
     console.log('SUBMITTED', data);
+    const payload = assert<CreateRecipeDTO>({
+      ingredients: data.ingredients.map(i => ({ ...i, optional: i.optional ?? false, notes: i.notes ?? null })),
+      name: data.name,
+      time: {},
+      steps: data.steps.map(s => JSON.stringify(s)),
+      description: JSON.stringify(data.description),
+      servings: { exact: 1 },
+    } as CreateRecipeDTO);
+    console.log('PAYLOAD', payload);
+    console.groupEnd();
+
+    submit(JSON.stringify(payload), { method: 'post', action: '/recipe/create', encType: 'application/json' });
   };
 
   useEffect(() => {
-    if (data?.recipe) {
+    if (data?.recipe.id) {
       toast(`Ingredient "${data?.recipe.name}" was successfully created`, {
         richColors: true,
         action: {
@@ -217,9 +250,11 @@ export default function CreateRecipeRoute() {
           />
         </div>
 
+        <Label as="h2" id="ingredients">Ingredients</Label>
+        {formState.errors.ingredients?.root && (
+          <ErrorLine>{formState.errors.ingredients.root.message}</ErrorLine>
+        )}
         <div className="flex flex-col mt-4" aria-labelledby="ingredients">
-          <Label as="h2" id="ingredients">Ingredients</Label>
-
           {ingredients.fields.map((ingField, i) => (
             <RenderField ingField={ingField} index={i} key={ingField.id} />
           ))}

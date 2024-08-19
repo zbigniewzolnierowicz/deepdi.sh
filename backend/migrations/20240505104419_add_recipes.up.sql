@@ -2,7 +2,7 @@ CREATE TABLE "recipes" (
   "id" uuid PRIMARY KEY,
   "name" varchar(255) NOT NULL,
   "description" text NOT NULL,
-  "steps" varchar(255) array NOT NULL,
+  "steps" text array NOT NULL,
   "time" json NOT NULL,
   "servings" json NOT NULL,
   "metadata" json NOT NULL
