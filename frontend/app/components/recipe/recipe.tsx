@@ -5,6 +5,7 @@ import { formatDuration } from 'date-fns';
 import type { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
 import { convertSecondsToDuration } from '~/utils/convertSecondsToDuration';
 import { Title, Heading } from '~/components/headings';
+import { LexicalToReact } from '../editor/renderReact';
 
 const Description: FC<PropsWithChildren> = ({ children }) => (
   <p className="mb-2">
@@ -15,7 +16,7 @@ const Description: FC<PropsWithChildren> = ({ children }) => (
 const Step: FC<{ step: string; index: number }> = ({ step, index }) => (
   <>
     <h3 className="text-xl font-heading text-text-50 mb-2">Step {index + 1}</h3>
-    <p>{step}</p>
+    <LexicalToReact data={JSON.parse(step)} />
   </>
 );
 
@@ -62,7 +63,9 @@ export const Recipe: FC<{ recipe: RecipeDTO }> = ({ recipe }) => {
   return (
     <div className="px-2 font-body">
       <Title>{recipe.name}</Title>
-      <Description>{recipe.description}</Description>
+      <Description>
+        <LexicalToReact data={JSON.parse(recipe.description)} />
+      </Description>
       <Metadata data={metadata} />
       <Heading>Ingredients</Heading>
       <IngredientList className="mb-2" ingredients={recipe.ingredients} />
