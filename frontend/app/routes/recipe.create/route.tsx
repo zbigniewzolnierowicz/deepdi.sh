@@ -1,14 +1,16 @@
 import { Form, useActionData, useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
 import { clsx } from 'clsx';
 import { IngredientDTO } from 'common/bindings/IngredientDTO';
+import { IngredientUnitDTO } from 'common/bindings/IngredientUnitDTO';
 import type { RecipeDTO } from 'common/bindings/RecipeDTO';
 import type { SerializedEditorState } from 'lexical';
 import { PenLineIcon } from 'lucide-react';
-import { useEffect } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Fragment, useEffect, useState } from 'react';
+import { Controller, FieldArrayWithId, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Centered } from '~/components/centered';
 import { Editor } from '~/components/editor';
+import { EMPTY_RTE } from '~/components/editor/utils';
 import { renderToPlaintext } from '~/components/editor/renderPlaintext';
 import { ErrorLine } from '~/components/form/error';
 import { Label } from '~/components/form/label';
@@ -29,10 +31,18 @@ export async function loader() {
   };
 }
 
+interface InternalIngredientWithAmount {
+  ingredient_id?: string | null;
+  amount: IngredientUnitDTO;
+  optional?: boolean;
+  notes?: string;
+}
+
 interface RecipeCreateForm {
   name: string;
   description: SerializedEditorState;
-  steps: (SerializedEditorState | null)[];
+  steps: SerializedEditorState[];
+  ingredients: InternalIngredientWithAmount[];
 }
 
 function makeRequiredAndNotEmpty<T>(text: string, validateFn: (value: T) => boolean) {
@@ -55,6 +65,8 @@ function validateRTEContent(value: SerializedEditorState | null): boolean {
 
 const MIN_AMOUNT = 1;
 
+const UNITS: IngredientUnitDTO['_type'][] = ['cups', 'grams', 'other', 'teaspoons', 'mililiters'] as const;
+
 export default function CreateRecipeRoute() {
   const data = useActionData<typeof action>();
   const { availableIngredients } = useLoaderData<typeof loader>();
@@ -75,6 +87,11 @@ export default function CreateRecipeRoute() {
     },
   });
 
+  const ingredients = useFieldArray({
+    name: 'ingredients',
+    control,
+  });
+
   const submitData = (data: RecipeCreateForm) => {
     console.log('SUBMITTED', data);
   };
@@ -92,6 +109,57 @@ export default function CreateRecipeRoute() {
       navigate('/recipe');
     }
   }, [data, navigate]);
+
+  const RenderField = ({ ingField, index }: { ingField: FieldArrayWithId<RecipeCreateForm, 'ingredients', 'id'>; index: number }) => {
+    const [isOther, setIsOther] = useState(ingField.amount._type === 'other');
+    return (
+      <Fragment>
+        {formState.errors.ingredients?.[index]?.ingredient_id && (
+          <ErrorLine>{formState.errors.ingredients[index].ingredient_id.message}</ErrorLine>
+        )}
+        <select
+          defaultValue=""
+          {...register(`ingredients.${index}.ingredient_id`, {
+            required: 'You must pick an ingredient',
+          })}
+        >
+          <option disabled value="">Select an ingredient</option>
+          {availableIngredients.map(ing => (
+            <option value={ing.id} key={ing.id}>{ing.name}</option>
+          ))}
+        </select>
+        <select
+          {...register(
+            `ingredients.${index}.amount._type`,
+            { onChange: (e) => { setIsOther(e.target.value === 'other'); } },
+          )}
+        >
+          {UNITS.map(u => (
+            <option value={u} key={u}>{u}</option>
+          ))}
+        </select>
+        {isOther
+          ? (
+              <>
+                <input type="text" {...register(`ingredients.${index}.amount.amount.unit`)} />
+                <input
+                  type="number"
+                  step="any"
+                  {...register(`ingredients.${index}.amount.amount.amount`, { valueAsNumber: true })}
+                />
+              </>
+            )
+          : (
+              <input
+                type="number"
+                step="any"
+                {...register(`ingredients.${index}.amount.amount`, { valueAsNumber: true })}
+              />
+            )}
+        <button type="button" onClick={() => ingredients.remove(index)}>Delete</button>
+      </Fragment>
+    );
+  };
 
   return (
     <Centered>
@@ -149,9 +217,30 @@ export default function CreateRecipeRoute() {
           />
         </div>
 
-        <div className="flex flex-col mt-4" aria-labelledby="description">
-          <Label as="h2">Ingredients</Label>
-          <pre>{JSON.stringify(availableIngredients, null, 2)}</pre>
+        <div className="flex flex-col mt-4" aria-labelledby="ingredients">
+          <Label as="h2" id="ingredients">Ingredients</Label>
+
+          {ingredients.fields.map((ingField, i) => (
+            <RenderField ingField={ingField} index={i} key={ingField.id} />
+          ))}
+
+          <button
+            className={clsx(
+              'w-full h-20',
+              'border-dashed rounded-2xl border-4',
+              'border-background-700 hover:border-background-400 focus:border-background-400',
+              'bg-background-950 hover:bg-background-900 focus:bg-background-900',
+              'my-4',
+              'uppercase font-extrabold',
+              'text-text-400 hover:text-text-300 focus:text-text-300',
+              'transition-colors',
+              'outline-none',
+            )}
+            onClick={() => ingredients.append({ amount: { _type: 'grams', amount: 100 } })}
+            type="button"
+          >
+            + Add a new ingredient
+          </button>
         </div>
 
         <Label as="h2" className="mt-4">Steps</Label>
@@ -180,7 +269,7 @@ export default function CreateRecipeRoute() {
                     id={`steps.${i}`}
                     className={clsx('mt-2 prose p-2 outline-none focus-within:bg-background-900', editBorder)}
                     name={field.name}
-                    value={field.value ? field.value : undefined}
+                    value={field.value}
                     onChange={field.onChange}
                     ref={field.ref}
                   />
@@ -202,7 +291,7 @@ export default function CreateRecipeRoute() {
             'transition-colors',
             'outline-none',
           )}
-          onClick={() => steps.append(null)}
+          onClick={() => steps.append(EMPTY_RTE)}
           type="button"
         >
           + Add a new step
