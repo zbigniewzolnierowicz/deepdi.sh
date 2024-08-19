@@ -6,11 +6,11 @@ export function renderToPlaintext<T extends object>(data?: T): string | null {
 
   if (is<SerializedEditorState>(data)) {
     return (
-      data.root.children.map(renderToPlaintext).join()
+      data.root.children.map(renderToPlaintext).join('')
     );
   }
   else if ('children' in data && Array.isArray(data.children)) {
-    return data.children.map(renderToPlaintext).join();
+    return data.children.map(renderToPlaintext).join('');
   }
   else if (is<SerializedTextNode>(data)) {
     return data.text;

@@ -12,7 +12,8 @@ export const meta: MetaFunction<typeof loader> = () => {
 };
 
 export async function loader() {
-  const ingredients: IngredientDTO[] = await fetch('http://localhost:8111/ingredient').then(res => res.json());
+  const res = await fetch('http://localhost:8111/ingredient');
+  const ingredients: IngredientDTO[] = await res.json();
 
   return {
     ingredients,

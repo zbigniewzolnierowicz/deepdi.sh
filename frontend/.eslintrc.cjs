@@ -93,7 +93,6 @@ module.exports = {
   ],
   rules: {
     ...customizedStylistic.rules,
-    'react/prop-types': 'off',
     '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'non-jsx' }],
     '@typescript-eslint/no-unused-vars': [
       'error',
@@ -107,6 +106,7 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
-
+    'react/prop-types': 0,
+    '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
   },
 };
