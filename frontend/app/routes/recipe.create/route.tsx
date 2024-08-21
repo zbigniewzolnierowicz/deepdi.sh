@@ -6,7 +6,7 @@ import type { RecipeDTO } from 'common/bindings/RecipeDTO';
 import type { SerializedEditorState } from 'lexical';
 import { PenLineIcon } from 'lucide-react';
 import { Fragment, useEffect, useState } from 'react';
-import { Controller, FieldArrayWithId, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, FieldArrayWithId, useFieldArray, UseFieldArrayProps, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Centered } from '~/components/centered';
 import { Editor } from '~/components/editor';
@@ -18,19 +18,28 @@ import { editBorder } from '~/utils/classes';
 import { assert } from 'typia';
 import { CreateRecipeDTO } from 'common/bindings/CreateRecipeDTO';
 import { ActionFunctionArgs } from '@remix-run/node';
+import { ButtonAddNew } from '~/components/button';
+import { Heading } from '~/components/headings';
 
 export async function action({ request }: ActionFunctionArgs) {
   const data = assert<CreateRecipeDTO>(await request.json());
-  console.log(data);
 
   const res = await fetch('http://localhost:8111/recipe/create',
     { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } },
   );
-  const recipe: RecipeDTO = await res.json();
-  console.log('RECIPE', recipe);
+  const status = res.status;
+
+  if (status >= 200 && status < 300) {
+    const recipe: RecipeDTO = await res.json();
+    return {
+      status,
+      recipe,
+    };
+  }
 
   return {
-    recipe,
+    errorCode: status,
+    body: await res.json(),
   };
 }
 
@@ -57,16 +66,18 @@ interface RecipeCreateForm {
   ingredients: InternalIngredientWithAmount[];
 }
 
-function makeRequiredAndNotEmpty<T>(text: string, validateFn: (value: T) => boolean) {
+function makeRequiredAndNotEmpty<T>(
+  text: string,
+  validateFn: (value: T) => boolean,
+  rules?: UseFieldArrayProps['rules'],
+) {
   return {
+    ...rules,
     required: text,
     validate: (value: T) => {
-      if (
-        validateFn(value)
-      ) {
-        return;
+      if (!validateFn(value)) {
+        return text;
       }
-      return text;
     },
   };
 }
@@ -103,13 +114,13 @@ export default function CreateRecipeRoute() {
   const ingredients = useFieldArray({
     name: 'ingredients',
     control,
-    rules: {
+    /* rules: {
       required: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
       minLength: {
         value: MIN_AMOUNT,
         message: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
       },
-    },
+    }, */
   });
 
   const submitData = (data: RecipeCreateForm) => {
@@ -130,7 +141,7 @@ export default function CreateRecipeRoute() {
   };
 
   useEffect(() => {
-    if (data?.recipe.id) {
+    if (data && 'recipe' in data && data.recipe) {
       toast(`Ingredient "${data?.recipe.name}" was successfully created`, {
         richColors: true,
         action: {
@@ -143,7 +154,13 @@ export default function CreateRecipeRoute() {
     }
   }, [data, navigate]);
 
-  const RenderField = ({ ingField, index }: { ingField: FieldArrayWithId<RecipeCreateForm, 'ingredients', 'id'>; index: number }) => {
+  const RenderField = ({
+    ingField,
+    index,
+  }: {
+    ingField: FieldArrayWithId<RecipeCreateForm, 'ingredients', 'id'>;
+    index: number;
+  }) => {
     const [isOther, setIsOther] = useState(ingField.amount._type === 'other');
     return (
       <Fragment>
@@ -196,6 +213,12 @@ export default function CreateRecipeRoute() {
 
   return (
     <Centered>
+      {data && 'errorCode' in data && (
+        <div className="bg-red-100 mt-4 p-4 border-solid border-red-300 border-2 rounded">
+          <Heading>An error has occured.</Heading>
+          <pre>{JSON.stringify(data.body, null, 2)}</pre>
+        </div>
+      )}
       <Form
         onSubmit={handleSubmit(submitData)}
         className="flex flex-col p-2"
@@ -259,23 +282,11 @@ export default function CreateRecipeRoute() {
             <RenderField ingField={ingField} index={i} key={ingField.id} />
           ))}
 
-          <button
-            className={clsx(
-              'w-full h-20',
-              'border-dashed rounded-2xl border-4',
-              'border-background-700 hover:border-background-400 focus:border-background-400',
-              'bg-background-950 hover:bg-background-900 focus:bg-background-900',
-              'my-4',
-              'uppercase font-extrabold',
-              'text-text-400 hover:text-text-300 focus:text-text-300',
-              'transition-colors',
-              'outline-none',
-            )}
+          <ButtonAddNew
             onClick={() => ingredients.append({ amount: { _type: 'grams', amount: 100 } })}
-            type="button"
           >
             + Add a new ingredient
-          </button>
+          </ButtonAddNew>
         </div>
 
         <Label as="h2" className="mt-4">Steps</Label>
@@ -314,23 +325,11 @@ export default function CreateRecipeRoute() {
           />
         ))}
 
-        <button
-          className={clsx(
-            'w-full h-20',
-            'border-dashed rounded-2xl border-4',
-            'border-background-700 hover:border-background-400 focus:border-background-400',
-            'bg-background-950 hover:bg-background-900 focus:bg-background-900',
-            'my-4',
-            'uppercase font-extrabold',
-            'text-text-400 hover:text-text-300 focus:text-text-300',
-            'transition-colors',
-            'outline-none',
-          )}
+        <ButtonAddNew
           onClick={() => steps.append(EMPTY_RTE)}
-          type="button"
         >
           + Add a new step
-        </button>
+        </ButtonAddNew>
 
         <button
           type="submit"

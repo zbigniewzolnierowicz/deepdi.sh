@@ -8,9 +8,9 @@ import { Title, Heading } from '~/components/headings';
 import { LexicalToReact } from '../editor/renderReact';
 
 const Description: FC<PropsWithChildren> = ({ children }) => (
-  <p className="mb-2">
+  <div className="mb-2">
     {children}
-  </p>
+  </div>
 );
 
 const Step: FC<{ step: string; index: number }> = ({ step, index }) => (
