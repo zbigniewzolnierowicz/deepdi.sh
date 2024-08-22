@@ -4,7 +4,7 @@ import { IngredientDTO } from 'common/bindings/IngredientDTO';
 import { IngredientUnitDTO } from 'common/bindings/IngredientUnitDTO';
 import type { RecipeDTO } from 'common/bindings/RecipeDTO';
 import type { SerializedEditorState } from 'lexical';
-import { PenLineIcon } from 'lucide-react';
+import { PenLineIcon, TrashIcon } from 'lucide-react';
 import { Fragment, useEffect, useState } from 'react';
 import { Controller, FieldArrayWithId, useFieldArray, UseFieldArrayProps, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -17,40 +17,12 @@ import { Label } from '~/components/form/label';
 import { editBorder } from '~/utils/classes';
 import { assert } from 'typia';
 import { CreateRecipeDTO } from 'common/bindings/CreateRecipeDTO';
-import { ActionFunctionArgs } from '@remix-run/node';
-import { ButtonAddNew } from '~/components/button';
+import { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import { DashedButton } from '~/components/button/dashed';
+import { IconButton } from '~/components/button/icon';
 import { Heading } from '~/components/headings';
-
-export async function action({ request }: ActionFunctionArgs) {
-  const data = assert<CreateRecipeDTO>(await request.json());
-
-  const res = await fetch('http://localhost:8111/recipe/create',
-    { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } },
-  );
-  const status = res.status;
-
-  if (status >= 200 && status < 300) {
-    const recipe: RecipeDTO = await res.json();
-    return {
-      status,
-      recipe,
-    };
-  }
-
-  return {
-    errorCode: status,
-    body: await res.json(),
-  };
-}
-
-export async function loader() {
-  const res = await fetch('http://localhost:8111/ingredient');
-  const ingredients: IngredientDTO[] = await res.json();
-
-  return {
-    availableIngredients: ingredients,
-  };
-}
+import { Input } from '~/components/form/input';
+import { makeTitle } from '~/utils/makeTitle';
 
 interface InternalIngredientWithAmount {
   ingredient_id?: string | null;
@@ -64,6 +36,7 @@ interface RecipeCreateForm {
   description: SerializedEditorState;
   steps: SerializedEditorState[];
   ingredients: InternalIngredientWithAmount[];
+  servings: number;
 }
 
 function makeRequiredAndNotEmpty<T>(
@@ -90,12 +63,16 @@ const MIN_AMOUNT = 1;
 
 const UNITS: IngredientUnitDTO['_type'][] = ['cups', 'grams', 'other', 'teaspoons', 'mililiters'] as const;
 
+const newButtonClass = clsx(
+  'w-full h-20',
+);
+
 export default function CreateRecipeRoute() {
   const data = useActionData<typeof action>();
   const { availableIngredients } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const navigate = useNavigate();
-  const { register, handleSubmit, control, formState } = useForm<RecipeCreateForm>({
+  const { register, handleSubmit, control, formState, setValue } = useForm<RecipeCreateForm>({
     reValidateMode: 'onSubmit',
     criteriaMode: 'all',
   });
@@ -114,13 +91,13 @@ export default function CreateRecipeRoute() {
   const ingredients = useFieldArray({
     name: 'ingredients',
     control,
-    /* rules: {
+    rules: {
       required: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
       minLength: {
         value: MIN_AMOUNT,
         message: `Your recipe should have at least ${MIN_AMOUNT} ingredients!`,
       },
-    }, */
+    },
   });
 
   const submitData = (data: RecipeCreateForm) => {
@@ -132,7 +109,7 @@ export default function CreateRecipeRoute() {
       time: {},
       steps: data.steps.map(s => JSON.stringify(s)),
       description: JSON.stringify(data.description),
-      servings: { exact: 1 },
+      servings: { exact: data.servings },
     } as CreateRecipeDTO);
     console.log('PAYLOAD', payload);
     console.groupEnd();
@@ -167,46 +144,105 @@ export default function CreateRecipeRoute() {
         {formState.errors.ingredients?.[index]?.ingredient_id && (
           <ErrorLine>{formState.errors.ingredients[index].ingredient_id.message}</ErrorLine>
         )}
-        <select
-          defaultValue=""
-          {...register(`ingredients.${index}.ingredient_id`, {
-            required: 'You must pick an ingredient',
-          })}
+        <div className={clsx(
+          'grid',
+          'gap-2 items-center',
+          'sm:grid-row-1 sm:grid-cols-[6fr_1fr_auto_1fr_auto]',
+          'grid-row-3 grid-cols-[1fr_auto_auto]',
+        )}
         >
-          <option disabled value="">Select an ingredient</option>
-          {availableIngredients.map(ing => (
-            <option value={ing.id} key={ing.id}>{ing.name}</option>
-          ))}
-        </select>
-        <select
-          {...register(
-            `ingredients.${index}.amount._type`,
-            { onChange: (e) => { setIsOther(e.target.value === 'other'); } },
-          )}
-        >
-          {UNITS.map(u => (
-            <option value={u} key={u}>{u}</option>
-          ))}
-        </select>
-        {isOther
-          ? (
-              <>
-                <input type="text" {...register(`ingredients.${index}.amount.amount.unit`)} />
-                <input
+          {isOther
+            ? (
+                <div
+                  className={
+                    clsx(
+                      'flex flex-row justify-between gap-4',
+                      'col-span-3 sm:col-span-1',
+                    )
+                  }
+                >
+                  <Input
+                    placeholder="Amount"
+                    type="number"
+                    step="any"
+                    inputClassName="text-end"
+                    {...register(`ingredients.${index}.amount.amount.amount`, { valueAsNumber: true })}
+                  />
+                  <Input
+                    placeholder="Unit"
+                    className="flex-grow"
+                    type="text"
+                    {...register(`ingredients.${index}.amount.amount.unit`)}
+                  />
+                </div>
+              )
+            : (
+                <Input
+                  placeholder="Amount"
+                  autoComplete="off"
+                  aria-autocomplete="none"
                   type="number"
                   step="any"
-                  {...register(`ingredients.${index}.amount.amount.amount`, { valueAsNumber: true })}
+                  inputClassName="text-end"
+                  className={
+                    clsx(
+                      'flex flex-row justify-between gap-4',
+                      'col-span-2 sm:col-start-1 sm:col-end-2',
+                    )
+                  }
+                  {...register(`ingredients.${index}.amount.amount`, { valueAsNumber: true })}
                 />
-              </>
-            )
-          : (
-              <input
-                type="number"
-                step="any"
-                {...register(`ingredients.${index}.amount.amount`, { valueAsNumber: true })}
-              />
-            )}
-        <button type="button" onClick={() => ingredients.remove(index)}>Delete</button>
+              )}
+          <select
+            className={
+              clsx(
+                'min-w-16',
+                { 'col-span-3 sm:col-span-1': isOther },
+              )
+            }
+            {
+              ...register(`ingredients.${index}.amount._type`,
+                {
+                  onChange: (e) => {
+                    const isOther = e.target.value === 'other';
+                    setIsOther(isOther);
+
+                    if (typeof ingField.amount.amount === 'object') {
+                      setValue(`ingredients.${index}.amount.amount`, ingField.amount.amount.amount);
+                    }
+                    else {
+                      setValue(`ingredients.${index}.amount.amount.amount`, ingField.amount.amount);
+                    }
+                  },
+                },
+              )
+            }
+          >
+            {UNITS.map(u => (
+              <option value={u} key={u}>{u}</option>
+            ))}
+          </select>
+          <select
+            defaultValue=""
+            {...register(`ingredients.${index}.ingredient_id`, {
+              required: 'You must pick an ingredient',
+            })}
+            className="flex-grow col-span-3 sm:col-span-1"
+          >
+            <option disabled value="">Select an ingredient</option>
+            {availableIngredients.map(ing => (
+              <option value={ing.id} key={ing.id}>{ing.name}</option>
+            ))}
+          </select>
+          <IconButton
+            onClick={() => ingredients.remove(index)}
+            aria-label="Delete this ingredient"
+            title="Delete this ingredient"
+            className="col-span-3 sm:col-span-1 justify-self-end"
+          >
+            <TrashIcon />
+          </IconButton>
+        </div>
       </Fragment>
     );
   };
@@ -228,24 +264,37 @@ export default function CreateRecipeRoute() {
           {formState.errors.name && (
             <ErrorLine>{formState.errors.name.message}</ErrorLine>
           )}
-          <div
-            className={clsx([
-              'flex flex-row justify-stretch items-end focus-within:bg-background-900', 'pb-2 pr-2',
-              editBorder,
-            ])}
-          >
-            <input
-              id="name"
-              className="text-4xl font-heading bg-transparent flex-grow outline-none"
-              placeholder="Name"
-              autoComplete="off"
-              aria-autocomplete="none"
-              {...register('name', { required: 'The name should not be empty' })}
-            />
-            <span className="w-6 h-6 ml-2 flex-grow-0" aria-hidden="true">
-              <PenLineIcon />
-            </span>
-          </div>
+          <Input
+            id="name"
+            className="text-4xl font-heading"
+            placeholder="Name"
+            autoComplete="off"
+            aria-autocomplete="none"
+            icon={<PenLineIcon />}
+            {...register('name', { required: 'The name should not be empty' })}
+          />
+        </div>
+
+        <div className="flex flex-col" aria-labelledby="servings">
+          <Label htmlFor="servings">Servings</Label>
+          {formState.errors.servings && (
+            <ErrorLine>{formState.errors.servings.message}</ErrorLine>
+          )}
+          <Input
+            id="servings"
+            placeholder="Servings"
+            autoComplete="off"
+            aria-autocomplete="none"
+            type="number"
+            step="1"
+            defaultValue={1}
+            {...register('servings',
+              {
+                required: 'The amount of servings should be above 0',
+                min: { value: 0, message: 'The amount of servings should be above 0' },
+              },
+            )}
+          />
         </div>
 
         <div className="flex flex-col mt-4" aria-labelledby="description">
@@ -273,63 +322,90 @@ export default function CreateRecipeRoute() {
           />
         </div>
 
-        <Label as="h2" id="ingredients">Ingredients</Label>
-        {formState.errors.ingredients?.root && (
-          <ErrorLine>{formState.errors.ingredients.root.message}</ErrorLine>
-        )}
         <div className="flex flex-col mt-4" aria-labelledby="ingredients">
+          <Label as="p" id="ingredients">Ingredients</Label>
+          {formState.errors.ingredients?.root && (
+            <ErrorLine>{formState.errors.ingredients.root.message}</ErrorLine>
+          )}
           {ingredients.fields.map((ingField, i) => (
             <RenderField ingField={ingField} index={i} key={ingField.id} />
           ))}
 
-          <ButtonAddNew
+          <DashedButton
             onClick={() => ingredients.append({ amount: { _type: 'grams', amount: 100 } })}
+            className={
+              clsx(
+                newButtonClass,
+                'mt-4',
+                'before:inline before:content-["+"]',
+                'before:pr-2 before:text-xl',
+                'flex flex-row items-center justify-center',
+              )
+            }
           >
-            + Add a new ingredient
-          </ButtonAddNew>
+            Add a new ingredient
+          </DashedButton>
         </div>
 
-        <Label as="h2" className="mt-4">Steps</Label>
-        {formState.errors.steps?.root && (
-          <ErrorLine>{formState.errors.steps?.root.message}</ErrorLine>
-        )}
-        {steps.fields.map((stepField, i) => (
-          <Controller
-            name={`steps.${i}`}
-            control={control}
-            key={stepField.id}
-            rules={makeRequiredAndNotEmpty('This step must not be empty', validateRTEContent)}
-            render={function StepField({ field, fieldState }) {
-              return (
-                <div className="mt-4">
-                  <div className="flex flex-row justify-between items-center">
-                    <Label className="text-xl" htmlFor={`steps.${i}`}>
-                      Step {i + 1}
-                    </Label>
-                    <button type="button" onClick={() => steps.remove(i)}>Delete</button>
-                  </div>
-                  {fieldState.error && (
-                    <ErrorLine>{fieldState.error.message}</ErrorLine>
-                  )}
-                  <Editor
-                    id={`steps.${i}`}
-                    className={clsx('mt-2 prose p-2 outline-none focus-within:bg-background-900', editBorder)}
-                    name={field.name}
-                    value={field.value}
-                    onChange={field.onChange}
-                    ref={field.ref}
-                  />
-                </div>
-              );
-            }}
-          />
-        ))}
+        <div className="flex flex-col mt-4" aria-labelledby="steps">
+          <Label as="p" id="steps">Steps</Label>
+          {formState.errors.steps?.root && (
+            <ErrorLine>{formState.errors.steps?.root.message}</ErrorLine>
+          )}
+          {steps.fields.map((stepField, i) => (
+            <Controller
+              name={`steps.${i}`}
+              control={control}
+              key={stepField.id}
+              rules={makeRequiredAndNotEmpty('This step must not be empty', validateRTEContent)}
+              render={function StepField({ field, fieldState }) {
+                return (
+                  <Fragment>
+                    <div className="flex flex-row justify-between items-center">
+                      <Label className="text-xl" htmlFor={`steps.${i}`}>
+                        Step {i + 1}
+                      </Label>
+                      <IconButton
+                        onClick={() => steps.remove(i)}
+                        aria-label="Delete this step"
+                        title="Delete this step"
+                        className="hover:bg-background-900 active:bg-background-800 p-4 rounded-full flex-none"
+                      >
+                        <TrashIcon />
+                      </IconButton>
+                    </div>
+                    {fieldState.error && (
+                      <ErrorLine>{fieldState.error.message}</ErrorLine>
+                    )}
+                    <Editor
+                      id={`steps.${i}`}
+                      className={clsx('mt-2 prose p-2 outline-none focus-within:bg-background-900', editBorder)}
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      ref={field.ref}
+                    />
+                  </Fragment>
+                );
+              }}
+            />
+          ))}
 
-        <ButtonAddNew
-          onClick={() => steps.append(EMPTY_RTE)}
-        >
-          + Add a new step
-        </ButtonAddNew>
+          <DashedButton
+            onClick={() => steps.append(EMPTY_RTE)}
+            className={
+              clsx(
+                newButtonClass,
+                'mt-4',
+                'before:inline before:content-["+"]',
+                'before:pr-2 before:text-xl',
+                'flex flex-row items-center justify-center',
+              )
+            }
+          >
+            Add a new step
+          </DashedButton>
+        </div>
 
         <button
           type="submit"
@@ -346,4 +422,41 @@ export default function CreateRecipeRoute() {
       </Form>
     </Centered>
   );
+}
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: makeTitle('Create a recipe') },
+  ];
+};
+
+export async function action({ request }: ActionFunctionArgs) {
+  const data = assert<CreateRecipeDTO>(await request.json());
+
+  const res = await fetch('http://localhost:8111/recipe/create',
+    { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } },
+  );
+  const status = res.status;
+
+  if (status >= 200 && status < 300) {
+    const recipe: RecipeDTO = await res.json();
+    return {
+      status,
+      recipe,
+    };
+  }
+
+  return {
+    errorCode: status,
+    body: await res.json(),
+  };
+}
+
+export async function loader() {
+  const res = await fetch('http://localhost:8111/ingredient');
+  const ingredients: IngredientDTO[] = await res.json();
+
+  return {
+    availableIngredients: ingredients,
+  };
 }
