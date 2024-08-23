@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { ElementType } from 'react';
+
 import type { PolymorphicProps } from '~/utils/polymorphicProps';
 
 type LabelType = React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;

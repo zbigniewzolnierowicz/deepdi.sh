@@ -1,5 +1,6 @@
 import type { MetaFunction } from '@remix-run/react';
 import { Link } from '@remix-run/react';
+
 import { Centered } from '~/components/centered';
 import { Title } from '~/components/headings';
 import { makeTitle } from '~/utils/makeTitle';

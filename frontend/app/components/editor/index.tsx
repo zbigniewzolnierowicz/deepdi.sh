@@ -1,5 +1,4 @@
 import type { EditorState, SerializedEditorState } from 'lexical';
-
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import type { InitialConfigType } from '@lexical/react/LexicalComposer';
@@ -11,10 +10,10 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
-
 import { clsx } from 'clsx';
-import { EDITOR_NODES, theme } from './settings';
 import { forwardRef, useImperativeHandle } from 'react';
+
+import { EDITOR_NODES, theme } from './settings';
 import { renderToPlaintext } from './renderPlaintext';
 
 type EditorProps<T> = {

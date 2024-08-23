@@ -1,6 +1,7 @@
 import type { MetaFunction } from '@remix-run/react';
 import { Link, useLoaderData } from '@remix-run/react';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
+
 import { Centered } from '~/components/centered';
 import { Title } from '~/components/headings';
 import { makeTitle } from '~/utils/makeTitle';

@@ -1,11 +1,14 @@
 import type { RecipeDTO } from 'common/bindings/RecipeDTO';
 import type { FC, PropsWithChildren } from 'react';
-import { IngredientList } from './ingredientList';
 import { formatDuration } from 'date-fns';
 import type { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
+
+import { LexicalToReact } from '../editor/renderReact';
+
+import { IngredientList } from './ingredientList';
+
 import { convertSecondsToDuration } from '~/utils/convertSecondsToDuration';
 import { Title, Heading } from '~/components/headings';
-import { LexicalToReact } from '../editor/renderReact';
 
 const Description: FC<PropsWithChildren> = ({ children }) => (
   <div className="mb-2">

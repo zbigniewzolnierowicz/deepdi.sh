@@ -108,5 +108,14 @@ module.exports = {
     ],
     'react/prop-types': 0,
     '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
+    'import/order': ['error', {
+      'newlines-between': 'always',
+      'pathGroups': [
+        {
+          pattern: 'common/**',
+          group: 'internal',
+        },
+      ],
+    }],
   },
 };

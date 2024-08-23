@@ -5,9 +5,10 @@ import type { IngredientWithAmountDTO } from 'common/bindings/IngredientWithAmou
 import convert from 'convert-units';
 import { formatQuantity } from 'format-quantity';
 import type { DetailedHTMLProps, FC, HTMLAttributes, PropsWithChildren } from 'react';
-import Spoon from '~/icons/spoon.svg?react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { CircleHelpIcon, GlassWaterIcon, WeightIcon } from 'lucide-react';
+
+import Spoon from '~/icons/spoon.svg?react';
 
 type UnitIconProps = { unit: IngredientUnitDTO['_type'] };
 

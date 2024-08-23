@@ -2,22 +2,23 @@ import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Form, useActionData, useNavigate, useSubmit } from '@remix-run/react';
 import { clsx } from 'clsx';
-import { Centered } from '~/components/centered';
 import { Controller, useForm } from 'react-hook-form';
 import type { CreateIngredientDTO } from 'common/bindings/CreateIngredientDTO';
 import { assert } from 'typia';
-import { Editor } from '~/components/editor';
 import type { SerializedEditorState } from 'lexical';
 import type { IngredientDTO } from 'common/bindings/IngredientDTO';
-import { editBorder } from '~/utils/classes';
 import { PenLineIcon } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+
+import { Centered } from '~/components/centered';
+import { Editor } from '~/components/editor';
+import { editBorder } from '~/utils/classes';
 import { Label } from '~/components/form/label';
 import { CheckboxRow } from '~/components/form/checkbox';
 import { renderToPlaintext } from '~/components/editor/renderPlaintext';
 import { makeTitle } from '~/utils/makeTitle';
 import { diets } from '~/components/ingredients/diets';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
 // import { Handle } from '~/utils/types';
 
 export const meta: MetaFunction = () => [

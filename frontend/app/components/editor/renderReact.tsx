@@ -4,8 +4,10 @@ import { IS_BOLD, IS_CODE, IS_HIGHLIGHT, IS_ITALIC, IS_SUBSCRIPT, IS_SUPERSCRIPT
 import type { ReactElement } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { is } from 'typia';
-import { Heading } from '../headings';
 import type { SerializedLinkNode } from '@lexical/link';
+
+import { Heading } from '../headings';
+
 import { theme } from './settings';
 
 export function LexicalToReact<T extends object>({ data }: { data?: T }): ReactElement {

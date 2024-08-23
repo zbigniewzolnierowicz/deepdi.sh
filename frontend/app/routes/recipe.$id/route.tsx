@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { type RecipeDTO } from 'common/bindings/RecipeDTO';
+
 import { Recipe } from '~/components/recipe/recipe';
 import { Centered } from '~/components/centered';
 import { makeTitle } from '~/utils/makeTitle';

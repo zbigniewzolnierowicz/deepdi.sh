@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { ElementType, FC, PropsWithChildren } from 'react';
+
 import type { PolymorphicProps } from '~/utils/polymorphicProps';
 
 export type HeadingType = React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;

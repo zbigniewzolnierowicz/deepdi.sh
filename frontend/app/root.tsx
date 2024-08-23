@@ -1,5 +1,4 @@
 /// <reference types="vite-plugin-svgr/client" />
-
 import {
   Links,
   Meta,
@@ -8,16 +7,15 @@ import {
   ScrollRestoration,
   useMatches,
 } from '@remix-run/react';
-
-import './tailwind.css';
 import '@fontsource-variable/raleway';
 import '@fontsource-variable/playfair-display';
-
 import { Suspense, type FC, type PropsWithChildren } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Toaster } from 'sonner';
+
 import type { Handle } from './utils/types';
 import { TopBar } from './components/topBar';
+import './tailwind.css';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

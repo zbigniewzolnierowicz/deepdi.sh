@@ -1,8 +1,9 @@
 import { clsx } from 'clsx';
 import type { FC } from 'react';
-import { diets } from './diets';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
+
+import { diets } from './diets';
 
 export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: inputDiets, className }) => {
   const dietsDisplay = diets.map(diet => ({

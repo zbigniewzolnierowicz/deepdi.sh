@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import { DetailedHTMLProps, forwardRef, InputHTMLAttributes, ReactElement } from 'react';
+
 import { editBorder } from '~/utils/classes';
 
 type NativeInputProps = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
