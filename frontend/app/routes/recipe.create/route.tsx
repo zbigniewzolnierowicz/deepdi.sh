@@ -11,6 +11,9 @@ import { toast } from 'sonner';
 import { assert } from 'typia';
 import { CreateRecipeDTO } from 'common/bindings/CreateRecipeDTO';
 import { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import { parse as parseDuration } from 'tinyduration';
+
+import { DurationInput } from './DurationInput';
 
 import { Centered } from '~/components/centered';
 import { Editor } from '~/components/editor';
@@ -38,6 +41,7 @@ interface RecipeCreateForm {
   steps: SerializedEditorState[];
   ingredients: InternalIngredientWithAmount[];
   servings: number;
+  time: Record<string, string>;
 }
 
 function makeRequiredAndNotEmpty<T>(
@@ -104,10 +108,23 @@ export default function CreateRecipeRoute() {
   const submitData = (data: RecipeCreateForm) => {
     console.group('SUBMITTING');
     console.log('SUBMITTED', data);
+
+    const time: Record<string, bigint> = Object.fromEntries(
+      Object
+        .entries(data.time)
+        .map(([k, v]) => {
+          const duration = parseDuration(v);
+          let seconds = 0;
+          seconds += (duration.hours ?? 0) * 60 * 60;
+          seconds += (duration.minutes ?? 0) * 60;
+          return [k, BigInt(seconds)];
+        }),
+    );
+
     const payload = assert<CreateRecipeDTO>({
       ingredients: data.ingredients.map(i => ({ ...i, optional: i.optional ?? false, notes: i.notes ?? null })),
       name: data.name,
-      time: {},
+      time,
       steps: data.steps.map(s => JSON.stringify(s)),
       description: JSON.stringify(data.description),
       servings: { exact: data.servings },
@@ -132,7 +149,7 @@ export default function CreateRecipeRoute() {
     }
   }, [data, navigate]);
 
-  const RenderField = ({
+  const IngredientField = ({
     ingField,
     index,
   }: {
@@ -298,6 +315,46 @@ export default function CreateRecipeRoute() {
           />
         </div>
 
+        <div className="flex flex-col gap-2">
+          <Label>Time</Label>
+          <div className="flex flex-row items-baseline">
+            <Label as="span" className="text-xl mr-2 flex-none">Prep time</Label>
+            <Controller
+              name="time.Prep time"
+              control={control}
+              render={function DescriptionField({ field }) {
+                return (
+                  <DurationInput
+                    value={field.value}
+                    onChange={(v) => {
+                      setValue(field.name, v);
+                    }}
+                    className="flex-grow"
+                  />
+                );
+              }}
+            />
+          </div>
+          <div className="flex flex-row items-baseline">
+            <Label as="span" className="text-xl mr-2 flex-none">Cook time</Label>
+            <Controller
+              name="time.Cook time"
+              control={control}
+              render={function DescriptionField({ field }) {
+                return (
+                  <DurationInput
+                    value={field.value}
+                    onChange={(v) => {
+                      setValue(field.name, v);
+                    }}
+                    className="flex-grow"
+                  />
+                );
+              }}
+            />
+          </div>
+        </div>
+
         <div className="flex flex-col mt-4" aria-labelledby="description">
           <Label htmlFor="description">Description</Label>
           {formState.errors.description?.message && (
@@ -329,7 +386,7 @@ export default function CreateRecipeRoute() {
             <ErrorLine>{formState.errors.ingredients.root.message}</ErrorLine>
           )}
           {ingredients.fields.map((ingField, i) => (
-            <RenderField ingField={ingField} index={i} key={ingField.id} />
+            <IngredientField ingField={ingField} index={i} key={ingField.id} />
           ))}
 
           <DashedButton

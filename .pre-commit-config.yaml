@@ -4,7 +4,7 @@ repos:
     - id: sqlx-prepare-check
       files: '^backend/(.*)'
       name: "[BACKEND] Checking if SQLx queries are cached"
-      entry: go-task db:check
+      entry: task db:check
       language: system
       pass_filenames: false
     - id: eslint
@@ -12,4 +12,4 @@ repos:
       name: "[FRONTEND] Running ESLint"
       language: system
       pass_filenames: false
-      entry: go-task fe:lint:fix
+      entry: task fe:lint:fix
