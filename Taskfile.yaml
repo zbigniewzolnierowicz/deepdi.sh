@@ -12,7 +12,7 @@ includes:
     aliases:
       - fe
 tasks:
-  default: go-task -l
+  default: task -l
   db:prepare:
     desc: "Prepare SQLx for offline"
     cmd: cargo sqlx prepare --workspace -- --tests
