@@ -13,6 +13,9 @@ includes:
       - fe
 tasks:
   default: task -l
+  dev:
+    desc: "Run development servers"
+    cmd: mprocs
   db:prepare:
     desc: "Prepare SQLx for offline"
     cmd: cargo sqlx prepare --workspace -- --tests
