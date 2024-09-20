@@ -1,0 +1,23 @@
+{
+    log default {
+	    output stdout
+	    include http.log.access admin.api
+    }
+}
+
+:4318 {
+	@options {
+		method OPTIONS
+	}
+
+	header Access-Control-Allow-Origin "http://localhost:5173"
+	header Access-Control-Allow-Credentials "true"
+	header Access-Control-Allow-Methods "GET, OPTIONS"
+	header Access-Control-Allow-Headers "Priority,User-Agent,Content-Type"
+	respond @options 204 
+
+	reverse_proxy localhost:14318 {
+	    header_down -Access-Control-Allow-Origin
+	    header_down -Access-Control-Allow-Credentials
+	}
+}

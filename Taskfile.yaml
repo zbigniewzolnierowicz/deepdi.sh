@@ -68,3 +68,6 @@ tasks:
     cmds:
       - task: backend:lint:fix
       - task: frontend:lint:fix
+  proxy:
+    desc: "Run proxy for Tempo"
+    cmd: "caddy run"
