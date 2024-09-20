@@ -3,10 +3,19 @@
 version: "3"
 
 includes:
-  backend: ./.taskfiles/Backend/Taskfile.yaml
-
+  backend: 
+    taskfile: ./.taskfiles/Backend/Taskfile.yaml
+    aliases:
+      - be
+  frontend:
+    taskfile: ./.taskfiles/Frontend/Taskfile.yaml
+    aliases:
+      - fe
 tasks:
   default: task -l
+  dev:
+    desc: "Run development servers"
+    cmd: mprocs
   db:prepare:
     desc: "Prepare SQLx for offline"
     cmd: cargo sqlx prepare --workspace -- --tests
@@ -14,6 +23,10 @@ tasks:
     desc: "Run every migration"
     cmds:
       - task: backend:migrate
+  db:reset:
+    desc: "Reset database"
+    dir: "backend"
+    cmd: cargo sqlx database reset
   db:check:
     desc: "Check if SQLx prepared files are generated"
     cmd: cargo sqlx prepare --workspace --check -- --tests
@@ -37,8 +50,21 @@ tasks:
     cmds:
       - task: backend:unused
       - task: frontend:unused
-  frontend:unused:
-    desc: "Check for unused dependencies on the frontend"
-    cmd: "npx knip"
-    dir: "frontend"
-    ignore_error: true
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - task: backend:install
+      - task: frontend:install
+    aliases:
+      - i
+      - deps
+  lint:
+    desc: "Lint everything"
+    cmds:
+      - task: backend:lint
+      - task: frontend:lint
+  lint:fix:
+    desc: "Fix linting errors"
+    cmds:
+      - task: backend:lint:fix
+      - task: frontend:lint:fix

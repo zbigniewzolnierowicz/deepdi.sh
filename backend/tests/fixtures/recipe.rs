@@ -11,7 +11,8 @@ pub fn recipe_fixture(ingredients: &[IngredientDTO]) -> serde_json::Value {
                     "ingredient_id": ingredient.id,
                     "optional": false,
                     "amount": {
-                        "grams": 100.0
+                        "_type": "grams",
+                        "amount": 100.0
                     },
                 })
             })

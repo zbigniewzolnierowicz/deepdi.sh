@@ -2,9 +2,11 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
-use crate::domain::{entities::ingredient::{types::WhichDiets, Ingredient}, queries::ingredients::get_by_id::{
-    get_ingredient_by_id, GetIngredientError,
-}, repositories::ingredients::{IngredientRepository, IngredientRepositoryService}};
+use crate::domain::{
+    entities::ingredient::{types::WhichDiets, Ingredient},
+    queries::ingredients::get_by_id::{get_ingredient_by_id, GetIngredientError},
+    repositories::ingredients::{IngredientRepository, IngredientRepositoryService},
+};
 
 pub async fn get_by_id_returns_ingredient(repo: impl IngredientRepository) {
     repo.insert(Ingredient {

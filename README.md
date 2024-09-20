@@ -1,39 +1,4 @@
-# Recipes
-
-## Tools used:
-
-### In the app proper
-
-| Usual | New |
-|:------| --- |
-| postgres | [SurrealDB](https://surrealdb.com/) (not using this, I want to show off sqlx) |
-| Spring | [Actix Web](https://actix.rs/) |
-| React | [Leptos](https://leptos.dev/) (not using this, gave up, but using some other cool stuff) |
-| Minio | [Garage](https://garagehq.deuxfleurs.fr/) |
-| curl | [hurl](https://hurl.dev) |
-| Stripe | [Hyperswitch](https://hyperswitch.io/) (not using this) |
-| esbuild/Webpack | [Vite](https://vitejs.dev) with [SWC](https://swc.rs) and later with [Rolldown](https://rolldown.rs) |
-
-### In my terminal
-
-| Usual | New |
-|:------| --- |
-| tmux | [zellij](https://zellij.dev) |
-| Neovim | still Neovim, but with [bob](https://github.com/MordechaiHadad/bob), or [helix](https://helix-editor.com/), or [zed](https://zed.dev) |
-| nvm/rubyenv/pyenv | [mise](https://mise.jdx.dev/) |
-| cd/z | [zoxide](https://github.com/ajeetdsouza/zoxide) |
-| oh-my-zsh prompt | [starship](https://starship.rs) |
-| grep | [ripgrep](https://github.com/BurntSushi/ripgrep) |
-| find | [fd](https://github.com/sharkdp/fd) |
-| cat | [bat](https://github.com/sharkdp/bat) |
-| du | [dust](https://github.com/bootandy/dust) |
-| ls | [eza](https://eza.rocks) |
-| lazygit | [gitui](https://github.com/extrawurst/gitui) |
-| vscode | [neovide](https://neovide.dev) |
-| tldr | [tealdeer](https://github.com/dbrgn/tealdeer) |
-| zsh | [nu](https://nushell.sh) (I'm not using this one, too used to zsh) |
-| ctrl-r | [mcfly](https://github.com/cantino/mcfly) && [mcfly-fzf](https://github.com/bnprks/mcfly-fzf) |
-| make | [just](https://justfile.dev) |
+# deepdi.sh
 
 ## Prerequisites
 
@@ -43,25 +8,18 @@
 cargo install cargo-binstall
 cargo binstall trunk
 cargo binstall hurl
-
-# Setting compilation targets && switching to nightly compiler (needed for Leptos)
-
-rustup toolchain add nightly
-rustup override set nightly
-cd frontend
-rustup target add wasm32-unknown-unknown
-rustup component add rust-analyzer
+cargo binstall mise
 ```
 
-## Issues
+## FAQ
 
-- Rust is a very slow to write in language
-    - But a very correct language!
-- Steep learning curve
-- Integrating with existing JS libraries is a bit of a pain
-    - this was written back when the frontend was in Rust
-- Async traits have caveats (for library developers mostly)
-- Cannot use pooled connections with Neon ([issue in sqlx](https://github.com/launchbadge/sqlx/issues/67), just use normal connections rather than Neon's connection pooling)
+> The integration tests are failing because of image pulling!
+
+Simply pull the `postgres:11-alpine` image manually:
+
+```bash
+docker pull postgres:11-alpine
+```
 
 ## Others
 

@@ -19,4 +19,3 @@ impl From<sqlx::Error> for DeleteIngredientError {
         Self::UnknownError(e.into())
     }
 }
-

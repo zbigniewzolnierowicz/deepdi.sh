@@ -1,0 +1,7 @@
+procs:
+  backend:
+    cmd: ["task", "be:dev"]
+    stop: "SIGKILL"
+  frontend:
+    cmd: ["task", "fe:dev"]
+    stop: "SIGKILL"

@@ -73,7 +73,8 @@ async fn updating_an_ingredient_in_a_recipe_works() {
         "ingredients": vec![
             serde_json::json!({
                 "amount": {
-                    "grams": 999.0
+                    "_type": "grams",
+                    "amount": 999.0
                 }
             })
         ]

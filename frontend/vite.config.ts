@@ -1,15 +1,28 @@
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
+import { vitePlugin as remix } from '@remix-run/dev';
+import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import svgr from 'vite-plugin-svgr';
+import UnpluginTypia from '@ryoppippi/unplugin-typia/vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:8111",
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
+  define: {
+    global: {},
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
     },
   },
+  plugins: [
+    remix({
+      future: {
+        v3_fetcherPersist: true,
+        v3_relativeSplatPath: true,
+        v3_throwAbortReason: true,
+      },
+    }),
+    tsconfigPaths(),
+    svgr(),
+    UnpluginTypia(),
+  ],
 });

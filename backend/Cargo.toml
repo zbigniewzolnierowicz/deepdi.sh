@@ -46,3 +46,6 @@ features = ["preserve_order"]
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)'] }

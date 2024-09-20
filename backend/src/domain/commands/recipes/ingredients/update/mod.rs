@@ -26,7 +26,7 @@ pub enum UpdateIngredientInRecipeError {
 
 impl From<UpdateIngredientInRecipeErrorInternal> for UpdateIngredientInRecipeError {
     fn from(value: UpdateIngredientInRecipeErrorInternal) -> Self {
-        value.into()
+        Self::Unknown(value.into())
     }
 }
 

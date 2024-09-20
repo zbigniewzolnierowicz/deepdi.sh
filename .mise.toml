@@ -1,2 +1,10 @@
 [settings]
 env_file = ".env"
+
+[tools]
+node = "20"
+task = "latest"
+"cargo:cargo-nextest" = "latest"
+"cargo:cargo-udeps" = "latest"
+"cargo:cargo-llvm-cov" = "latest"
+"cargo:mprocs" = "latest"

@@ -63,7 +63,7 @@ impl TryFrom<Vec<IngredientWithAmount>> for RecipeIngredients {
     type Error = ValidationError;
     fn try_from(value: Vec<IngredientWithAmount>) -> Result<Self, Self::Error> {
         if value.is_empty() {
-            Err(ValidationError::EmptyField(vec!["steps"]))
+            Err(ValidationError::EmptyField(vec!["ingredients"]))
         } else {
             Ok(Self(value.to_owned()))
         }

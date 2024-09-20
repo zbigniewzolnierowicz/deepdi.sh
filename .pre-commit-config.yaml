@@ -2,8 +2,14 @@ repos:
 - repo: local
   hooks:
     - id: sqlx-prepare-check
-      name: Check if the prepared queries are correct
+      files: '^backend/(.*)'
+      name: "[BACKEND] Checking if SQLx queries are cached"
       entry: task db:check
       language: system
       pass_filenames: false
-
+    - id: eslint
+      files: '^frontend/(.*)'
+      name: "[FRONTEND] Running ESLint"
+      language: system
+      pass_filenames: false
+      entry: task fe:lint:fix
