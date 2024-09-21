@@ -27,6 +27,8 @@
     "@opentelemetry/auto-instrumentations-node": "^0.50.0",
     "@opentelemetry/auto-instrumentations-web": "^0.41.0",
     "@opentelemetry/context-zone": "^1.26.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.53.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.53.0",
     "@opentelemetry/instrumentation": "^0.53.0",
     "@opentelemetry/instrumentation-document-load": "^0.40.0",
     "@opentelemetry/propagator-b3": "^1.26.0",
