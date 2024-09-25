@@ -1,15 +1,18 @@
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse};
 use common::{CreateIngredientDTO, IngredientDTO};
 use reqwest::StatusCode;
 
 use crate::{
-    api::{errors::MakeError, AppState},
+    api::{errors::MakeError, extract::Json, AppState},
     domain::commands::ingredients::create::{
         create_ingredient, CreateIngredient, CreateIngredientError,
     },
 };
 
 impl MakeError<String> for CreateIngredientError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_message(&self) -> String {
         self.to_string()
     }

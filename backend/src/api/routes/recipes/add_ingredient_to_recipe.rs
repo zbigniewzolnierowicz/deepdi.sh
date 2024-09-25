@@ -1,14 +1,13 @@
 use axum::{
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use common::{IngredientAmountDTO, RecipeDTO};
 use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::{
-    api::{errors::MakeError, AppState},
+    api::{errors::MakeError, extract::Json, AppState},
     domain::{
         commands::recipes::ingredients::add::{
             add_ingredient_to_recipe, AddIngredientToRecipeError,
@@ -20,6 +19,9 @@ use crate::{
 };
 
 impl MakeError<String> for AddIngredientToRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             Self::GetIngredient(GetIngredientByIdError::NotFound(_)) => StatusCode::BAD_REQUEST,
@@ -56,5 +58,5 @@ pub async fn add_ingredient_to_recipe_route(
     )
     .await?;
 
-    Ok(axum::Json(result.into()))
+    Ok(Json(result.into()))
 }

@@ -1,13 +1,17 @@
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse};
 use common::{CreateRecipeDTO, RecipeDTO};
 use reqwest::StatusCode;
 
 use crate::api::errors::MakeError;
+use crate::api::extract::Json;
 use crate::api::AppState;
 use crate::domain::commands::recipes::create::{create_recipe, CreateRecipe, CreateRecipeError};
 use crate::domain::entities::recipe::IngredientAmountData;
 
 impl MakeError<String> for CreateRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             Self::IngredientsNotFound(_) => StatusCode::BAD_REQUEST,

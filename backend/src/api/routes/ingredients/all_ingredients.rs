@@ -1,12 +1,15 @@
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse};
 use common::IngredientDTO;
 
 use crate::{
-    api::{errors::MakeError, AppState},
+    api::{errors::MakeError, extract::Json, AppState},
     domain::queries::ingredients::get_all::{get_all_ingredients, GetAllIngredientsError},
 };
 
 impl MakeError<String> for GetAllIngredientsError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_message(&self) -> String {
         self.to_string()
     }

@@ -1,14 +1,18 @@
 use axum::extract::Path;
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse};
 use common::{RecipeDTO, UpdateRecipeDTO};
 use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::api::errors::MakeError;
+use crate::api::extract::Json;
 use crate::api::AppState;
 use crate::domain::commands::recipes::update::{update_recipe, UpdateRecipeError};
 
 impl MakeError<String> for UpdateRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
@@ -38,5 +42,5 @@ pub async fn update_recipe_route(
 ) -> Result<Json<RecipeDTO>, UpdateRecipeError> {
     let recipe = update_recipe(recipe_repository, &recipe_id, body.into()).await?;
 
-    Ok(axum::Json(recipe.into()))
+    Ok(Json(recipe.into()))
 }

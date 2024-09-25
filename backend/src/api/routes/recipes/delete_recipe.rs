@@ -11,6 +11,9 @@ use crate::{
 };
 
 impl MakeError<String> for DeleteRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             Self::NotFound(_) => StatusCode::NOT_FOUND,

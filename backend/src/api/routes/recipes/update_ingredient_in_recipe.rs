@@ -1,14 +1,13 @@
 use axum::{
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use common::{IngredientUnitDTO, RecipeDTO};
 use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::{
-    api::{errors::MakeError, AppState},
+    api::{errors::MakeError, extract::Json, AppState},
     domain::{
         commands::recipes::ingredients::update::{
             update_ingredient_in_recipe, UpdateIngredientInRecipeError,
@@ -19,6 +18,9 @@ use crate::{
 };
 
 impl MakeError<String> for UpdateIngredientInRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             UpdateIngredientInRecipeError::MissingIngredient(_)

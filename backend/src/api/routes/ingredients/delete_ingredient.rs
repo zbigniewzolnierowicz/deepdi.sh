@@ -11,6 +11,9 @@ use crate::{
 };
 
 impl MakeError<String> for DeleteIngredientError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_message(&self) -> String {
         self.to_string()
     }

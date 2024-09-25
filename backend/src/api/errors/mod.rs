@@ -1,12 +1,12 @@
+pub mod api;
+
 use chrono::Utc;
 use common::error::ErrorMessage;
 use reqwest::StatusCode;
 use serde::Serialize;
 
-pub trait MakeError<T: Serialize>: AsRef<str> + ToString {
-    fn get_kind(&self) -> String {
-        self.as_ref().to_string()
-    }
+pub trait MakeError<T: Serialize> {
+    fn get_kind(&self) -> String;
     fn get_status_code(&self) -> StatusCode {
         StatusCode::INTERNAL_SERVER_ERROR
     }
