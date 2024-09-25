@@ -1,17 +1,19 @@
 use axum::{
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use common::{IngredientDTO, UpdateIngredientDTO};
 use uuid::Uuid;
 
 use crate::{
-    api::{errors::MakeError, AppState},
+    api::{errors::MakeError, extract::Json, AppState},
     domain::commands::ingredients::update::{update_ingredient, UpdateIngredientError},
 };
 
 impl MakeError<String> for UpdateIngredientError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_message(&self) -> String {
         self.to_string()
     }

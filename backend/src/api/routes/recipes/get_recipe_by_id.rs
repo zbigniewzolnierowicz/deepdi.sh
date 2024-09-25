@@ -11,6 +11,9 @@ use crate::api::{errors::MakeError, AppState};
 use crate::domain::queries::recipes::get_by_id::{get_recipe_by_id, GetRecipeError};
 
 impl MakeError<String> for GetRecipeError {
+    fn get_kind(&self) -> String {
+        self.as_ref().to_string()
+    }
     fn get_status_code(&self) -> StatusCode {
         match self {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
