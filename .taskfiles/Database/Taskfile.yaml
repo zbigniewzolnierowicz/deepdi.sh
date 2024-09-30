@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+includes:
+  backend: 
+    taskfile: ../Backend/Taskfile.yaml
+tasks:
+  sql:
+    desc: "Open psql shell"
+    cmd: psql $DATABASE_URL
+    interactive: true
+  prepare:
+    desc: "Prepare SQLx for offline"
+    cmd: cargo sqlx prepare --workspace -- --tests
+  reset:
+    desc: "Reset database"
+    dir: "backend"
+    cmd: cargo sqlx database reset
+  check:
+    desc: "Check if SQLx prepared files are generated"
+    cmd: cargo sqlx prepare --workspace --check -- --tests
+  add:
+    desc: "Add a new migration"
+    cmd: cargo sqlx migrate add {{.name}}
+    dir: "backend"

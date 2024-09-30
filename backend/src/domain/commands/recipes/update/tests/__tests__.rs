@@ -2,6 +2,9 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
+use chrono::Utc;
+use pretty_assertions::assert_eq;
+
 use crate::domain::commands::recipes::update::{update_recipe, UpdateRecipe, UpdateRecipeError};
 use crate::domain::entities::recipe::{Recipe, ServingsType};
 use crate::domain::repositories::ingredients::IngredientRepository;
@@ -24,6 +27,16 @@ pub async fn updating_a_recipe_succeeds(
         .await
         .unwrap();
 
+    let now = Utc::now();
+
+    assert_ne!(result.created_at, result.updated_at);
+
+    let result = Recipe {
+        updated_at: now,
+        created_at: now,
+        ..result
+    };
+
     assert_eq!(
         result,
         Recipe {
@@ -34,6 +47,8 @@ pub async fn updating_a_recipe_succeeds(
                 .unwrap(),
             time: BTreeMap::from([("Prep time".to_string(), Duration::from_secs(60))]),
             servings: ServingsType::Exact(4),
+            updated_at: now,
+            created_at: now,
             ..recipe
         }
     );

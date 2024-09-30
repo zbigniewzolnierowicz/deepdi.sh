@@ -1,6 +1,7 @@
-use crate::domain::queries::recipes::get_by_id::GetRecipeError;
+use crate::domain::{entities::recipe::Recipe, queries::recipes::get_by_id::GetRecipeError};
 use std::sync::Arc;
 
+use chrono::Utc;
 use uuid::Uuid;
 
 use crate::{
@@ -27,7 +28,21 @@ pub async fn getting_recipe_by_id_works(
     let recipe_repo: RecipeRepositoryService = Arc::new(Box::new(repo));
     let result = get_recipe_by_id(recipe_repo, &recipe.id).await.unwrap();
 
-    assert_eq!(result, recipe);
+    let now = Utc::now();
+
+    let recipe = Recipe {
+        created_at: now,
+        updated_at: now,
+        ..recipe
+    };
+
+    let result = Recipe {
+        created_at: now,
+        updated_at: now,
+        ..result
+    };
+
+    assert_eq!(recipe, result);
 }
 
 pub async fn getting_a_nonexistent_recipe_errors(repo: impl RecipeRepository) {
