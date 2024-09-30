@@ -1,4 +1,5 @@
 pub mod errors;
+use chrono::{DateTime, Utc};
 use derive_more::DerefMut;
 use std::collections::BTreeMap;
 
@@ -24,6 +25,8 @@ pub struct Recipe {
     pub ingredients: RecipeIngredients,
     pub time: BTreeMap<String, std::time::Duration>,
     pub servings: ServingsType,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 #[derive(Debug, Clone, Shrinkwrap, DerefMut)]
 pub struct RecipeIngredients(Vec<IngredientWithAmount>);
@@ -119,6 +122,8 @@ impl From<Recipe> for RecipeDTO {
                 .map(|(k, v)| (k, v.as_secs()))
                 .collect(),
             servings: value.servings.into(),
+            updated_at: value.updated_at.to_rfc3339(),
+            created_at: value.created_at.to_rfc3339(),
         }
     }
 }

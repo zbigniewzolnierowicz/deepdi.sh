@@ -45,6 +45,12 @@ async fn insert_ingredient(
     Ok(())
 }
 
+async fn update_timestamps_in_recipe(pool: &PgPool, id: Uuid) {
+    let _ = sqlx::query_file!("queries/recipes/update_recipe_timestamps.sql", id)
+        .execute(pool)
+        .await;
+}
+
 #[async_trait]
 impl RecipeRepository for PostgresRecipeRepository {
     async fn insert(&self, input: Recipe) -> Result<(), InsertRecipeError> {
@@ -117,6 +123,8 @@ impl RecipeRepository for PostgresRecipeRepository {
             time,
             servings,
             ingredients: ingredients.try_into()?,
+            created_at: result.created_at,
+            updated_at: result.updated_at,
         };
 
         Ok(recipe)
@@ -148,6 +156,7 @@ impl RecipeRepository for PostgresRecipeRepository {
     ) -> Result<(), UpdateRecipeError> {
         let id = &recipe.id;
         let tx = self.0.begin().await?;
+        let mut updated = false;
 
         if let Some(value) = changeset.name {
             if value != recipe.name {
@@ -162,6 +171,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                 )
                 .execute(&self.0)
                 .await?;
+                updated = true;
             }
         };
 
@@ -178,6 +188,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                 )
                 .execute(&self.0)
                 .await?;
+                updated = true;
             }
         };
 
@@ -197,6 +208,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                 )
                 .execute(&self.0)
                 .await?;
+                updated = true;
             }
         }
 
@@ -216,6 +228,7 @@ impl RecipeRepository for PostgresRecipeRepository {
                 )
                 .execute(&self.0)
                 .await?;
+                updated = true;
             }
         }
 
@@ -234,7 +247,12 @@ impl RecipeRepository for PostgresRecipeRepository {
                 )
                 .execute(&self.0)
                 .await?;
+                updated = true;
             }
+        }
+
+        if updated {
+            update_timestamps_in_recipe(&self.0, *id).await;
         }
 
         tx.commit()
@@ -249,6 +267,7 @@ impl RecipeRepository for PostgresRecipeRepository {
         ingredient: IngredientWithAmount,
     ) -> Result<(), AddIngredientIntoRecipeError> {
         insert_ingredient(&self.0, recipe.id, &ingredient).await?;
+        update_timestamps_in_recipe(&self.0, recipe.id).await;
 
         Ok(())
     }
@@ -265,6 +284,8 @@ impl RecipeRepository for PostgresRecipeRepository {
         )
         .execute(&self.0)
         .await?;
+
+        update_timestamps_in_recipe(&self.0, recipe.id).await;
 
         Ok(())
     }
@@ -288,6 +309,8 @@ impl RecipeRepository for PostgresRecipeRepository {
         .execute(&self.0)
         .await?;
 
+        update_timestamps_in_recipe(&self.0, recipe.id).await;
+
         tx.commit().await?;
 
         Ok(())
@@ -303,8 +326,6 @@ impl RecipeRepository for PostgresRecipeRepository {
         )
         .fetch_optional(&self.0)
         .await?;
-
-        dbg!(&recipes_using_ingredient);
 
         Ok(recipes_using_ingredient.is_some())
     }

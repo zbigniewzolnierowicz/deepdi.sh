@@ -7,6 +7,10 @@ tasks:
     desc: "[BACKEND] run database migration"
     cmd: cargo sqlx migrate run
     dir: backend
+  revert:
+    desc: "[BACKEND] revert last database migration"
+    cmd: cargo sqlx migrate revert
+    dir: backend
   unused:
     desc: "[BACKEND] Check for unused dependencies"
     cmd: "cargo +nightly udeps --all-targets"

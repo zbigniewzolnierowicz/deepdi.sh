@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use chrono::{DateTime, Utc};
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use uuid::Uuid;
 
@@ -108,7 +109,10 @@ pub async fn create_recipe(
         .collect();
 
     let id = Uuid::now_v7();
+    let created_at: DateTime<Utc> = Utc::now();
+    let updated_at: DateTime<Utc> = Utc::now();
 
+    // FIXME: make the database take care of this
     recipe_repo
         .insert(Recipe {
             id,
@@ -118,6 +122,8 @@ pub async fn create_recipe(
             ingredients: ingredients_in_recipe.try_into()?,
             time: input.time.clone(),
             servings: input.servings.clone(),
+            created_at,
+            updated_at,
         })
         .await?;
 

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\nr.id,\nr.name,\nr.description,\nr.steps,\nr.time,\nr.servings\nFROM recipes AS r\nJOIN ingredients_recipes AS ir ON r.id = ir.recipe_id\nJOIN ingredients AS i ON ir.ingredient_id = i.id\nWHERE r.id = $1\n\n",
+  "query": "SELECT\nr.id,\nr.name,\nr.description,\nr.steps,\nr.time,\nr.servings,\nr.created_at,\nr.updated_at\nFROM recipes AS r\nJOIN ingredients_recipes AS ir ON r.id = ir.recipe_id\nJOIN ingredients AS i ON ir.ingredient_id = i.id\nWHERE r.id = $1\n\n",
   "describe": {
     "columns": [
       {
@@ -32,6 +32,16 @@
         "ordinal": 5,
         "name": "servings",
         "type_info": "Json"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
@@ -45,8 +55,10 @@
       false,
       false,
       false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "eadca99b158a637ee681c071f5aacc0232e20cb2e76f9e31bb7b13fea2abd05e"
+  "hash": "a98c0f180edaf17b84c75a3ff101c7b23f071503e58d404cd12771d90a664101"
 }

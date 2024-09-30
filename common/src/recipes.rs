@@ -27,6 +27,8 @@ pub struct RecipeDTO {
     pub time: HashMap<String, u64>,
     pub ingredients: Vec<IngredientWithAmountDTO>,
     pub servings: ServingsTypeDTO,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize, TS)]

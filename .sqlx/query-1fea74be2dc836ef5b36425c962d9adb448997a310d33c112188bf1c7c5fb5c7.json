@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ingredients_recipes\nSET updated_at = timezone('utc', now())\nWHERE ingredients_recipes.recipe_id = $1\nAND ingredients_recipes.ingredient_id = $2;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1fea74be2dc836ef5b36425c962d9adb448997a310d33c112188bf1c7c5fb5c7"
+}

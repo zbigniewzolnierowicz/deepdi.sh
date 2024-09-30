@@ -11,25 +11,15 @@ includes:
     taskfile: ./.taskfiles/Frontend/Taskfile.yaml
     aliases:
       - fe
+  database:
+    taskfile: ./.taskfiles/Database/Taskfile.yaml
+    aliases:
+      - db
 tasks:
   default: task -l
   dev:
     desc: "Run development servers"
     cmd: mprocs
-  db:prepare:
-    desc: "Prepare SQLx for offline"
-    cmd: cargo sqlx prepare --workspace -- --tests
-  db:migrate:
-    desc: "Run every migration"
-    cmds:
-      - task: backend:migrate
-  db:reset:
-    desc: "Reset database"
-    dir: "backend"
-    cmd: cargo sqlx database reset
-  db:check:
-    desc: "Check if SQLx prepared files are generated"
-    cmd: cargo sqlx prepare --workspace --check -- --tests
   test:
     desc: "Testing the application"
     cmd: "cargo nextest run"

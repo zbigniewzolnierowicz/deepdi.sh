@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, time::Duration};
 
+use chrono::{DateTime, Utc};
 use futures::future::join_all;
 
 use crate::domain::commands::recipes::update::UpdateRecipe;
@@ -22,6 +23,8 @@ pub fn ingredient_fixture() -> Ingredient {
 pub fn recipe_fixture() -> Recipe {
     // Recipe from https://publicdomainrecipes.com/hoisin_tofu_and_broccoli/
     Recipe {
+        created_at: DateTime::<Utc>::from_timestamp_nanos(1_662_921_288_000_000_000),
+        updated_at: DateTime::<Utc>::from_timestamp_nanos(1_662_921_288_000_000_000),
         id: uuid::Uuid::nil(),
         name: "Hoisin Tofu and Broccoli".to_string(),
         description: "If necessary, provide a very brief description of the dish in one or two sentences. For most dishes, this will be unnecessary. If there is a title image of this dish, it should be above this paragraph. You may also include prep/cook time and the number of servings as below:".to_string(),

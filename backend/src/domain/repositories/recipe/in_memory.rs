@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use chrono::Utc;
 use eyre::eyre;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
@@ -76,24 +77,35 @@ impl RecipeRepository for InMemoryRecipeRepository {
                 "The recipe could not be found somehow"
             )))?;
 
+        let mut updated = false;
+
         if let Some(v) = changeset.name {
             recipe.name = v;
+            updated = true;
         };
 
         if let Some(v) = changeset.time {
             recipe.time = v;
+            updated = true;
         };
 
         if let Some(v) = changeset.steps {
             recipe.steps = v;
+            updated = true;
         };
 
         if let Some(v) = changeset.servings {
             recipe.servings = v;
+            updated = true;
         };
 
         if let Some(v) = changeset.description {
             recipe.description = v;
+            updated = true;
+        };
+
+        if updated {
+            recipe.updated_at = Utc::now();
         };
 
         Ok(())
@@ -112,6 +124,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
             )))?;
 
         recipe.ingredients.push(ingredient);
+        recipe.updated_at = Utc::now();
 
         Ok(())
     }
@@ -138,6 +151,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
         recipe.ingredients = new_ingredients
             .try_into()
             .map_err(DeleteIngredientFromRecipeError::ValidationError)?;
+        recipe.updated_at = Utc::now();
 
         Ok(())
     }
@@ -164,6 +178,7 @@ impl RecipeRepository for InMemoryRecipeRepository {
             )))?;
 
         ingredient.amount = new_amount.clone();
+        recipe.updated_at = Utc::now();
 
         Ok(())
     }
