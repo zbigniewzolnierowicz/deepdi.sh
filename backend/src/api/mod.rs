@@ -1,6 +1,6 @@
 mod errors;
-mod routes;
 mod extract;
+mod routes;
 
 use std::sync::Arc;
 

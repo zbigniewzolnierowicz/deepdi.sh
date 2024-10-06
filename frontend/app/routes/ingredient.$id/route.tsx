@@ -9,6 +9,7 @@ import { DietList } from '~/components/ingredients/dietList';
 import { Title } from '~/components/headings';
 import { LexicalToReact } from '~/components/editor/renderReact';
 import { makeTitle } from '~/utils/makeTitle';
+import { safeEditorStateParse } from '~/components/editor/utils';
 
 const tracer = trace.getTracer('dice-lib');
 
@@ -46,7 +47,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 
 export default function IngredientRoute() {
   const { ingredient } = useLoaderData<typeof loader>();
-  const description = JSON.parse(ingredient.description);
+  const description = safeEditorStateParse(ingredient.description);
 
   return (
     <Centered className="p-2">
