@@ -15,6 +15,10 @@ includes:
     taskfile: ./.taskfiles/Database/Taskfile.yaml
     aliases:
       - db
+  services:
+    taskfile: ./.taskfiles/Services/Taskfile.yaml
+    aliases:
+      - svc
 tasks:
   default: task -l
   dev:

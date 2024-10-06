@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  up:
+    desc: "[SERVICES] start up all necessary services"
+    cmd: docker compose up -d
+  down:
+    desc: "[SERVICES] turn off services"
+    cmd: docker compose down

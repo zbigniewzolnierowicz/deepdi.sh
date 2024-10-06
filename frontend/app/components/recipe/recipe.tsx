@@ -1,14 +1,15 @@
 import type { RecipeDTO } from 'common/bindings/RecipeDTO';
 import type { FC, PropsWithChildren } from 'react';
-import { formatDuration } from 'date-fns';
+import { formatDate, formatDuration } from 'date-fns';
 import type { ServingsTypeDTO } from 'common/bindings/ServingsTypeDTO';
 
 import { LexicalToReact } from '../editor/renderReact';
+import { safeEditorStateParse } from '../editor/utils';
 
 import { IngredientList } from './ingredientList';
 
 import { convertSecondsToDuration } from '~/utils/convertSecondsToDuration';
-import { Title, Heading } from '~/components/headings';
+import { Title, Heading, DateText } from '~/components/headings';
 
 const Description: FC<PropsWithChildren> = ({ children }) => (
   <div className="mb-2">
@@ -50,11 +51,23 @@ const formatServings = (servings: ServingsTypeDTO): string => {
 };
 
 const convertRecipeTimesToMetadata = (times: RecipeDTO['time']) => {
+  // TODO: sort metadata
+
   const entries = Object.entries(times).map(([type, time]) => {
     return [type, formatDuration(convertSecondsToDuration(Number(time)))];
   });
 
   return Object.fromEntries(entries);
+};
+
+const getDateText = (created: string, updated: string): string => {
+  let initial = `Created at ${formatDate(created, 'hh:mma, dd LLL yyyy')}`;
+
+  if (created !== updated) {
+    initial += ` (updated at ${formatDate(updated, 'hh:mma, dd LLL yyyy')})`;
+  }
+
+  return initial;
 };
 
 export const Recipe: FC<{ recipe: RecipeDTO }> = ({ recipe }) => {
@@ -65,9 +78,12 @@ export const Recipe: FC<{ recipe: RecipeDTO }> = ({ recipe }) => {
 
   return (
     <div className="px-2 font-body">
-      <Title>{recipe.name}</Title>
+      <div className="mb-2">
+        <Title>{recipe.name}</Title>
+        <DateText>{getDateText(recipe.created_at, recipe.updated_at)}</DateText>
+      </div>
       <Description>
-        <LexicalToReact data={JSON.parse(recipe.description)} />
+        <LexicalToReact data={safeEditorStateParse(recipe.description)} />
       </Description>
       <Metadata data={metadata} />
       <Heading>Ingredients</Heading>

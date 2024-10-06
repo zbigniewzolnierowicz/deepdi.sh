@@ -40,7 +40,7 @@ interface RecipeCreateForm {
   description: SerializedEditorState;
   steps: SerializedEditorState[];
   ingredients: InternalIngredientWithAmount[];
-  servings: number;
+  servings: string;
   time: Record<string, string>;
 }
 
@@ -109,7 +109,7 @@ export default function CreateRecipeRoute() {
     console.group('SUBMITTING');
     console.log('SUBMITTED', data);
 
-    const time: Record<string, bigint> = Object.fromEntries(
+    const time: Record<string, number> = Object.fromEntries(
       Object
         .entries(data.time)
         .map(([k, v]) => {
@@ -117,7 +117,7 @@ export default function CreateRecipeRoute() {
           let seconds = 0;
           seconds += (duration.hours ?? 0) * 60 * 60;
           seconds += (duration.minutes ?? 0) * 60;
-          return [k, BigInt(seconds)];
+          return [k, seconds];
         }),
     );
 
@@ -127,7 +127,7 @@ export default function CreateRecipeRoute() {
       time,
       steps: data.steps.map(s => JSON.stringify(s)),
       description: JSON.stringify(data.description),
-      servings: { exact: data.servings },
+      servings: { exact: parseInt(data.servings) },
     } as CreateRecipeDTO);
     console.log('PAYLOAD', payload);
     console.groupEnd();
@@ -315,9 +315,9 @@ export default function CreateRecipeRoute() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label>Time</Label>
-          <div className="flex flex-row items-baseline">
+        <div className="flex flex-col gap-2 mt-4">
+          <Label className="mb-4">Time</Label>
+          <div className="grid grid-cols-[1fr_2fr] grid-rows-2 gap-2">
             <Label as="span" className="text-xl mr-2 flex-none">Prep time</Label>
             <Controller
               name="time.Prep time"
@@ -334,8 +334,6 @@ export default function CreateRecipeRoute() {
                 );
               }}
             />
-          </div>
-          <div className="flex flex-row items-baseline">
             <Label as="span" className="text-xl mr-2 flex-none">Cook time</Label>
             <Controller
               name="time.Cook time"

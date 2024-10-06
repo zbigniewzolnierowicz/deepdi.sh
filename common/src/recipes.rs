@@ -12,6 +12,7 @@ pub struct CreateRecipeDTO {
     pub name: String,
     pub description: String,
     pub steps: Vec<String>,
+    #[ts(type = "Record<string, number>")]
     pub time: HashMap<String, u64>,
     pub ingredients: Vec<IngredientAmountDTO>,
     pub servings: ServingsTypeDTO,
@@ -24,6 +25,7 @@ pub struct RecipeDTO {
     pub name: String,
     pub description: String,
     pub steps: Vec<String>,
+    #[ts(type = "Record<string, number>")]
     pub time: HashMap<String, u64>,
     pub ingredients: Vec<IngredientWithAmountDTO>,
     pub servings: ServingsTypeDTO,
@@ -74,6 +76,7 @@ pub struct UpdateRecipeDTO {
     pub name: Option<String>,
     pub description: Option<String>,
     pub steps: Option<Vec<String>>,
+    #[ts(type = "Record<string, number> | null")]
     pub time: Option<HashMap<String, u64>>,
     pub servings: Option<ServingsTypeDTO>,
 }
