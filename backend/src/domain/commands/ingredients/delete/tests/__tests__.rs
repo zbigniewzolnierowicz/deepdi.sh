@@ -21,7 +21,7 @@ pub async fn deleting_works(repo: impl IngredientRepository, recipe_repo: impl R
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
+        diet_violations: WhichDiets::new(),
     };
 
     let insert_result = repo.insert(input).await.unwrap();

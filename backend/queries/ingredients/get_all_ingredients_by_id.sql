@@ -1,3 +1,3 @@
-SELECT id, name, description, diet_friendly
+SELECT id, name, description, diet_violations
 FROM ingredients
 WHERE id = ANY($1);

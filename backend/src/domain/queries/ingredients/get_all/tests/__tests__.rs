@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::domain::{
     entities::ingredient::{
-        types::{DietFriendly, IngredientDescription, IngredientName, WhichDiets},
+        types::{DietViolations, IngredientDescription, IngredientName, WhichDiets},
         Ingredient,
     },
     queries::ingredients::get_all::get_all_ingredients,
@@ -31,14 +31,14 @@ pub async fn returns_vec_of_items_inside(repo: impl IngredientRepository) {
         id: Uuid::now_v7(),
         name: IngredientName("Tomato".into()),
         description: IngredientDescription("Description of a tomato".into()),
-        diet_friendly: vec![DietFriendly::Vegan, DietFriendly::Vegetarian].into(),
+        diet_violations: vec![DietViolations::Vegan, DietViolations::Vegetarian].into(),
     };
 
     let given_2 = Ingredient {
         id: Uuid::now_v7(),
         name: IngredientName("Meat fries".into()),
         description: IngredientDescription("Description of meat fries (whatever they are)".into()),
-        diet_friendly: WhichDiets::new(),
+        diet_violations: WhichDiets::new(),
     };
 
     repo.insert(given_1.clone()).await.unwrap();

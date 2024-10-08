@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use self::{
     errors::ValidationError,
-    types::{DietFriendly, IngredientDescription, IngredientName, WhichDiets},
+    types::{DietViolations, IngredientDescription, IngredientName, WhichDiets},
 };
 
 // TODO: Consider ingredients that are variants of other ingredients
@@ -20,7 +20,7 @@ pub struct Ingredient {
     pub name: IngredientName,
     pub description: IngredientDescription,
     // TODO: change to diet_violations for easier filtering
-    pub diet_friendly: WhichDiets,
+    pub diet_violations: WhichDiets,
 }
 
 impl From<Ingredient> for IngredientDTO {
@@ -29,7 +29,7 @@ impl From<Ingredient> for IngredientDTO {
             id: value.id,
             name: value.name.to_string(),
             description: value.description.to_string(),
-            diet_friendly: value.diet_friendly.clone().into(),
+            diet_violations: value.diet_violations.clone().into(),
         }
     }
 }
@@ -40,7 +40,7 @@ impl From<&Ingredient> for IngredientDTO {
             id: value.id,
             name: value.name.to_string(),
             description: value.description.to_string(),
-            diet_friendly: value.diet_friendly.clone().into(),
+            diet_violations: value.diet_violations.clone().into(),
         }
     }
 }
@@ -50,7 +50,7 @@ pub struct IngredientModel {
     pub id: Uuid,
     pub name: String,
     pub description: String,
-    pub diet_friendly: Vec<String>,
+    pub diet_violations: Vec<String>,
 }
 
 impl TryFrom<&IngredientModel> for Ingredient {
@@ -60,7 +60,7 @@ impl TryFrom<&IngredientModel> for Ingredient {
             id: value.id,
             name: value.name.clone().try_into()?,
             description: value.description.clone().try_into()?,
-            diet_friendly: value.diet_friendly.clone().into(),
+            diet_violations: value.diet_violations.clone().into(),
         })
     }
 }
@@ -76,7 +76,7 @@ impl FromIterator<String> for WhichDiets {
     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
         Self(
             iter.into_iter()
-                .filter_map(|s| DietFriendly::try_from(s).ok())
+                .filter_map(|s| DietViolations::try_from(s).ok())
                 .collect(),
         )
     }
@@ -88,14 +88,14 @@ impl From<Ingredient> for IngredientModel {
             id,
             name,
             description,
-            diet_friendly,
+            diet_violations,
         }: Ingredient,
     ) -> Self {
         Self {
             id,
             name: name.to_string(),
             description: description.to_string(),
-            diet_friendly: diet_friendly.into(),
+            diet_violations: diet_violations.into(),
         }
     }
 }
@@ -106,7 +106,7 @@ impl From<IngredientModel> for common::IngredientDTO {
             id: value.id,
             name: value.name.to_string(),
             description: value.description.to_string(),
-            diet_friendly: value.diet_friendly,
+            diet_violations: value.diet_violations,
         }
     }
 }
@@ -115,5 +115,5 @@ impl From<IngredientModel> for common::IngredientDTO {
 pub struct IngredientChangeset {
     pub name: Option<IngredientName>,
     pub description: Option<IngredientDescription>,
-    pub diet_friendly: Option<WhichDiets>,
+    pub diet_violations: Option<WhichDiets>,
 }

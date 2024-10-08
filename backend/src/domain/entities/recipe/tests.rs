@@ -17,7 +17,7 @@ fn converting_ingredient_with_amount_works() {
             id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
-            diet_friendly: vec![],
+            diet_violations: vec![],
         },
         amount: serde_json::json!({
             "grams": 20
@@ -31,7 +31,7 @@ fn converting_ingredient_with_amount_works() {
             id: Uuid::nil(),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
-            diet_friendly: WhichDiets::new(),
+            diet_violations: WhichDiets::new(),
         },
         amount: super::IngredientUnit::Grams(20.0),
         notes: None,
@@ -50,7 +50,7 @@ fn converting_ingredient_with_custom_amount_unit_works() {
             id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
-            diet_friendly: vec![],
+            diet_violations: vec![],
         },
         amount: serde_json::json!({
             "other": {
@@ -67,7 +67,7 @@ fn converting_ingredient_with_custom_amount_unit_works() {
             id: Uuid::nil(),
             name: IngredientName("Ingredient name".to_owned()),
             description: IngredientDescription("Ingredient description".to_owned()),
-            diet_friendly: WhichDiets::new(),
+            diet_violations: WhichDiets::new(),
         },
         amount: super::IngredientUnit::Other {
             unit: "cloves".to_owned(),
@@ -89,7 +89,7 @@ fn converting_ingredient_with_custom_amount_unit_but_without_unit_descriptor_fai
             id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
-            diet_friendly: vec![],
+            diet_violations: vec![],
         },
         amount: serde_json::json!({
             "other": {
@@ -116,7 +116,7 @@ fn malformed_ingredient_amount_fails() {
             id: Uuid::nil(),
             name: "Ingredient name".to_owned(),
             description: "Ingredient description".to_owned(),
-            diet_friendly: vec![],
+            diet_violations: vec![],
         },
         amount: serde_json::json!("10 grams"),
         notes: None,

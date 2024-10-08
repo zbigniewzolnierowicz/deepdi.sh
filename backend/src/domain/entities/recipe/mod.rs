@@ -1,7 +1,7 @@
 pub mod errors;
 use chrono::{DateTime, Utc};
 use derive_more::DerefMut;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use common::{
     IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
@@ -28,6 +28,48 @@ pub struct Recipe {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
+
+impl Recipe {
+    fn get_time(&self) -> HashMap<String, u64> {
+        self.time
+            .clone()
+            .into_iter()
+            .map(|(k, v)| (k, v.as_secs()))
+            .collect()
+    }
+
+    fn get_diet_violations(&self) -> Vec<String> {
+        self.ingredients
+            .iter()
+            .fold(HashSet::new(), |mut acc, curr| {
+                curr.ingredient.diet_violations.iter().for_each(|diet| {
+                    acc.insert(diet.to_string());
+                });
+
+                acc
+            })
+            .into_iter()
+            .collect()
+    }
+}
+
+impl From<Recipe> for RecipeDTO {
+    fn from(value: Recipe) -> Self {
+        Self {
+            id: value.id.to_string(),
+            ingredients: value.ingredients.iter().map(|i| i.clone().into()).collect(),
+            name: value.clone().name,
+            description: value.clone().description,
+            steps: value.clone().steps.0,
+            time: value.clone().get_time(),
+            servings: value.servings.clone().into(),
+            updated_at: value.updated_at.to_rfc3339(),
+            created_at: value.created_at.to_rfc3339(),
+            diet_violations: value.get_diet_violations(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Shrinkwrap, DerefMut)]
 pub struct RecipeIngredients(Vec<IngredientWithAmount>);
 
@@ -105,26 +147,6 @@ impl TryFrom<&Vec<String>> for RecipeSteps {
     type Error = ValidationError;
     fn try_from(value: &Vec<String>) -> Result<Self, Self::Error> {
         RecipeSteps::try_from(value.clone())
-    }
-}
-
-impl From<Recipe> for RecipeDTO {
-    fn from(value: Recipe) -> Self {
-        Self {
-            id: value.id.to_string(),
-            ingredients: value.ingredients.iter().map(|i| i.clone().into()).collect(),
-            name: value.name,
-            description: value.description,
-            steps: value.steps.0,
-            time: value
-                .time
-                .into_iter()
-                .map(|(k, v)| (k, v.as_secs()))
-                .collect(),
-            servings: value.servings.into(),
-            updated_at: value.updated_at.to_rfc3339(),
-            created_at: value.created_at.to_rfc3339(),
-        }
     }
 }
 

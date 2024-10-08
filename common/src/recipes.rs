@@ -31,6 +31,7 @@ pub struct RecipeDTO {
     pub servings: ServingsTypeDTO,
     pub created_at: String,
     pub updated_at: String,
+    pub diet_violations: Vec<String>,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize, TS)]

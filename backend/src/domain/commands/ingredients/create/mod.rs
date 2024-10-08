@@ -6,7 +6,7 @@ use crate::domain::repositories::ingredients::{
 };
 
 use self::errors::ValidationError;
-use self::types::DietFriendly;
+use self::types::DietViolations;
 
 #[derive(thiserror::Error, Debug, strum::AsRefStr)]
 pub enum CreateIngredientError {
@@ -42,7 +42,7 @@ impl From<ValidationError> for CreateIngredientError {
 pub struct CreateIngredient<'a> {
     pub name: &'a str,
     pub description: &'a str,
-    pub diet_friendly: Vec<String>,
+    pub diet_violations: Vec<String>,
 }
 
 impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
@@ -52,11 +52,11 @@ impl<'a> TryFrom<&CreateIngredient<'a>> for Ingredient {
             id: Uuid::now_v7(),
             name: value.name.try_into()?,
             description: value.description.try_into()?,
-            diet_friendly: value
-                .diet_friendly
+            diet_violations: value
+                .diet_violations
                 .clone()
                 .into_iter()
-                .filter_map(|x| DietFriendly::try_from(x).ok())
+                .filter_map(|x| DietViolations::try_from(x).ok())
                 .collect::<Vec<_>>()
                 .into(),
         })

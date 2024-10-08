@@ -35,7 +35,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const ingredient = assert<CreateIngredientDTO>({
     name: parsed.name as string,
     description: parsed.description as string,
-    diet_friendly: (parsed.dietFriendly as unknown as string).split(','),
+    diet_violations: (parsed.dietViolations as unknown as string).split(','),
   });
 
   const createdIngredient: IngredientDTO = await fetch(
@@ -51,7 +51,7 @@ export async function action({ request }: ActionFunctionArgs) {
 interface IngredientCreateForm {
   name: string;
   description: SerializedEditorState;
-  dietFriendly?: string[];
+  dietViolations?: string[];
 }
 
 export default function CreateIngredientRoute() {
@@ -113,12 +113,12 @@ export default function CreateIngredientRoute() {
         </div>
         <fieldset className="flex flex-col mt-4 max-w-xs">
           <Label as="legend" className="mb-2">
-            Diet restrictions
+            Violates a diet?
             {' '}
-            <span className="text-xs font-normal text-text-300">(check means diet-friendly)</span>
+            <span className="text-xs font-normal text-text-300">(check means you can&apos;t eat it on that diet)</span>
           </Label>
           {diets.map(diet => (
-            <CheckboxRow key={diet.id} id={diet.id} value={diet.id} className="mb-2 last:mb-0" {...register('dietFriendly')}>
+            <CheckboxRow key={diet.id} id={diet.id} value={diet.id} className="mb-2 last:mb-0" {...register('dietViolations')}>
               <span className="mr-2" aria-disabled="true">{diet.icon}</span>
               {diet.name}
             </CheckboxRow>

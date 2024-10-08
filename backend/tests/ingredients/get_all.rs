@@ -1,5 +1,5 @@
 use crate::setup::TestApp;
-use backend::domain::entities::ingredient::{types::DietFriendly, IngredientModel};
+use backend::domain::entities::ingredient::{types::DietViolations, IngredientModel};
 use common::IngredientDTO;
 use uuid::Uuid;
 
@@ -26,31 +26,31 @@ async fn getting_all_with_full_database_returns_in_array() {
         id: Uuid::from_u128(1),
         name: "Tomato".to_string(),
         description: "Very yummy tomato".to_string(),
-        diet_friendly: vec![
-            DietFriendly::Vegan.to_string(),
-            DietFriendly::Vegetarian.to_string(),
+        diet_violations: vec![
+            DietViolations::Vegan.to_string(),
+            DietViolations::Vegetarian.to_string(),
         ],
     }];
 
     let tx = app.db.begin().await.unwrap();
 
     for ingredient in ingredients.clone() {
-        let diet_friendly: Vec<String> = ingredient
+        let diet_violations: Vec<String> = ingredient
             .clone()
-            .diet_friendly
+            .diet_violations
             .into_iter()
             .map(|d| d.to_string())
             .collect();
 
         sqlx::query!(
             r#"
-                INSERT INTO ingredients (id, name, description, diet_friendly)
+                INSERT INTO ingredients (id, name, description, diet_violations)
                 VALUES ($1, $2, $3, $4)
             "#,
             ingredient.id,
             &ingredient.name,
             &ingredient.description,
-            &diet_friendly
+            &diet_violations
         )
         .execute(&app.db)
         .await

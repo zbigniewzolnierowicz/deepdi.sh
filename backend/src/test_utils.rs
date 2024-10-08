@@ -6,7 +6,7 @@ use futures::future::join_all;
 use crate::domain::commands::recipes::update::UpdateRecipe;
 use crate::domain::entities::recipe::{IngredientUnit, IngredientWithAmount, ServingsType};
 use crate::domain::entities::{
-    ingredient::{types::DietFriendly, Ingredient},
+    ingredient::{types::DietViolations, Ingredient},
     recipe::Recipe,
 };
 use crate::domain::repositories::ingredients::IngredientRepository;
@@ -16,7 +16,7 @@ pub fn ingredient_fixture() -> Ingredient {
         id: uuid::Uuid::from_u128(64),
         name: "Beef".try_into().unwrap(),
         description: "You killed a cow for it".try_into().unwrap(),
-        diet_friendly: vec![DietFriendly::GlutenFree].into(),
+        diet_violations: vec![DietViolations::GlutenFree].into(),
     }
 }
 
@@ -39,10 +39,10 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::nil(),
                     name: "Firm tofu".try_into().unwrap(),
                     description: "It's tofu".try_into().unwrap(),
-                    diet_friendly: vec![
-                        DietFriendly::Vegan,
-                        DietFriendly::Vegetarian,
-                        DietFriendly::GlutenFree
+                    diet_violations: vec![
+                        DietViolations::Vegan,
+                        DietViolations::Vegetarian,
+                        DietViolations::GlutenFree
                     ].into(),
                 },
                 amount: IngredientUnit::Grams(400.0),
@@ -54,10 +54,10 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::from_u128(1),
                     name: "Broccoli".try_into().unwrap(),
                     description: "It's broccoli".try_into().unwrap(),
-                    diet_friendly: vec![
-                        DietFriendly::Vegan,
-                        DietFriendly::Vegetarian,
-                        DietFriendly::GlutenFree
+                    diet_violations: vec![
+                        DietViolations::Vegan,
+                        DietViolations::Vegetarian,
+                        DietViolations::GlutenFree
                     ].into(),
                 },
                 amount: IngredientUnit::Other{unit: "head".to_string(), amount: 1.0},
@@ -69,10 +69,10 @@ pub fn recipe_fixture() -> Recipe {
                     id: uuid::Uuid::from_u128(2),
                     name: "Garlic".try_into().unwrap(),
                     description: "Garlic description".try_into().unwrap(),
-                    diet_friendly: vec![
-                        DietFriendly::Vegan,
-                        DietFriendly::Vegetarian,
-                        DietFriendly::GlutenFree
+                    diet_violations: vec![
+                        DietViolations::Vegan,
+                        DietViolations::Vegetarian,
+                        DietViolations::GlutenFree
                     ].into(),
                 },
                 amount: IngredientUnit::Other{ unit: "clove".to_string(), amount: 4.0 },

@@ -76,13 +76,13 @@ impl std::fmt::Display for IngredientDescription {
     Copy,
 )]
 #[strum(serialize_all = "snake_case")]
-pub enum DietFriendly {
+pub enum DietViolations {
     Vegan,
     Vegetarian,
     GlutenFree,
 }
 
-impl TryFrom<String> for DietFriendly {
+impl TryFrom<String> for DietViolations {
     type Error = ValidationError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.to_lowercase().as_str() {
@@ -90,7 +90,7 @@ impl TryFrom<String> for DietFriendly {
             "vegetarian" => Ok(Self::Vegetarian),
             "gluten_free" => Ok(Self::GlutenFree),
             _ => Err(ValidationError::DoesNotMatch(
-                "diet_friendly",
+                "diet_violations",
                 Self::VARIANTS,
             )),
         }
@@ -100,7 +100,7 @@ impl TryFrom<String> for DietFriendly {
 #[derive(
     Serialize, Deserialize, Shrinkwrap, sqlx::Type, sqlx::FromRow, PartialEq, Eq, Clone, Debug,
 )]
-pub struct WhichDiets(pub Vec<DietFriendly>);
+pub struct WhichDiets(pub Vec<DietViolations>);
 
 impl WhichDiets {
     pub fn new() -> Self {
@@ -120,14 +120,14 @@ impl From<Vec<String>> for WhichDiets {
         Self(
             value
                 .iter()
-                .filter_map(|v| DietFriendly::from_str(v).ok())
+                .filter_map(|v| DietViolations::from_str(v).ok())
                 .collect(),
         )
     }
 }
 
-impl From<Vec<DietFriendly>> for WhichDiets {
-    fn from(value: Vec<DietFriendly>) -> Self {
+impl From<Vec<DietViolations>> for WhichDiets {
+    fn from(value: Vec<DietViolations>) -> Self {
         Self(value)
     }
 }
@@ -144,8 +144,8 @@ impl PartialEq<WhichDiets> for Vec<String> {
     }
 }
 
-impl PartialEq<DietFriendly> for String {
-    fn eq(&self, other: &DietFriendly) -> bool {
+impl PartialEq<DietViolations> for String {
+    fn eq(&self, other: &DietViolations) -> bool {
         self == &other.to_string()
     }
 }

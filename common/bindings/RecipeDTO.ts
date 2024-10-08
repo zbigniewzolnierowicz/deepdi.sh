@@ -2,4 +2,4 @@
 import type { IngredientWithAmountDTO } from "./IngredientWithAmountDTO";
 import type { ServingsTypeDTO } from "./ServingsTypeDTO";
 
-export interface RecipeDTO { id: string, name: string, description: string, steps: Array<string>, time: Record<string, number>, ingredients: Array<IngredientWithAmountDTO>, servings: ServingsTypeDTO, created_at: string, updated_at: string, }
+export interface RecipeDTO { id: string, name: string, description: string, steps: Array<string>, time: Record<string, number>, ingredients: Array<IngredientWithAmountDTO>, servings: ServingsTypeDTO, created_at: string, updated_at: string, diet_violations: Array<string>, }

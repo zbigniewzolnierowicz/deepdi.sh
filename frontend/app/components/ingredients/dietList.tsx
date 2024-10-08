@@ -5,12 +5,20 @@ import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
 
 import { diets } from './diets';
 
-export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: inputDiets, className }) => {
-  const dietsDisplay = diets.map(diet => ({
-    ...diet,
-    violates: inputDiets.includes(diet.id),
-    description: inputDiets.includes(diet.id) ? diet.friendly : diet.unfriendly,
-  }));
+export const DietList: FC<{ diets: string[]; type?: string; className?: string }> = ({
+  diets: inputDiets,
+  className,
+  type,
+}) => {
+  const dietsDisplay = diets(type).map((diet) => {
+    const violates = inputDiets.includes(diet.id);
+
+    return ({
+      ...diet,
+      violates,
+      description: violates ? diet.unfriendly : diet.friendly,
+    });
+  });
 
   return (
     <div className={clsx('mr-2', className)}>
@@ -27,10 +35,10 @@ export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: i
                 <Tooltip.Trigger>
                   {diet.violates
                     ? (
-                        <CircleCheckIcon className="text-green-900" />
+                        <CircleXIcon className="text-red-900" />
                       )
                     : (
-                        <CircleXIcon className="text-red-900" />
+                        <CircleCheckIcon className="text-green-900" />
                       )}
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
@@ -38,7 +46,7 @@ export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: i
                     className={
                       clsx(
                         'p-2 rounded',
-                        diet.violates ? 'bg-background-700' : 'bg-red-300',
+                        diet.violates ? 'bg-red-300' : 'bg-background-700',
                       )
                     }
                   >
@@ -46,7 +54,7 @@ export const DietList: FC<{ diets: string[]; className?: string }> = ({ diets: i
                     <Tooltip.Arrow
                       className={
                         clsx(
-                          diet.violates ? 'fill-background-700' : 'fill-red-300',
+                          diet.violates ? 'fill-red-300' : 'fill-background-700',
                         )
                       }
                     />

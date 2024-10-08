@@ -9,7 +9,7 @@ pub struct CreateIngredientDTO {
     pub name: String,
     pub description: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub diet_friendly: Option<Vec<String>>,
+    pub diet_violations: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, TS, PartialEq, Eq, Clone)]
@@ -18,7 +18,7 @@ pub struct IngredientDTO {
     pub id: Uuid,
     pub name: String,
     pub description: String,
-    pub diet_friendly: Vec<String>,
+    pub diet_violations: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, TS)]
@@ -38,5 +38,5 @@ pub struct UpdateIngredientDTO {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub diet_friendly: Option<Vec<String>>,
+    pub diet_violations: Option<Vec<String>>,
 }

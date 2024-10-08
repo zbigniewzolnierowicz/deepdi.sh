@@ -15,7 +15,7 @@ async fn inserting_ingredient_succeeds() {
         .json(&json!({
             "name": "Tomato",
             "description": "Tomatoes are very squishy",
-            "diet_friendly": ["vegan", "vegetarian", "gluten_free"]
+            "diet_violations": ["vegan", "vegetarian", "gluten_free"]
         }))
         .send()
         .await
@@ -29,7 +29,7 @@ async fn inserting_ingredient_succeeds() {
         id: uuid::Uuid::nil(),
         name: "Tomato".to_string(),
         description: "Tomatoes are very squishy".to_string(),
-        diet_friendly: vec![
+        diet_violations: vec![
             "vegan".to_string(),
             "vegetarian".to_string(),
             "gluten_free".to_string(),
@@ -38,7 +38,7 @@ async fn inserting_ingredient_succeeds() {
 
     assert_eq!(body.name, expected_body.name);
     assert_eq!(body.description, expected_body.description);
-    assert_eq!(body.diet_friendly, expected_body.diet_friendly);
+    assert_eq!(body.diet_violations, expected_body.diet_violations);
 }
 
 #[tokio::test]
@@ -51,7 +51,7 @@ async fn sending_insufficient_data_errors() {
         .post(&path)
         .json(&json!({
             "description": "This is an example without the name",
-            "diet_friendly": ["vegan", "vegetarian", "gluten_free"]
+            "diet_violations": ["vegan", "vegetarian", "gluten_free"]
         }))
         .send()
         .await
@@ -71,7 +71,7 @@ async fn incorrect_diets_are_ignored() {
         .json(&json!({
             "name": "Tomato",
             "description": "Tomatoes are very squishy",
-            "diet_friendly": ["vegan", "vegetarian", "gluten_free", "I_AM_INCORRECT"]
+            "diet_violations": ["vegan", "vegetarian", "gluten_free", "I_AM_INCORRECT"]
         }))
         .send()
         .await
@@ -82,7 +82,7 @@ async fn incorrect_diets_are_ignored() {
     let body = request.json::<IngredientDTO>().await.unwrap();
 
     assert_eq!(
-        body.diet_friendly,
+        body.diet_violations,
         vec![
             "vegan".to_string(),
             "vegetarian".to_string(),

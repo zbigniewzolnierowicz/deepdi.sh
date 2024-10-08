@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO ingredients (id, name, description, diet_violations)\n                VALUES ($1, $2, $3, $4)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        "VarcharArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "19b658e81c99ab62dd5dd9c172fd68e04f3ad9ee84658cdde4d486a6983ecade"
+}

@@ -50,7 +50,7 @@ pub async fn updating_with_empty_changeset_fails(repo: impl IngredientRepository
         id: Uuid::from_u128(1),
         name: "Ingredient name 1".try_into().unwrap(),
         description: "Ingredient description 1".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
+        diet_violations: WhichDiets::new(),
     };
     let changeset = UpdateIngredient::default();
 
@@ -61,7 +61,7 @@ pub async fn updating_with_empty_changeset_fails(repo: impl IngredientRepository
         .unwrap_err();
 
     assert!(
-        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == ["name", "description", "diet_friendly"])
+        matches!(error, UpdateIngredientError::ValidationError(ValidationError::EmptyField(fields)) if fields == ["name", "description", "diet_violations"])
     );
 }
 
