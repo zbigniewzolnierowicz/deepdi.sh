@@ -13,7 +13,7 @@ use crate::domain::{
 pub struct UpdateIngredient {
     pub name: Option<String>,
     pub description: Option<String>,
-    pub diet_friendly: Option<Vec<String>>,
+    pub diet_violations: Option<Vec<String>>,
 }
 
 impl From<UpdateIngredientDTO> for UpdateIngredient {
@@ -21,7 +21,7 @@ impl From<UpdateIngredientDTO> for UpdateIngredient {
         Self {
             name: value.name,
             description: value.description,
-            diet_friendly: value.diet_friendly,
+            diet_violations: value.diet_violations,
         }
     }
 }
@@ -39,12 +39,12 @@ impl TryFrom<&UpdateIngredient> for IngredientChangeset {
             None => None,
         };
 
-        let diet_friendly = value.diet_friendly.as_ref().map(|x| x.clone().into());
+        let diet_violations = value.diet_violations.as_ref().map(|x| x.clone().into());
 
         Ok(Self {
             name,
             description,
-            diet_friendly,
+            diet_violations,
         })
     }
 }

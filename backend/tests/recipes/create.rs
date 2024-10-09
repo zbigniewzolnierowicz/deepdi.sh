@@ -5,7 +5,10 @@ use pretty_assertions::assert_eq;
 use reqwest::{Client, StatusCode};
 
 use crate::{
-    fixtures::{ingredient::ingredient_fixture, recipe::recipe_fixture},
+    fixtures::{
+        ingredient::{ingredient_fixture, ingredient_fixture_meat},
+        recipe::recipe_fixture,
+    },
     setup::TestApp,
 };
 
@@ -61,9 +64,69 @@ async fn inserts_recipe_correctly() {
         "servings": {
             "exact": 1
         },
+        "diet_violations": []
     });
 
     assert_eq!(result.ingredients.len(), 1);
+    assert_json_include!(actual: result, expected: expected);
+}
+
+#[tokio::test]
+async fn inserting_recipe_with_multiple_ingredients_generates_diet_violations_correctly() {
+    let app = TestApp::new().await;
+    let client = Client::new();
+    let ingredient_create_path = app.get_base("ingredient/create");
+    let recipe_create_path = app.get_base("recipe/create");
+
+    let ingredients_input = [ingredient_fixture(), ingredient_fixture_meat()];
+
+    let ingredients: Vec<IngredientDTO> =
+        join_all(ingredients_input.iter().map(|ingredient| async {
+            client
+                .post(&ingredient_create_path)
+                .json(&ingredient.clone())
+                .send()
+                .await
+                .unwrap()
+                .json()
+                .await
+                .unwrap()
+        }))
+        .await;
+
+    let data = recipe_fixture(&ingredients);
+
+    let result: RecipeDTO = client
+        .post(&recipe_create_path)
+        .json(&data)
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+
+    let expected = serde_json::json!({
+        "name": "A diced cucumber",
+        "description": "Cucumber that's been diced",
+        "time": {
+            "Prep time": 6000
+        },
+        "ingredients": ingredients
+            .iter()
+            .map(|ing| serde_json::json!({
+                "ingredient": ing,
+                "optional": false
+            }))
+            .collect::<Vec<_>>(),
+        "steps": ["Get a cucumber", "Dice it"],
+        "servings": {
+            "exact": 1
+        },
+        "diet_violations": ["vegan", "vegetarian"]
+    });
+
+    assert_eq!(result.ingredients.len(), 2);
     assert_json_include!(actual: result, expected: expected);
 }
 

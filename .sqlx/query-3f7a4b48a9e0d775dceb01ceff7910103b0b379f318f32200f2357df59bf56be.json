@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, name, description, diet_friendly\nFROM ingredients\nWHERE id = $1;\n",
+  "query": "SELECT id, name, description, diet_violations\nFROM ingredients;\n",
   "describe": {
     "columns": [
       {
@@ -20,14 +20,12 @@
       },
       {
         "ordinal": 3,
-        "name": "diet_friendly",
+        "name": "diet_violations",
         "type_info": "VarcharArray"
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid"
-      ]
+      "Left": []
     },
     "nullable": [
       false,
@@ -36,5 +34,5 @@
       false
     ]
   },
-  "hash": "a491896afbfa0634312e25382aaca52f587876b0b18cc9226cdf7dfcb1f5a170"
+  "hash": "3f7a4b48a9e0d775dceb01ceff7910103b0b379f318f32200f2357df59bf56be"
 }

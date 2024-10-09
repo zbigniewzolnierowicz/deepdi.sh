@@ -6,6 +6,7 @@ import { type RecipeDTO } from 'common/bindings/RecipeDTO';
 import { Recipe } from '~/components/recipe/recipe';
 import { Centered } from '~/components/centered';
 import { makeTitle } from '~/utils/makeTitle';
+import { DietList } from '~/components/ingredients/dietList';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -37,6 +38,11 @@ export default function RecipeRoute() {
 
   return (
     <Centered>
+      <DietList
+        className="2xl:absolute top-24 left-[calc(50%_-_768px_+_2rem)] mt-2 2xl:mt-0 w-full 2xl:w-80"
+        diets={recipe.diet_violations}
+        type="recipe"
+      />
       <Recipe recipe={recipe} />
     </Centered>
   );

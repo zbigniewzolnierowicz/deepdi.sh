@@ -35,9 +35,9 @@ impl IngredientRepository for PostgresIngredientRepository {
         skip(self)
     )]
     async fn insert(&self, ingredient: Ingredient) -> Result<Ingredient, InsertIngredientError> {
-        let diet_friendly: Vec<String> = ingredient
+        let diet_violations: Vec<String> = ingredient
             .clone()
-            .diet_friendly
+            .diet_violations
             .0
             .into_iter()
             .map(|d| d.to_string())
@@ -49,7 +49,7 @@ impl IngredientRepository for PostgresIngredientRepository {
             ingredient.id,
             &ingredient.name,
             &ingredient.description,
-            &diet_friendly
+            &diet_violations
         )
         .fetch_one(&self.0)
         .await
@@ -111,11 +111,11 @@ impl IngredientRepository for PostgresIngredientRepository {
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
-        let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
+        let diet_violations: Option<Vec<String>> = changeset.diet_violations.map(|df| df.into());
 
-        if name.is_none() && description.is_none() && diet_friendly.is_none() {
+        if name.is_none() && description.is_none() && diet_violations.is_none() {
             return Err(UpdateIngredientError::ValidationError(
-                ValidationError::EmptyField(vec!["name", "description", "diet_friendly"]),
+                ValidationError::EmptyField(vec!["name", "description", "diet_violations"]),
             ));
         };
 
@@ -155,17 +155,17 @@ impl IngredientRepository for PostgresIngredientRepository {
             }
         };
 
-        if let Some(diet_friendly) = diet_friendly {
-            if diet_friendly != ingredient_to_update.diet_friendly {
+        if let Some(diet_violations) = diet_violations {
+            if diet_violations != ingredient_to_update.diet_violations {
                 sqlx::query!(
                     r#"
                     UPDATE ingredients
                     SET
-                    diet_friendly = $2
+                    diet_violations = $2
                     WHERE id = $1
                     "#,
                     id,
-                    &diet_friendly
+                    &diet_violations
                 )
                 .execute(&self.0)
                 .await?;

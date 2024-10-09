@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO ingredients (id, name, description, diet_friendly)\nVALUES ($1, $2, $3, $4)\nRETURNING id, name, description, diet_friendly;\n",
+  "query": "INSERT INTO ingredients (id, name, description, diet_violations)\nVALUES ($1, $2, $3, $4)\nRETURNING id, name, description, diet_violations;\n",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "diet_friendly",
+        "name": "diet_violations",
         "type_info": "VarcharArray"
       }
     ],
@@ -39,5 +39,5 @@
       false
     ]
   },
-  "hash": "080d7e227e73cfc003676be292d7fd9507177bdf67ef42bc2e3a213c2043aede"
+  "hash": "769e0b44cd11d51714db85188dd3c1ab8112b951925c7dbef03b83dfc85f37c6"
 }

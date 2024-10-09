@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    UPDATE ingredients\n                    SET\n                    diet_violations = $2\n                    WHERE id = $1\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "VarcharArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "def6635d5b8425697984a5f01bc72c9a1bf6ac081e82b25075a76d5b64add4cc"
+}

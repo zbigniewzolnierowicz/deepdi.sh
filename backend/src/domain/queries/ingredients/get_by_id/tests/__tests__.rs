@@ -13,7 +13,7 @@ pub async fn get_by_id_returns_ingredient(repo: impl IngredientRepository) {
         id: Uuid::from_u128(1),
         name: "Ingredient name".try_into().unwrap(),
         description: "Ingredient description".try_into().unwrap(),
-        diet_friendly: WhichDiets::new(),
+        diet_violations: WhichDiets::new(),
     })
     .await
     .unwrap();

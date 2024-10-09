@@ -86,11 +86,11 @@ impl IngredientRepository for InMemoryIngredientRepository {
 
         let name: Option<String> = changeset.name.map(|n| n.to_string());
         let description: Option<String> = changeset.description.map(|n| n.to_string());
-        let diet_friendly: Option<Vec<String>> = changeset.diet_friendly.map(|df| df.into());
+        let diet_violations: Option<Vec<String>> = changeset.diet_violations.map(|df| df.into());
 
-        if name.is_none() && description.is_none() && diet_friendly.is_none() {
+        if name.is_none() && description.is_none() && diet_violations.is_none() {
             return Err(UpdateIngredientError::ValidationError(
-                ValidationError::EmptyField(vec!["name", "description", "diet_friendly"]),
+                ValidationError::EmptyField(vec!["name", "description", "diet_violations"]),
             ));
         };
 
@@ -102,8 +102,8 @@ impl IngredientRepository for InMemoryIngredientRepository {
             ingredient.description = new_description.try_into()?;
         }
 
-        if let Some(new_diets) = diet_friendly {
-            ingredient.diet_friendly = new_diets.into();
+        if let Some(new_diets) = diet_violations {
+            ingredient.diet_violations = new_diets.into();
         }
 
         Ok(())
