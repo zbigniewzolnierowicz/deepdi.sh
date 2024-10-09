@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -13,7 +13,7 @@ pub struct CreateRecipeDTO {
     pub description: String,
     pub steps: Vec<String>,
     #[ts(type = "Record<string, number>")]
-    pub time: HashMap<String, u64>,
+    pub time: BTreeMap<String, u64>,
     pub ingredients: Vec<IngredientAmountDTO>,
     pub servings: ServingsTypeDTO,
 }
@@ -26,7 +26,7 @@ pub struct RecipeDTO {
     pub description: String,
     pub steps: Vec<String>,
     #[ts(type = "Record<string, number>")]
-    pub time: HashMap<String, u64>,
+    pub time: BTreeMap<String, u64>,
     pub ingredients: Vec<IngredientWithAmountDTO>,
     pub servings: ServingsTypeDTO,
     pub created_at: String,
@@ -78,6 +78,6 @@ pub struct UpdateRecipeDTO {
     pub description: Option<String>,
     pub steps: Option<Vec<String>>,
     #[ts(type = "Record<string, number> | null")]
-    pub time: Option<HashMap<String, u64>>,
+    pub time: Option<BTreeMap<String, u64>>,
     pub servings: Option<ServingsTypeDTO>,
 }

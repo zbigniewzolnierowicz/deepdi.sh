@@ -1,12 +1,12 @@
 pub mod errors;
 use chrono::{DateTime, Utc};
 use derive_more::DerefMut;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 
 use common::{
     IngredientAmountDTO, IngredientUnitDTO, IngredientWithAmountDTO, RecipeDTO, ServingsTypeDTO,
 };
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::{iter::{IntoParallelRefIterator, ParallelIterator}, slice::ParallelSliceMut};
 use serde::{Deserialize, Serialize};
 use shrinkwraprs::Shrinkwrap;
 use sqlx::FromRow;
@@ -30,7 +30,7 @@ pub struct Recipe {
 }
 
 impl Recipe {
-    fn get_time(&self) -> HashMap<String, u64> {
+    fn get_time(&self) -> BTreeMap<String, u64> {
         self.time
             .clone()
             .into_iter()
@@ -41,7 +41,7 @@ impl Recipe {
     fn get_diet_violations(&self) -> Vec<String> {
         self.ingredients
             .iter()
-            .fold(HashSet::new(), |mut acc, curr| {
+            .fold(BTreeSet::new(), |mut acc, curr| {
                 curr.ingredient.diet_violations.iter().for_each(|diet| {
                     acc.insert(diet.to_string());
                 });
@@ -55,6 +55,9 @@ impl Recipe {
 
 impl From<Recipe> for RecipeDTO {
     fn from(value: Recipe) -> Self {
+        let mut diet_violations = value.get_diet_violations();
+        diet_violations.par_sort();
+
         Self {
             id: value.id.to_string(),
             ingredients: value.ingredients.iter().map(|i| i.clone().into()).collect(),
